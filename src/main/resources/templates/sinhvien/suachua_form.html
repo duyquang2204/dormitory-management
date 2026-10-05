@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-10 p-4">
+                <h4 class="mb-4">Báo Cáo Sự Cố & Sửa Chữa</h4>
+                
+                <div th:if="${param.success}" class="alert alert-success">
+                    Gửi yêu cầu sửa chữa thành công!
+                </div>
+
+                <div class="row">
+                    <!-- Biểu mẫu Yêu cầu -->
+                    <div class="col-md-5">
+                        <div class="card shadow-sm mb-4 border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0">Gửi yêu cầu sửa chữa</h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/sinhvien/sua-chua/gui}" th:object="${yeuCauDTO}" method="post" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label class="form-label">Chọn Phòng <span class="text-danger">*</span></label>
+                                        <select class="form-select" th:field="*{maPhong}" th:classappend="${#fields.hasErrors('maPhong')} ? 'is-invalid' : ''">
+                                            <option value="">-- Chọn phòng bạn đang ở --</option>
+                                            <option th:each="pp : ${myRooms}" th:value="${pp.phong.maPhong}" th:text="${pp.phong.soPhong + ' - ' + pp.phong.khu.tenKhu}"></option>
+                                        </select>
+                                        <div class="invalid-feedback" th:if="${#fields.hasErrors('maPhong')}" th:errors="*{maPhong}"></div>
+                                        <small class="text-muted" th:if="${#lists.isEmpty(myRooms)}">Bạn chưa được phân phòng, không thể gửi yêu cầu sửa chữa.</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Nội dung sự cố <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" th:field="*{noiDungSuCo}" rows="4" placeholder="Mô tả chi tiết đồ vật bị hỏng, vị trí..."></textarea>
+                                        <div class="text-danger small" th:if="${#fields.hasErrors('noiDungSuCo')}" th:errors="*{noiDungSuCo}"></div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label">Hình ảnh minh họa (Tải lên qua Cloudinary)</label>
+                                        <input class="form-control" type="file" name="hinhAnhFile" accept="image/*">
+                                        <small class="text-muted">Chụp ảnh thiết bị hư hỏng giúp chúng tôi sửa chữa nhanh hơn.</small>
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-warning text-dark fw-bold" th:disabled="${#lists.isEmpty(myRooms)}">
+                                            <i class="fas fa-hammer me-2"></i>Gửi Yêu Cầu
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lịch sử Yêu cầu -->
+                    <div class="col-md-7">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0 text-secondary">Lịch sử sửa chữa</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Ngày gửi</th>
+                                            <th>Phòng</th>
+                                            <th>Nội dung</th>
+                                            <th>Hình ảnh</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="yc : ${yeuCauList}">
+                                            <td th:text="${#temporals.format(yc.ngayGui, 'dd-MM-yyyy HH:mm')}"></td>
+                                            <td th:text="${yc.phong != null ? yc.phong.soPhong : ''}"></td>
+                                            <td th:text="${yc.noiDungSuCo}"></td>
+                                            <td>
+                                                <div class="d-flex flex-column gap-1 align-items-start">
+                                                    <a th:if="${yc.hinhAnh != null and yc.hinhAnh != ''}" th:href="${yc.hinhAnh}" target="_blank" class="badge bg-info text-decoration-none" title="Ảnh bạn đã gửi">Trước sửa</a>
+                                                    <span th:unless="${yc.hinhAnh != null and yc.hinhAnh != ''}" class="text-muted small">Không có ảnh hỏng</span>
+                                                    
+                                                    <a th:if="${yc.ketQuaSuaChua != null and yc.ketQuaSuaChua.hinhAnhMinhChung != null and yc.ketQuaSuaChua.hinhAnhMinhChung != ''}" th:href="${yc.ketQuaSuaChua.hinhAnhMinhChung}" target="_blank" class="badge bg-success text-decoration-none" title="Ảnh kết quả sửa chữa">Sau sửa</a>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span th:class="${yc.trangThai == 'Đã hoàn thành' ? 'badge bg-success' : (yc.trangThai == 'Đang xử lý' ? 'badge bg-primary' : (yc.trangThai == 'Đã hủy' ? 'badge bg-danger' : 'badge bg-warning text-dark'))}" 
+                                                      th:text="${yc.trangThai}"></span>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(yeuCauList)}">
+                                            <td colspan="5" class="text-center text-muted py-4">Bạn chưa có báo cáo sự cố nào</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

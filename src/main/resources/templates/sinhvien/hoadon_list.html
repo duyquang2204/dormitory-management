@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-10 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4>Hóa đơn Điện Nước</h4>
+                </div>
+
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="alert alert-info" th:if="${currentRoom != null}">
+                    <i class="fas fa-info-circle me-2"></i> Bạn đang xem hóa đơn của phòng <strong><span th:text="${currentRoom.soPhong} + ' (Khu ' + ${currentRoom.khu.tenKhu} + ')'"></span></strong>.
+                </div>
+                
+                <div class="alert alert-warning" th:if="${currentRoom == null}">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Bạn hiện không được phân vào phòng nào nên không có dữ liệu hóa đơn.
+                </div>
+
+                <!-- Thanh thông tin đơn giá điện nước -->
+                <div class="card border-0 shadow-sm mb-4 bg-white" style="border-radius: 10px;">
+                    <div class="card-body py-3 px-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div class="d-flex align-items-center flex-wrap gap-3">
+                            <span class="fw-bold text-dark"><i class="fas fa-tag text-primary me-2"></i>Đơn giá dịch vụ hiện hành:</span>
+                            <span class="badge bg-warning bg-opacity-25 text-dark border border-warning px-3 py-2 fs-6">
+                                <i class="fas fa-bolt text-warning me-1"></i> Điện: <strong>3.500 đ</strong> / kWh
+                            </span>
+                            <span class="badge bg-info bg-opacity-25 text-dark border border-info px-3 py-2 fs-6">
+                                <i class="fas fa-water text-info me-1"></i> Nước: <strong>15.000 đ</strong> / m³
+                            </span>
+                        </div>
+                        <div class="text-muted small fst-italic">
+                            <i class="fas fa-info-circle me-1"></i>Tiền điện và nước được chia đều cho các sinh viên trong phòng
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm" th:if="${currentRoom != null}">
+                    <div class="card-body">
+                        <table class="table table-hover table-bordered text-center align-middle">
+                            <thead class="table-light">
+                                    <th>Kỳ thu</th>
+                                    <th>Chi tiết tính tiền</th>
+                                    <th>Tổng thanh toán</th>
+                                    <th>Hạn thu</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="hd : ${hoaDonPage.content}">
+                                    <td class="fw-bold" th:text="${hd.thang + '/' + hd.nam}"></td>
+                                    <td class="text-start">
+                                        <div class="mb-1"><small><strong>Phòng:</strong> <span th:text="${#numbers.formatDecimal(hd.tienPhong, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></small></div>
+                                        <div class="mb-1"><small><strong>Điện (phần của bạn):</strong> <span th:text="${#numbers.formatDecimal(hd.tienDien, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span> <br><span class="text-muted">(Phòng dùng: <span th:text="${hd.chiSoDienMoi - hd.chiSoDienCu}"></span> kWh)</span></small></div>
+                                        <div><small><strong>Nước (phần của bạn):</strong> <span th:text="${#numbers.formatDecimal(hd.tienNuoc, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span> <br><span class="text-muted">(Phòng dùng: <span th:text="${hd.chiSoNuocMoi - hd.chiSoNuocCu}"></span> m³)</span></small></div>
+                                    </td>
+                                    <td th:text="${#numbers.formatDecimal(hd.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'" class="fw-bold text-success fs-5"></td>
+                                    <td class="text-danger fw-bold" th:text="'25/' + ${hd.thang} + '/' + ${hd.nam}"></td>
+                                    <td>
+                                        <span th:class="${hd.trangThai == 'Đã thanh toán' ? 'badge bg-success' : (hd.trangThai == 'Chưa thanh toán' ? 'badge bg-warning text-dark' : 'badge bg-info')}" 
+                                              th:text="${hd.trangThai}"></span>
+                                        <div th:if="${hd.phuongThucThanhToan == 'Tiền mặt' and hd.trangThai != 'Đã thanh toán'}" class="mt-2 text-muted small">
+                                            <i class="fas fa-hand-holding-usd"></i> Chờ nộp tiền mặt
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a th:if="${hd.trangThai == 'Chưa thanh toán'}" th:href="@{/sinhvien/vnpay/thanh-toan(maHoaDon=${hd.maHoaDon})}" class="btn btn-sm btn-primary mb-1 shadow-sm" style="background-color: #005a9e; border-color: #005a9e;">
+                                            <i class="fas fa-credit-card me-1"></i>Thanh toán VNPAY
+                                        </a>
+                                        
+                                        <div th:if="${hd.minhChungThanhToan != null}" class="mb-1">
+                                            <a th:href="${hd.minhChungThanhToan}" target="_blank" class="btn btn-sm btn-outline-info" title="Xem biên lai">
+                                                <i class="fas fa-image me-1"></i>Biên lai cũ
+                                            </a>
+                                        </div>
+                                        
+                                        <span th:if="${hd.trangThai != 'Chưa thanh toán' and hd.minhChungThanhToan == null}" class="text-muted small">
+                                            <i class="fas fa-check-circle text-success me-1"></i>Đã xong
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(hoaDonPage.content)}">
+                                    <td colspan="6" class="text-center text-muted py-4">Chưa có dữ liệu hóa đơn cho phòng này</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <!-- Pagination Fragment -->
+                        <div th:replace="~{fragments/pagination :: pagination(pageObj=${hoaDonPage}, url='/sinhvien/hoa-don', queryParams='')}"></div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

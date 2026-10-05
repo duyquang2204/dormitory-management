@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-10 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4>Quản lý Kỷ luật (Vi phạm)</h4>
+                    <a th:href="@{/quansinh/vi-pham/them}" class="btn btn-danger"><i class="fas fa-plus me-2"></i>Lập Biên Bản</a>
+                </div>
+
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <form th:action="@{/quansinh/vi-pham}" method="get" class="d-flex">
+                            <div class="input-group" style="max-width: 400px;">
+                                <input type="text" name="keyword" class="form-control" placeholder="Tìm theo Mã SV..." th:value="${keyword}">
+                                <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ngày Vi Phạm</th>
+                                    <th>Mã SV</th>
+                                    <th>Họ Tên</th>
+                                    <th>Nội Dung</th>
+                                    <th>Địa Điểm</th>
+                                    <th>Trạng Thái</th>
+                                    <th>Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="vp : ${viPhamPage.content}">
+                                    <td th:text="${vp.ngayViPham}"></td>
+                                    <td>
+                                        <span class="badge bg-secondary" th:text="${vp.sinhVien.maSV}"></span>
+                                    </td>
+                                    <td class="fw-bold" th:text="${vp.sinhVien.hoTen}"></td>
+                                    <td th:text="${vp.noiDung}"></td>
+                                    <td th:text="${vp.diaDiem}"></td>
+                                    <td>
+                                        <span th:class="${vp.trangThaiXuLy == 'Đã xử lý' ? 'badge bg-success' : 'badge bg-danger'}" 
+                                              th:text="${vp.trangThaiXuLy}"></span>
+                                    </td>
+                                    <td>
+                                        <button th:if="${vp.trangThaiXuLy == 'Chờ xử lý'}" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" th:data-bs-target="'#modalXuLy' + ${vp.maViPham}">
+                                            <i class="fas fa-gavel"></i> Xử lý
+                                        </button>
+                                        <span th:if="${vp.trangThaiXuLy == 'Đã xử lý'}" class="text-muted small" th:text="${vp.hinhThucXuLy}"></span>
+                                        
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(viPhamPage.content)}">
+                                    <td colspan="7" class="text-center text-muted py-4">Không tìm thấy dữ liệu vi phạm</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div th:replace="~{fragments/pagination :: pagination(pageObj=${viPhamPage}, url='/quansinh/vi-pham', queryParams=${keyword != null ? '&keyword=' + keyword : ''})}"></div>
+
+            </div>
+        </div>
+    </div>
+    <!-- Modals at body level (outside .card which has transform) -->
+    <th:block th:each="vp : ${viPhamPage.content}">
+                                        <!-- Modal Xử lý -->
+                                        <div class="modal fade" th:id="'modalXuLy' + ${vp.maViPham}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <form th:action="@{/quansinh/vi-pham/xu-ly}" method="post">
+                                                        <div class="modal-header bg-danger text-white">
+                                                            <h5 class="modal-title">Xử lý vi phạm</h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p><strong>Sinh viên:</strong> <span th:text="${vp.sinhVien.hoTen}"></span></p>
+                                                            <p><strong>Nội dung:</strong> <span th:text="${vp.noiDung}"></span></p>
+                                                            <input type="hidden" name="maViPham" th:value="${vp.maViPham}">
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Hình thức xử lý <span class="text-danger">*</span></label>
+                                                                <select class="form-select" name="hinhThucXuLy" required>
+                                                                    <option value="">-- Chọn hình thức --</option>
+                                                                    <option value="Cảnh cáo">Cảnh cáo</option>
+                                                                    <option value="Trừ điểm rèn luyện">Trừ điểm rèn luyện</option>
+                                                                    <option value="Bồi thường thiệt hại">Bồi thường thiệt hại</option>
+                                                                    <option value="Đuổi khỏi KTX">Đuổi khỏi KTX</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                            <button type="submit" class="btn btn-danger">Xác nhận xử lý</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+    </th:block>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

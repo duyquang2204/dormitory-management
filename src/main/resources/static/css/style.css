@@ -1,0 +1,245 @@
+:root {
+    --primary: #4361ee;
+    --primary-light: #4895ef;
+    --secondary: #3f37c9;
+    --success: #2ecc71;
+    --danger: #e63946;
+    --warning: #fca311;
+    --info: #4cc9f0;
+    --dark: #2b2d42;
+    --light: #f8f9fa;
+    --bg-color: #f4f6fc;
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: #333;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1; 
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8; 
+}
+
+/* Navbar */
+.navbar {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-sm);
+    z-index: 1030;
+}
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--primary) !important;
+}
+
+/* Sidebar */
+.sidebar {
+    background: #ffffff;
+    border-right: 1px solid rgba(0,0,0,0.05);
+    min-height: calc(100vh - 56px);
+    box-shadow: 2px 0 15px rgba(0,0,0,0.02);
+}
+.sidebar .nav-link {
+    color: #64748b;
+    font-weight: 500;
+    padding: 0.8rem 1rem;
+    margin: 0.2rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+.sidebar .nav-link i {
+    width: 24px;
+    text-align: center;
+    margin-right: 10px;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+}
+.sidebar .nav-link:hover {
+    color: var(--primary);
+    background-color: #f8faff;
+    transform: translateX(4px);
+}
+.sidebar .nav-link:hover i {
+    transform: scale(1.1);
+}
+.sidebar .nav-link.active {
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    background-color: #ffffff;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 1.25rem 1.5rem;
+}
+
+/* Gradient Dashboard Cards */
+.bg-primary {
+    background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%) !important;
+}
+.bg-success {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
+}
+.bg-info {
+    background: linear-gradient(135deg, #4cc9f0 0%, #00b4d8 100%) !important;
+}
+.bg-warning {
+    background: linear-gradient(135deg, #fca311 0%, #e85d04 100%) !important;
+}
+.bg-dark {
+    background: linear-gradient(135deg, #2b2d42 0%, #1a1a2e 100%) !important;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 1.25rem;
+    transition: all 0.2s ease;
+}
+.btn:active {
+    transform: scale(0.97);
+}
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+.btn-primary:hover {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.4);
+}
+.btn-success {
+    background-color: var(--success);
+    border-color: var(--success);
+}
+.btn-success:hover {
+    background-color: #27ae60;
+    border-color: #27ae60;
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+}
+.btn-outline-primary:hover, .btn-outline-danger:hover, .btn-outline-success:hover {
+    transform: translateY(-2px);
+}
+
+/* Badges */
+.badge {
+    padding: 0.4em 0.8em;
+    border-radius: 6px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+.badge.bg-success {
+    background: rgba(46, 204, 113, 0.15) !important;
+    color: #1e8449 !important;
+}
+.badge.bg-warning {
+    background: rgba(252, 163, 17, 0.15) !important;
+    color: #d35400 !important;
+}
+.badge.bg-danger {
+    background: rgba(230, 57, 70, 0.15) !important;
+    color: #c0392b !important;
+}
+.badge.bg-info {
+    background: rgba(76, 201, 240, 0.15) !important;
+    color: #005f8f !important;
+}
+.badge.bg-secondary {
+    background: rgba(108, 117, 125, 0.15) !important;
+    color: #495057 !important;
+}
+.badge.bg-primary {
+    background: rgba(67, 97, 238, 0.15) !important;
+    color: #314bce !important;
+}
+
+/* For gradient cards, we override the badge colors back to white */
+.card.bg-primary .badge, .card.bg-success .badge, .card.bg-info .badge, .card.bg-warning .badge, .card.bg-dark .badge {
+    background-color: rgba(255,255,255,0.2) !important;
+    color: #fff !important;
+}
+
+/* Forms & Inputs */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.6rem 1rem;
+    transition: all 0.2s ease;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.25rem rgba(72, 149, 239, 0.15);
+}
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.4rem;
+}
+
+/* Tables */
+.table {
+    vertical-align: middle;
+}
+.table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    border-bottom: 2px solid #e9ecef;
+    padding: 1rem;
+}
+.table tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid #f8f9fa;
+    color: #495057;
+}
+.table-hover tbody tr:hover {
+    background-color: rgba(67, 97, 238, 0.03);
+}
+
+/* Dashboard Specific Tweaks */
+.card-title {
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+.card-text {
+    font-size: 2rem;
+    letter-spacing: -1px;
+}

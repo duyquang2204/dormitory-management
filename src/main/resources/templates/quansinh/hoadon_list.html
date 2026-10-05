@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-10 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0 text-dark fw-bold"><i class="fas fa-file-invoice-dollar me-2 text-info"></i>Quản lý Hóa đơn</h4>
+                    <div>
+                        <a th:href="@{/quansinh/hoa-don/ghi-so-hang-loat}" class="btn btn-warning text-dark fw-bold me-2"><i class="fas fa-bolt me-2"></i>Ghi chỉ số Hàng loạt</a>
+                        <a th:href="@{/quansinh/hoa-don/them}" class="btn btn-primary fw-bold"><i class="fas fa-plus-circle me-2"></i>Lập Hóa đơn Đơn lẻ</a>
+                    </div>
+                </div>
+                
+                <div th:if="${param.success}" class="alert alert-success">
+                    Lưu thông tin hóa đơn thành công!
+                </div>
+                <div th:if="${param.paid}" class="alert alert-info">
+                    Đã cập nhật trạng thái thanh toán thành công!
+                </div>
+
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <form th:action="@{/quansinh/hoa-don}" method="get" class="row g-3 align-items-center m-0">
+                            <div class="col-auto">
+                                <label for="maKhu" class="col-form-label fw-bold">Chọn Khu:</label>
+                            </div>
+                            <div class="col-auto">
+                                <select class="form-select" id="maKhu" name="maKhu" onchange="this.form.submit()">
+                                    <option value="">-- Tất cả các khu --</option>
+                                    <option th:each="khu : ${khus}" 
+                                            th:value="${khu.maKhu}" 
+                                            th:text="${khu.tenKhu}"
+                                            th:selected="${khu.maKhu == maKhu}"></option>
+                                </select>
+                            </div>
+                        </form>
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <span class="text-muted small fw-bold"><i class="fas fa-tag me-1 text-primary"></i>Đơn giá áp dụng:</span>
+                            <span class="badge bg-warning bg-opacity-25 text-dark border border-warning px-3 py-2">
+                                <i class="fas fa-bolt text-warning me-1"></i>Điện: <strong>3.500 đ</strong> / kWh
+                            </span>
+                            <span class="badge bg-info bg-opacity-25 text-dark border border-info px-3 py-2">
+                                <i class="fas fa-water text-primary me-1"></i>Nước: <strong>15.000 đ</strong> / m³
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <table class="table table-hover table-bordered text-center align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sinh viên</th>
+                                    <th>Khu - Phòng</th>
+                                    <th>Tháng/Năm</th>
+                                    <th>Số điện (kWh)</th>
+                                    <th>Số nước (m³)</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="hd : ${hoaDonPage.content}">
+                                    <td class="fw-bold" th:text="${hd.sinhVien != null ? hd.sinhVien.hoTen : 'Trống'}"></td>
+                                    <td class="fw-bold text-primary" th:text="${hd.phong.khu.tenKhu + ' - ' + hd.phong.soPhong}"></td>
+                                    <td th:text="${hd.thang + '/' + hd.nam}"></td>
+                                    <td>
+                                        <span class="text-danger fw-bold" th:text="${hd.chiSoDienMoi - hd.chiSoDienCu}"></span>
+                                    </td>
+                                    <td>
+                                        <span class="text-info fw-bold" th:text="${hd.chiSoNuocMoi - hd.chiSoNuocCu}"></span>
+                                    </td>
+                                    <td th:text="${#numbers.formatDecimal(hd.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'" class="fw-bold text-success"></td>
+                                    <td>
+                                        <span th:class="${hd.trangThai == 'Đã thanh toán' ? 'badge bg-success' : (hd.trangThai == 'Chưa thanh toán' ? 'badge bg-warning text-dark' : 'badge bg-info')}" 
+                                              th:text="${hd.trangThai}"></span>
+                                    </td>
+                                    <td>
+                                        <div th:if="${hd.minhChungThanhToan != null}" class="mb-1">
+                                            <a th:href="${hd.minhChungThanhToan}" target="_blank" class="btn btn-sm btn-outline-info" title="Xem biên lai">
+                                                <i class="fas fa-image"></i> Lịch sử Biên lai
+                                            </a>
+                                        </div>
+                                        <span th:if="${hd.trangThai == 'Đã thanh toán'}" class="text-muted small"><i class="fas fa-check-circle text-success"></i> Đã thu tự động qua VNPAY</span>
+                                        <span th:if="${hd.trangThai == 'Chưa thanh toán'}" class="text-muted small"><i class="fas fa-clock text-warning"></i> Chờ SV thanh toán</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(hoaDonPage.content)}">
+                                    <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu hóa đơn</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <!-- Pagination Fragment -->
+                        <div th:replace="~{fragments/pagination :: pagination(pageObj=${hoaDonPage}, url='/quansinh/hoa-don', queryParams=${maKhu != null ? '&maKhu=' + maKhu : ''})}"></div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

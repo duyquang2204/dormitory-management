@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-10 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4>Phân Phòng Nhanh (Trực tiếp)</h4>
+                    <a th:href="@{/quansinh/sinhvien}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Quay lại</a>
+                </div>
+
+                <div class="row">
+                    <!-- Thông tin sinh viên -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm mb-4 border-info">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Thông tin Sinh viên</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Mã SV:</strong> <span th:text="${sinhVien.maSV}"></span></p>
+                                <p><strong>Họ tên:</strong> <span th:text="${sinhVien.hoTen}"></span></p>
+                                <p><strong>Giới tính:</strong> <span th:text="${sinhVien.gioiTinh}"></span></p>
+                                <p><strong>Khoa:</strong> <span th:text="${sinhVien.khoa}"></span></p>
+                                <p><strong>Số điện thoại:</strong> <span th:text="${sinhVien.sdt}"></span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Biểu mẫu Phân phòng -->
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-success">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="fas fa-bed me-2"></i>Chọn phòng & Cấp phép lưu trú</h5>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${error}" class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i> <span th:text="${error}"></span>
+                                </div>
+                                
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-info-circle me-1"></i> <strong>Lưu ý:</strong> Chức năng phân phòng nhanh sẽ tự động sinh Hợp đồng mà không cần sinh viên gửi đơn. Hãy đảm bảo bạn đã thu đủ hồ sơ cần thiết.
+                                </div>
+
+                                <div th:if="${#lists.isEmpty(phongs)}" class="alert alert-danger">
+                                    Hiện tại không có phòng nào trống trong Ký túc xá.
+                                </div>
+
+                                <form th:if="${!#lists.isEmpty(phongs)}" th:action="@{/quansinh/phong/phan-nhanh/{id}(id=${sinhVien.maSV})}" method="post">
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold">Phòng được cấp <span class="text-danger">*</span></label>
+                                        <select class="form-select form-select-lg" name="maPhong" required>
+                                            <option value="">-- Chọn phòng trống --</option>
+                                            <option th:each="p : ${phongs}" th:value="${p.maPhong}" th:text="${p.soPhong + ' - Khu ' + p.khu.tenKhu + ' (' + p.trangThai + ') - ' + p.loaiPhong.tenLoaiPhong}"></option>
+                                        </select>
+                                        <small class="text-muted">Chỉ hiển thị các phòng chưa đầy.</small>
+                                    </div>
+                                    
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Ngày bắt đầu ở <span class="text-danger">*</span></label>
+                                            <input type="date" class="form-control" name="ngayBatDau" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Ngày kết thúc dự kiến <span class="text-danger">*</span></label>
+                                            <input type="date" class="form-control" name="ngayKetThuc" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-end mt-4">
+                                        <button type="submit" class="btn btn-success btn-lg"><i class="fas fa-check-circle me-2"></i>Xác nhận Xếp Phòng</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

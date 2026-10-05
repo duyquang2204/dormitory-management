@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo lỗi - Ký Túc Xá</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center min-vh-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-5 text-center">
+                <div class="card shadow-sm border-0 p-4 p-md-5 rounded-4">
+                    <div class="mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10 text-danger p-4 mb-2" style="width: 100px; height: 100px;">
+                            <i th:if="${status == 403}" class="fas fa-user-lock fa-3x"></i>
+                            <i th:if="${status == 404}" class="fas fa-compass fa-3x"></i>
+                            <i th:if="${status != 403 and status != 404}" class="fas fa-exclamation-triangle fa-3x"></i>
+                        </div>
+                        <h1 class="display-5 fw-bold text-dark mt-2" th:text="${status != null ? status : 'Lỗi'}">403</h1>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-dark" th:if="${status == 403}">Không có quyền truy cập</h5>
+                        <h5 class="fw-bold text-dark" th:if="${status == 404}">Không tìm thấy trang</h5>
+                        <h5 class="fw-bold text-dark" th:if="${status != 403 and status != 404}">Đã xảy ra sự cố</h5>
+
+                        <p class="text-muted mt-2 small" th:if="${status == 403}">
+                            Tài khoản của bạn không được cấp quyền truy cập vào đường dẫn hoặc chức năng này. Vui lòng kiểm tra lại quyền hạn của tài khoản.
+                        </p>
+                        <p class="text-muted mt-2 small" th:if="${status == 404}">
+                            Đường dẫn bạn yêu cầu không tồn tại hoặc đã bị thay đổi trong hệ thống.
+                        </p>
+                        <p class="text-muted mt-2 small" th:if="${status != 403 and status != 404}" th:text="${message != null ? message : 'Hệ thống gặp sự cố trong quá trình xử lý yêu cầu.'}">
+                            Hệ thống gặp sự cố trong quá trình xử lý yêu cầu.
+                        </p>
+                    </div>
+
+                    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                        <a href="/" class="btn btn-primary px-4 py-2">
+                            <i class="fas fa-home me-2"></i>Về trang chủ
+                        </a>
+                        <button onclick="history.back()" class="btn btn-outline-secondary px-4 py-2">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại
+                        </button>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top">
+                        <form th:action="@{/logout}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-link text-muted small text-decoration-none p-0">
+                                <i class="fas fa-sign-out-alt me-1"></i>Đăng nhập tài khoản khác
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

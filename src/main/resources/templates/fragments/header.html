@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<nav th:fragment="header" class="navbar navbar-expand-lg navbar-light sticky-top shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand text-success fw-bold" href="/">
+            <i class="fas fa-building me-2"></i>Ký Túc Xá
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <!-- Additional nav items can go here -->
+            </ul>
+            <div class="d-flex align-items-center">
+                <!-- Nút Chuông Thông Báo -->
+                <div class="dropdown me-4" th:if="${thongBaoInfo != null}">
+                    <a class="text-secondary position-relative dropdown-toggle-hidden" href="#" role="button" id="bellDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell fs-5"></i>
+                        <span th:if="${thongBaoInfo.totalCount > 0}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65em;">
+                            <span th:text="${thongBaoInfo.totalCount}">0</span>
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="bellDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                        <li><h6 class="dropdown-header fw-bold text-dark border-bottom pb-2">Việc cần xử lý</h6></li>
+                        <th:block th:if="${#lists.isEmpty(thongBaoInfo.todos)}">
+                            <li><span class="dropdown-item text-muted small py-3 text-center">Tuyệt vời! Không có việc nào tồn đọng.</span></li>
+                        </th:block>
+                        <th:block th:each="todo : ${thongBaoInfo.todos}">
+                            <li>
+                                <a class="dropdown-item py-2 d-flex align-items-center" th:href="@{${todo.link}}">
+                                    <div class="me-3 fs-5"><i th:class="${todo.iconClass}"></i></div>
+                                    <div class="text-wrap small text-dark fw-bold" th:text="${todo.title}">Title</div>
+                                </a>
+                            </li>
+                        </th:block>
+                        
+                        <th:block th:if="${!#lists.isEmpty(thongBaoInfo.updates)}">
+                            <li><h6 class="dropdown-header fw-bold text-dark border-bottom pb-2 mt-2">Cập nhật mới</h6></li>
+                            <th:block th:each="update : ${thongBaoInfo.updates}">
+                                <li>
+                                    <a class="dropdown-item py-2" th:href="@{/thong-bao/doc/{id}(id=${update.maThongBao})}" th:classappend="${!update.daDoc} ? 'bg-light' : ''">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="text-wrap small" th:classappend="${!update.daDoc} ? 'fw-bold text-dark' : 'text-secondary'" th:text="${update.tieuDe}">Update</div>
+                                            <span th:if="${!update.daDoc}" class="badge bg-danger ms-2" style="font-size: 0.6rem;">Mới</span>
+                                        </div>
+                                        <div th:if="${update.noiDung != null and update.noiDung != ''}" class="text-wrap text-muted" style="font-size: 0.8rem;" th:text="${update.noiDung}">Detail</div>
+                                        <div class="text-muted mt-1" style="font-size: 0.72rem;" th:text="${#temporals.format(update.ngayTao, 'dd/MM/yyyy HH:mm')}">Time</div>
+                                    </a>
+                                </li>
+                            </th:block>
+                        </th:block>
+                    </ul>
+                </div>
+
+                <span class="me-3" sec:authentication="principal.hoTen">Người dùng</span>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button class="btn btn-outline-danger btn-sm" type="submit">
+                        <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

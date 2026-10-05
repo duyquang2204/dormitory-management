@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-10 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4>Quản lý Sinh viên</h4>
+                    <a th:href="@{/quansinh/sinhvien/them}" class="btn btn-success"><i class="fas fa-plus me-1"></i>Thêm sinh viên</a>
+                </div>
+                
+                <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                <div th:if="${param.success}" class="alert alert-success">
+                    Lưu thông tin sinh viên thành công!
+                </div>
+
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <form th:action="@{/quansinh/sinhvien}" method="get" class="row g-3 align-items-center">
+                            <div class="col-auto">
+                                <label for="keyword" class="col-form-label fw-bold">Tìm kiếm sinh viên:</label>
+                            </div>
+                            <div class="col-auto">
+                                <input type="text" class="form-control" id="keyword" name="keyword" th:value="${keyword}" placeholder="Nhập tên sinh viên...">
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                                <a th:href="@{/quansinh/sinhvien}" class="btn btn-outline-secondary">Xóa tìm kiếm</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Mã SV</th>
+                                    <th>Họ tên</th>
+                                    <th>Trạng thái</th>
+                                    <th>Giới tính</th>
+                                    <th>Khoa</th>
+                                    <th>Năm học</th>
+                                    <th>SĐT</th>
+                                    <th>Email</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="sv : ${sinhVienPage.content}">
+                                    <td th:text="${sv.maSV}"></td>
+                                    <td class="fw-bold" th:text="${sv.hoTen}"></td>
+                                    <td>
+                                        <span th:class="${trangThaiMap.get(sv.maSV) == 'Chờ xếp phòng' ? 'badge bg-secondary text-white' : 'badge bg-success text-white'}" 
+                                              th:text="${trangThaiMap.get(sv.maSV)}"></span>
+                                    </td>
+                                    <td th:text="${sv.gioiTinh}"></td>
+                                    <td th:text="${sv.khoa}"></td>
+                                    <td th:text="${sv.namHoc}"></td>
+                                    <td th:text="${sv.sdt}"></td>
+                                    <td th:text="${sv.email}"></td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            <a th:href="@{/quansinh/phong/phan-nhanh/{id}(id=${sv.maSV})}" class="btn btn-sm btn-outline-success" title="Xếp phòng"><i class="fas fa-bed"></i></a>
+                                            <a th:href="@{/quansinh/sinhvien/sua/{id}(id=${sv.maSV})}" class="btn btn-sm btn-outline-primary" title="Sửa"><i class="fas fa-edit"></i></a>
+                                            <form th:action="@{/quansinh/sinhvien/xoa/{id}(id=${sv.maSV})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sinh viên này không? Thao tác này không thể hoàn tác!');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(sinhVienPage.content)}">
+                                    <td colspan="9" class="text-center text-muted py-3">Không tìm thấy sinh viên nào</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <!-- Pagination Fragment -->
+                        <div th:replace="~{fragments/pagination :: pagination(pageObj=${sinhVienPage}, url='/quansinh/sinhvien', queryParams=${keyword != null ? '&keyword=' + keyword : ''})}"></div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

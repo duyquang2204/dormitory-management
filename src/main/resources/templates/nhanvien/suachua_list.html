@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-10 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0 text-dark fw-bold"><i class="fas fa-tools me-2 text-primary"></i>Trung tâm Công việc (Nhân viên)</h4>
+                    <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm" th:text="'Ngày: ' + ${#calendars.format(#calendars.createNow(), 'dd/MM/yyyy')}"></span>
+                </div>
+                
+                <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-check-circle me-2"></i> Báo cáo kết quả sửa chữa thành công! Cảm ơn bạn.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                
+                <div class="alert alert-info border-0 shadow-sm" role="alert" style="background-color: #e3f2fd; color: #084298;">
+                    <i class="fas fa-info-circle me-2"></i> <strong>Hướng dẫn:</strong> Hãy cập nhật tình trạng công việc ngay sau khi hoàn thành để Quản sinh nắm thông tin. Đừng quên đính kèm ảnh chụp kết quả.
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Ngày giao</th>
+                                    <th>Phòng</th>
+                                    <th>Nội dung sự cố</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="cv : ${congViecList}">
+                                    <td th:text="${cv.ngayTiepNhan}"></td>
+                                    <td th:text="${cv.yeuCauSuaChua.phong.soPhong}" class="fw-bold"></td>
+                                    <td th:text="${cv.yeuCauSuaChua.noiDungSuCo}"></td>
+                                    <td>
+                                        <div class="d-flex flex-column gap-1 align-items-start">
+                                            <a th:if="${cv.yeuCauSuaChua.hinhAnh != null and cv.yeuCauSuaChua.hinhAnh != ''}" th:href="${cv.yeuCauSuaChua.hinhAnh}" target="_blank" class="badge bg-info text-decoration-none" title="Ảnh do Sinh viên gửi">Trước sửa</a>
+                                            <span th:unless="${cv.yeuCauSuaChua.hinhAnh != null and cv.yeuCauSuaChua.hinhAnh != ''}" class="text-muted small">Không có ảnh hỏng</span>
+                                            
+                                            <a th:if="${cv.hinhAnhMinhChung != null and cv.hinhAnhMinhChung != ''}" th:href="${cv.hinhAnhMinhChung}" target="_blank" class="badge bg-success text-decoration-none" title="Ảnh do bạn tải lên">Sau sửa</a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span th:class="${cv.yeuCauSuaChua.trangThai == 'Đã hoàn thành' ? 'badge bg-success' : 'badge bg-warning text-dark'}" 
+                                              th:text="${cv.yeuCauSuaChua.trangThai}"></span>
+                                    </td>
+                                    <td>
+                                        <button th:if="${cv.yeuCauSuaChua.trangThai == 'Đang xử lý'}" type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" th:data-bs-target="'#modalCapNhat-' + ${cv.maPhanCong}">
+                                            Cập nhật KQ
+                                        </button>
+                                        <span th:if="${cv.yeuCauSuaChua.trangThai == 'Đã hoàn thành'}" class="text-success fw-bold"><i class="fas fa-check"></i> Xong</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(congViecList)}">
+                                    <td colspan="6" class="text-center text-muted py-3">Bạn chưa được phân công công việc nào.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modals at body level (outside .card which has transform) -->
+    <th:block th:each="cv : ${congViecList}">
+                                        <!-- Modal Cập Nhật -->
+                                        <div th:if="${cv.yeuCauSuaChua.trangThai == 'Đang xử lý'}" class="modal fade" th:id="'modalCapNhat-' + ${cv.maPhanCong}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Báo cáo kết quả sửa chữa (Phòng <span th:text="${cv.yeuCauSuaChua.phong.soPhong}"></span>)</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <form th:action="@{/nhanvien/sua-chua/cap-nhat}" method="post" enctype="multipart/form-data">
+                                                        <div class="modal-body">
+                                                            <input type="hidden" name="maPhanCong" th:value="${cv.maPhanCong}">
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Nội dung đã xử lý</label>
+                                                                <textarea name="noiDungXuLy" class="form-control" rows="3" required placeholder="Ghi chú các việc đã làm..."></textarea>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Hình ảnh minh chứng (Tùy chọn)</label>
+                                                                <input type="file" name="hinhAnhFile" class="form-control" accept="image/*">
+                                                                <small class="text-muted">Chụp ảnh kết quả sau khi sửa để báo cáo cho Quản sinh.</small>
+                                                            </div>
+                                                            <input type="hidden" name="ketQua" value="Đã sửa xong">
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                                            <button type="submit" class="btn btn-primary">Lưu báo cáo</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+    </th:block>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

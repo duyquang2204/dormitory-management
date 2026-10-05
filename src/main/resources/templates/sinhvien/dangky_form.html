@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-10 p-4">
+                <h4 class="mb-4">Đăng ký phòng</h4>
+                
+                <div th:if="${param.success}" class="alert alert-success">
+                    Gửi yêu cầu đăng ký thành công! Vui lòng chờ Ban quản lý KTX duyệt.
+                </div>
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                <div class="row">
+                    <!-- Biểu mẫu đăng ký -->
+                    <div class="col-md-5">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0 text-success">Gửi yêu cầu mới</h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/sinhvien/dang-ky/luu}" th:object="${dangKyKTXDTO}" method="post">
+                                    <div class="mb-3">
+                                        <label class="form-label">Chọn Loại Phòng <span class="text-danger">*</span></label>
+                                        <select class="form-select" th:field="*{maLoaiPhong}" th:classappend="${#fields.hasErrors('maLoaiPhong')} ? 'is-invalid' : ''">
+                                            <option value="">-- Chọn loại phòng --</option>
+                                            <option th:each="lp : ${loaiPhongs}" th:value="${lp.maLoaiPhong}" th:text="${lp.tenLoaiPhong + ' - ' + lp.soNguoiToiDa + ' người (' + #numbers.formatDecimal(lp.donGia, 0, 'COMMA', 0, 'POINT') + ' đ)'}"></option>
+                                        </select>
+                                        <div class="invalid-feedback" th:if="${#fields.hasErrors('maLoaiPhong')}" th:errors="*{maLoaiPhong}"></div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label">Ghi chú (Nếu có nguyện vọng ở chung với bạn, ghi MSSV tại đây)</label>
+                                        <textarea class="form-control" th:field="*{ghiChu}" rows="3"></textarea>
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-success"><i class="fas fa-paper-plane me-2"></i>Gửi Đăng Ký</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lịch sử đăng ký -->
+                    <div class="col-md-7">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0 text-secondary">Lịch sử đăng ký</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Ngày đăng ký</th>
+                                            <th>Loại phòng</th>
+                                            <th>Ghi chú</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="dk : ${dangKyList}">
+                                            <td th:text="${dk.ngayDangKy}"></td>
+                                            <td th:text="${dk.loaiPhong != null ? dk.loaiPhong.tenLoaiPhong : ''}"></td>
+                                            <td th:text="${dk.ghiChu}"></td>
+                                            <td>
+                                                <span th:class="${dk.trangThai == 'Đã duyệt' ? 'badge bg-success' : (dk.trangThai == 'Từ chối' ? 'badge bg-danger' : 'badge bg-warning text-dark')}" 
+                                                      th:text="${dk.trangThai}"></span>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(dangKyList)}">
+                                            <td colspan="4" class="text-center text-muted py-4">Bạn chưa có yêu cầu đăng ký nào</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

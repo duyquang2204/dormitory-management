@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Pagination Fragment -->
+    <!-- Parameters required: 
+         - pageObj: The Spring Data Page object (e.g. ${phongPage})
+         - url: The base URL for pagination (e.g. '/quansinh/phong')
+         - queryParams: Additional query parameters as a string (e.g. '&maKhu=' + ${maKhu})
+    -->
+    <div th:fragment="pagination(pageObj, url, queryParams)" th:if="${pageObj.totalPages > 1}" class="mt-4">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <!-- First Page -->
+                <li class="page-item" th:classappend="${pageObj.first ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{${url} + '?page=1' + ${queryParams != null ? queryParams : ''}}">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <!-- Previous Page -->
+                <li class="page-item" th:classappend="${pageObj.first ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{${url} + '?page=' + ${pageObj.number} + ${queryParams != null ? queryParams : ''}}">
+                        Trang trước
+                    </a>
+                </li>
+                
+                <!-- Page Numbers -->
+                <li class="page-item" th:each="i : ${#numbers.sequence(1, pageObj.totalPages)}" 
+                    th:classappend="${pageObj.number + 1 == i ? 'active' : ''}">
+                    <a class="page-link" th:href="@{${url} + '?page=' + ${i} + ${queryParams != null ? queryParams : ''}}" th:text="${i}"></a>
+                </li>
+                
+                <!-- Next Page -->
+                <li class="page-item" th:classappend="${pageObj.last ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{${url} + '?page=' + ${pageObj.number + 2} + ${queryParams != null ? queryParams : ''}}">
+                        Trang sau
+                    </a>
+                </li>
+                <!-- Last Page -->
+                <li class="page-item" th:classappend="${pageObj.last ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{${url} + '?page=' + ${pageObj.totalPages} + ${queryParams != null ? queryParams : ''}}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</body>
+</html>

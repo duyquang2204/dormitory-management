@@ -1,0 +1,104 @@
+package vn.iotstar.dormitory.controller;
+
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import vn.iotstar.dormitory.dto.NguoiDungDTO;
+import vn.iotstar.dormitory.entity.NguoiDung;
+import vn.iotstar.dormitory.service.NguoiDungService;
+
+import java.util.Optional;
+
+@Controller
+@RequestMapping("/admin")
+public class AdminController {
+
+    @Autowired
+    private NguoiDungService nguoiDungService;
+
+    @Autowired
+    private vn.iotstar.dormitory.service.SinhVienService sinhVienService;
+    @Autowired
+    private vn.iotstar.dormitory.service.HoaDonService hoaDonService;
+    @Autowired
+    private vn.iotstar.dormitory.service.YeuCauSuaChuaService yeuCauSuaChuaService;
+    @Autowired
+    private vn.iotstar.dormitory.service.PhanPhongService phanPhongService;
+
+    @GetMapping("/dashboard")
+    public String dashboard(@RequestParam(value = "year", required = false) Integer year, Model model) {
+        model.addAttribute("totalUsers", nguoiDungService.findAll().size());
+        
+        long countNoiTru = phanPhongService.findAll().stream()
+                .filter(p -> "Đang ở".equals(p.getTrangThai()))
+                .count();
+        model.addAttribute("totalStudents", countNoiTru);
+        
+        model.addAttribute("totalInvoices", hoaDonService.findAll().size());
+        model.addAttribute("totalRepairs", yeuCauSuaChuaService.findAll().size());
+        
+        int currentYear = (year != null) ? year : java.time.LocalDate.now().getYear();
+        
+        java.util.List<Integer> distinctYears = hoaDonService.getDistinctYears();
+        if (!distinctYears.contains(currentYear)) {
+            distinctYears.add(currentYear);
+        }
+        java.util.Collections.sort(distinctYears, java.util.Collections.reverseOrder());
+        
+        java.util.List<Object[]> revenueRaw = hoaDonService.getRevenueByMonthAndYear(currentYear);
+        java.util.List<Double> revenueList = new java.util.ArrayList<>(java.util.Collections.nCopies(12, 0.0));
+        
+        for (Object[] obj : revenueRaw) {
+            int month = ((Number) obj[0]).intValue();
+            double amount = ((Number) obj[1]).doubleValue();
+            revenueList.set(month - 1, amount);
+        }
+        
+        model.addAttribute("revenueData", revenueList);
+        model.addAttribute("currentYear", currentYear);
+        model.addAttribute("availableYears", distinctYears);
+        
+        return "admin/dashboard";
+    }
+
+    @GetMapping("/tai-khoan")
+    public String listTaiKhoan(Model model) {
+        model.addAttribute("users", nguoiDungService.findAll());
+        return "admin/taikhoan_list";
+    }
+
+    @GetMapping("/tai-khoan/them")
+    public String themTaiKhoan(Model model) {
+        model.addAttribute("nguoiDungDTO", new NguoiDungDTO());
+        return "admin/taikhoan_form";
+    }
+
+    @PostMapping("/tai-khoan/luu")
+    public String luuTaiKhoan(@Valid @ModelAttribute("nguoiDungDTO") NguoiDungDTO dto, BindingResult result) {
+        if (result.hasErrors()) {
+            return "admin/taikhoan_form";
+        }
+        nguoiDungService.save(dto);
+        return "redirect:/admin/tai-khoan?success";
+    }
+
+    @GetMapping("/tai-khoan/sua/{id}")
+    public String suaTaiKhoan(@PathVariable("id") String id, Model model) {
+        Optional<NguoiDung> nd = nguoiDungService.findById(id);
+        if (nd.isPresent()) {
+            NguoiDungDTO dto = new NguoiDungDTO();
+            dto.setMaNguoiDung(nd.get().getMaNguoiDung());
+            dto.setTenDangNhap(nd.get().getTenDangNhap());
+            dto.setHoTen(nd.get().getHoTen());
+            dto.setSdt(nd.get().getSdt());
+            dto.setChucVu(nd.get().getChucVu());
+            dto.setTrangThai(nd.get().getTrangThai());
+            model.addAttribute("nguoiDungDTO", dto);
+            return "admin/taikhoan_form";
+        }
+        return "redirect:/admin/tai-khoan";
+    }
+}

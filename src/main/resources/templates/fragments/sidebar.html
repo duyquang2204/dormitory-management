@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div th:fragment="sidebar" class="sidebar p-3">
+    <h5 class="text-muted mb-3">Danh mục</h5>
+    <ul class="nav flex-column">
+        
+        <!-- Sinh viên -->
+        <li class="nav-item mb-2" sec:authorize="hasRole('SINH_VIEN')">
+            <a class="nav-link" th:href="@{/sinhvien/dashboard}">
+                <i class="fas fa-home me-2"></i>Trang chủ
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('SINH_VIEN')">
+            <a class="nav-link" th:href="@{/sinhvien/dang-ky}">
+                <i class="fas fa-edit me-2"></i>Đăng ký phòng
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('SINH_VIEN')">
+            <a class="nav-link" th:href="@{/sinhvien/phong}">
+                <i class="fas fa-door-open me-2"></i>Phòng & Hợp đồng
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('SINH_VIEN')">
+            <a class="nav-link" th:href="@{/sinhvien/sua-chua}">
+                <i class="fas fa-hammer me-2"></i>Báo cáo Sự cố
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('SINH_VIEN')">
+            <a class="nav-link" th:href="@{/sinhvien/hoa-don}">
+                <i class="fas fa-file-invoice-dollar me-2"></i>Hóa đơn & Thanh toán
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('SINH_VIEN')">
+            <a class="nav-link" th:href="@{/sinhvien/vi-pham}">
+                <i class="fas fa-gavel me-2 text-danger"></i>Kỷ luật - Vi phạm
+            </a>
+        </li>
+
+        <!-- Quản sinh -->
+        <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_SINH')">
+            <a class="nav-link" th:href="@{/quansinh/dashboard}">
+                <i class="fas fa-tachometer-alt me-2"></i>Tổng quan
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_SINH')">
+            <a class="nav-link" th:href="@{/quansinh/dang-ky}">
+                <i class="fas fa-file-signature me-2"></i>Duyệt Đăng ký phòng
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_SINH')">
+            <a class="nav-link" th:href="@{/quansinh/hop-dong}">
+                <i class="fas fa-file-contract me-2"></i>Quản lý Hợp đồng
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_SINH')">
+            <a class="nav-link" th:href="@{/quansinh/sua-chua}">
+                <i class="fas fa-tools me-2"></i>Quản lý Sửa chữa
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_SINH')">
+            <a class="nav-link" th:href="@{/quansinh/sinhvien}">
+                <i class="fas fa-users me-2"></i>Quản lý sinh viên
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_SINH')">
+            <a class="nav-link" th:href="@{/quansinh/phong}">
+                <i class="fas fa-building me-2"></i>Quản lý phòng
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_SINH')">
+            <a class="nav-link" th:href="@{/quansinh/hoa-don}">
+                <i class="fas fa-file-invoice-dollar me-2"></i>Quản lý Hóa đơn
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_SINH')">
+            <a class="nav-link" th:href="@{/quansinh/vi-pham}">
+                <i class="fas fa-exclamation-triangle me-2 text-danger"></i>Kỷ luật - Vi phạm
+            </a>
+        </li>
+
+        <!-- Nhân viên sửa chữa -->
+        <li class="nav-item mb-2" sec:authorize="hasRole('NHAN_VIEN')">
+            <a class="nav-link" th:href="@{/nhanvien/dashboard}">
+                <i class="fas fa-tools me-2"></i>Yêu cầu sửa chữa
+            </a>
+        </li>
+
+        <!-- Quản trị viên -->
+        <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_TRI')">
+            <a class="nav-link" th:href="@{/admin/dashboard}">
+                <i class="fas fa-tachometer-alt me-2"></i>Tổng quan
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_TRI')">
+            <a class="nav-link" th:href="@{/admin/tai-khoan}">
+                <i class="fas fa-user-shield me-2"></i>Tài khoản & Phân quyền
+            </a>
+        </li>
+
+        <li class="nav-item mt-4">
+            <a class="nav-link text-secondary" th:href="@{/doi-mat-khau}">
+                <i class="fas fa-key me-2"></i>Đổi mật khẩu
+            </a>
+        </li>
+    </ul>
+</div>
+</body>
+</html>

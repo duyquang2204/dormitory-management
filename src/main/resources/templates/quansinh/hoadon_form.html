@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-10 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4>Chốt Chỉ Số Điện Nước & Tạo Hóa Đơn</h4>
+                    <a th:href="@{/quansinh/hoa-don}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Quay lại</a>
+                </div>
+                
+                <div th:if="${error}" class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i> <span th:text="${error}"></span>
+                </div>
+
+                <!-- Đơn giá áp dụng -->
+                <div class="alert alert-light border shadow-sm mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center flex-wrap gap-3">
+                        <span class="fw-bold text-dark"><i class="fas fa-calculator text-primary me-2"></i>Đơn giá tự động tính:</span>
+                        <span class="badge bg-warning bg-opacity-25 text-dark border border-warning px-3 py-2">
+                            <i class="fas fa-bolt text-warning me-1"></i> Điện: <strong>3.500 đ</strong> / kWh
+                        </span>
+                        <span class="badge bg-info bg-opacity-25 text-dark border border-info px-3 py-2">
+                            <i class="fas fa-water text-primary me-1"></i> Nước: <strong>15.000 đ</strong> / m³
+                        </span>
+                    </div>
+                    <small class="text-muted fst-italic">Hệ thống sẽ tự động nhân đơn giá và chia đều cho sinh viên trong phòng</small>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <form th:action="@{/quansinh/hoa-don/luu}" th:object="${hoaDonDTO}" method="post">
+                            <input type="hidden" th:field="*{maHoaDon}">
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Chọn Phòng <span class="text-danger">*</span></label>
+                                    <select class="form-select" th:field="*{maPhong}" required>
+                                        <option value="">-- Chọn Phòng --</option>
+                                        <option th:each="p : ${phongs}" 
+                                                th:value="${p.maPhong}" 
+                                                th:text="${p.khu.tenKhu + ' - ' + p.soPhong}"></option>
+                                    </select>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('maPhong')}" th:errors="*{maPhong}"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Tháng <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" th:field="*{thang}" min="1" max="12" required>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('thang')}" th:errors="*{thang}"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Năm <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" th:field="*{nam}" min="2020" required>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('nam')}" th:errors="*{nam}"></div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3 mt-4">
+                                <h5><i class="fas fa-bolt text-warning me-2"></i>Chỉ số điện (kWh) <small class="text-muted fs-6 fw-normal">(Chỉ số cũ được hệ thống tự động tính từ tháng trước)</small></h5>
+                                <div class="col-md-12">
+                                    <label class="form-label">Chỉ số mới</label>
+                                    <input type="number" step="0.01" class="form-control" th:field="*{chiSoDienMoi}" required>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('chiSoDienMoi')}" th:errors="*{chiSoDienMoi}"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4 mt-4">
+                                <h5><i class="fas fa-tint text-info me-2"></i>Chỉ số nước (m³) <small class="text-muted fs-6 fw-normal">(Chỉ số cũ được hệ thống tự động tính từ tháng trước)</small></h5>
+                                <div class="col-md-12">
+                                    <label class="form-label">Chỉ số mới</label>
+                                    <input type="number" step="0.01" class="form-control" th:field="*{chiSoNuocMoi}" required>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('chiSoNuocMoi')}" th:errors="*{chiSoNuocMoi}"></div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Lưu Hóa Đơn</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Set default month and year to current
+        document.addEventListener("DOMContentLoaded", function() {
+            var thangInput = document.getElementById("thang");
+            var namInput = document.getElementById("nam");
+            var date = new Date();
+            
+            if(!thangInput.value) {
+                thangInput.value = date.getMonth() + 1; // JS months are 0-indexed
+            }
+            if(!namInput.value) {
+                namInput.value = date.getFullYear();
+            }
+        });
+    </script>
+</body>
+</html>

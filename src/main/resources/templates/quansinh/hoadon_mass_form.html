@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-10 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0 text-dark fw-bold"><i class="fas fa-bolt me-2 text-warning"></i>Ghi chỉ số Điện Nước Hàng loạt</h4>
+                    <a th:href="@{/quansinh/hoa-don}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Quay lại</a>
+                </div>
+                
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Đơn giá định mức áp dụng -->
+                <div class="alert alert-light border shadow-sm mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3" style="border-radius: 12px;">
+                    <div class="d-flex align-items-center flex-wrap gap-3">
+                        <span class="fw-bold text-dark"><i class="fas fa-calculator text-primary me-2"></i>Đơn giá tự động tính:</span>
+                        <span class="badge bg-warning bg-opacity-25 text-dark border border-warning px-3 py-2">
+                            <i class="fas fa-bolt text-warning me-1"></i> Điện: <strong>3.500 đ</strong> / kWh
+                        </span>
+                        <span class="badge bg-info bg-opacity-25 text-dark border border-info px-3 py-2">
+                            <i class="fas fa-water text-primary me-1"></i> Nước: <strong>15.000 đ</strong> / m³
+                        </span>
+                    </div>
+                    <small class="text-muted fst-italic">Hệ thống tính: (Tiêu thụ điện × 3.500 + Tiêu thụ nước × 15.000) / Số sinh viên + Tiền phòng</small>
+                </div>
+
+                <!-- Form chọn Khu và Thời gian -->
+                <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
+                    <div class="card-body p-4">
+                        <form th:action="@{/quansinh/hoa-don/ghi-so-hang-loat}" method="get" class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted">Khu Tòa Nhà</label>
+                                <select name="maKhu" class="form-select border-0 bg-light" required>
+                                    <option value="">-- Chọn Khu --</option>
+                                    <option th:each="k : ${khus}" 
+                                            th:value="${k.maKhu}" 
+                                            th:text="${k.tenKhu}"
+                                            th:selected="${massDto.maKhu == k.maKhu}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted">Tháng</label>
+                                <select name="thang" class="form-select border-0 bg-light" required>
+                                    <option th:each="i : ${#numbers.sequence(1, 12)}" 
+                                            th:value="${i}" 
+                                            th:text="'Tháng ' + ${i}"
+                                            th:selected="${massDto.thang == i}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted">Năm</label>
+                                <input type="number" name="nam" class="form-control border-0 bg-light" 
+                                       th:value="${massDto.nam != 0 ? massDto.nam : #dates.year(#dates.createNow())}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="fas fa-search me-2"></i>Lấy Danh sách Phòng</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Bảng nhập liệu -->
+                <div class="card shadow-sm border-0" style="border-radius: 12px;" th:if="${massDto.rooms != null and !massDto.rooms.isEmpty()}">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-list me-2 text-primary"></i>Nhập số liệu - Tháng <span th:text="${massDto.thang}"></span>/<span th:text="${massDto.nam}"></span></h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <form th:action="@{/quansinh/hoa-don/ghi-so-hang-loat}" th:object="${massDto}" method="post">
+                            <input type="hidden" th:field="*{maKhu}">
+                            <input type="hidden" th:field="*{thang}">
+                            <input type="hidden" th:field="*{nam}">
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="px-4">Phòng</th>
+                                            <th>Số Điện Cũ</th>
+                                            <th>Số Điện Mới</th>
+                                            <th>Số Nước Cũ</th>
+                                            <th>Số Nước Mới</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="room, itemStat : *{rooms}">
+                                            <td class="px-4 fw-bold">
+                                                <input type="hidden" th:field="*{rooms[__${itemStat.index}__].maPhong}" />
+                                                <input type="hidden" th:field="*{rooms[__${itemStat.index}__].tenPhong}" />
+                                                <input type="hidden" th:field="*{rooms[__${itemStat.index}__].daTonTai}" />
+                                                <span th:text="${room.tenPhong}"></span>
+                                                <span th:if="${room.daTonTai}" class="badge bg-warning ms-2" title="Hóa đơn tháng này đã được lập">Đã lập</span>
+                                            </td>
+                                            <td>
+                                                <input type="number" step="0.1" class="form-control bg-light" readonly th:field="*{rooms[__${itemStat.index}__].chiSoDienCu}" />
+                                            </td>
+                                            <td>
+                                                <input type="number" step="0.1" class="form-control" placeholder="Nhập số điện..." min="0" th:field="*{rooms[__${itemStat.index}__].chiSoDienMoi}" />
+                                            </td>
+                                            <td>
+                                                <input type="number" step="0.1" class="form-control bg-light" readonly th:field="*{rooms[__${itemStat.index}__].chiSoNuocCu}" />
+                                            </td>
+                                            <td>
+                                                <input type="number" step="0.1" class="form-control" placeholder="Nhập số nước..." min="0" th:field="*{rooms[__${itemStat.index}__].chiSoNuocMoi}" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="p-4 border-top d-flex justify-content-end bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                                <button type="submit" class="btn btn-success fw-bold px-4 py-2"><i class="fas fa-save me-2"></i>Lưu Tất cả Hóa đơn</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div th:if="${massDto.maKhu != null and (massDto.rooms == null or massDto.rooms.isEmpty())}" class="text-center py-5">
+                    <i class="fas fa-door-open fs-1 text-muted mb-3"></i>
+                    <p class="text-muted fs-5">Khu này hiện chưa có phòng nào.</p>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
