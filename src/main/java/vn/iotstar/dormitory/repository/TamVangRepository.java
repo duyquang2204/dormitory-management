@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TamVangRepository extends JpaRepository<TamVang, String> {
+    java.util.List<TamVang> findBySinhVien_MaSV(String maSV);
 }

@@ -69,16 +69,23 @@
                                 </div>
                             </div>
 
-                            <div class="row mb-4">
-                                <div class="col-md-4">
-                                    <label class="form-label">Khoa</label>
-                                    <input type="text" class="form-control" th:field="*{khoa}">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Trường Đại học / Cao đẳng</label>
+                                    <input type="text" class="form-control" th:field="*{truongDaiHoc}" placeholder="Ví dụ: ĐH Sư Phạm Kỹ Thuật TP.HCM">
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Khoa / Ngành học</label>
+                                    <input type="text" class="form-control" th:field="*{khoa}" placeholder="Ví dụ: Công nghệ Thông tin">
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
                                     <label class="form-label">Năm học</label>
                                     <input type="number" class="form-control" th:field="*{namHoc}">
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label class="form-label">Diện ưu tiên</label>
                                     <input type="text" class="form-control" th:field="*{dienUuTien}" placeholder="Ví dụ: Hộ nghèo, Con thương binh...">
                                 </div>

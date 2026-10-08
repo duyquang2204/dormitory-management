@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nộp hồ sơ lưu trú Ký Túc Xá Online - KTX Tư Nhân Cao Cấp</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg sticky-top bg-white border-bottom shadow-xs py-2 py-lg-3">
+    <div class="container-fluid px-xxl-5 px-xl-4 px-lg-3 px-3">
+        <a class="navbar-brand fw-bold d-flex align-items-center text-nowrap" th:href="@{/home}">
+            <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-2" style="width: 38px; height: 38px;">
+                <i class="fa-solid fa-building-user"></i>
+            </div>
+            <span class="text-dark fw-bold">KTX TƯ NHÂN CAO CẤP</span>
+        </a>
+        <div class="ms-auto d-flex align-items-center gap-2 text-nowrap">
+            <a th:href="@{/home}" class="btn btn-outline-dark btn-sm"><i class="fa-solid fa-house me-1"></i>Trang chủ</a>
+            <a th:href="@{/tra-cuu-phong}" class="btn btn-outline-dark btn-sm"><i class="fa-solid fa-magnifying-glass me-1"></i>Tra cứu chỗ trống</a>
+            <a th:href="@{/login}" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-right-to-bracket me-1"></i>Đăng nhập</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-5" style="max-width: 860px;">
+    <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 64px; height: 64px;">
+            <i class="fa-solid fa-file-signature fa-2x"></i>
+        </div>
+        <h2 class="fw-bold text-dark mb-1">ĐƠN ĐĂNG KÝ LƯU TRÚ KÝ TÚC XÁ ONLINE</h2>
+        <p class="text-muted">Dành cho sinh viên các trường Đại học & Cao đẳng trên toàn quốc</p>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
+    <div class="card shadow-sm border p-4 p-md-5 bg-white rounded-4">
+        <form th:action="@{/nop-don}" th:object="${nopDonDTO}" method="post" enctype="multipart/form-data">
+            
+            <!-- PHẦN 1: THÔNG TIN CÁ NHÂN -->
+            <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                <i class="fa-solid fa-user text-primary me-2"></i>1. THÔNG TIN CÁ NHÂN
+            </h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">Họ và tên sinh viên <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" th:field="*{hoTen}" placeholder="Ví dụ: Trần Văn Nam" required>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('hoTen')}" th:errors="*{hoTen}"></div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Ngày sinh <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" th:field="*{ngaySinh}" required>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('ngaySinh')}" th:errors="*{ngaySinh}"></div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Giới tính <span class="text-danger">*</span></label>
+                    <select class="form-select" th:field="*{gioiTinh}" required>
+                        <option value="">-- Chọn --</option>
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                    </select>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('gioiTinh')}" th:errors="*{gioiTinh}"></div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small">Số CCCD/CMND <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" th:field="*{cccd}" placeholder="012345678901" required>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('cccd')}" th:errors="*{cccd}"></div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small">Số điện thoại <span class="text-danger">*</span></label>
+                    <input type="tel" class="form-control" th:field="*{sdt}" placeholder="0901234567" required>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('sdt')}" th:errors="*{sdt}"></div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small">Email nhận kết quả <span class="text-danger">*</span></label>
+                    <input type="email" class="form-control" th:field="*{email}" placeholder="email@gmail.com" required>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold small">Quê quán / Địa chỉ thường trú <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" th:field="*{queQuan}" placeholder="Xã/Phường, Huyện/Quận, Tỉnh/TP..." required>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('queQuan')}" th:errors="*{queQuan}"></div>
+                </div>
+            </div>
+
+            <!-- PHẦN 2: THÔNG TIN TRƯỜNG ĐANG HỌC & ĐỐI TƯỢNG -->
+            <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                <i class="fa-solid fa-graduation-cap text-primary me-2"></i>2. THÔNG TIN HỌC TẬP & ĐỐI TƯỢNG ƯU TIÊN
+            </h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">Trường Đại học / Cao đẳng đang học <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" th:field="*{truongDaiHoc}" placeholder="Ví dụ: ĐH Sư Phạm Kỹ Thuật, ĐH Bách Khoa..." required>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('truongDaiHoc')}" th:errors="*{truongDaiHoc}"></div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small">Khoa / Chuyên ngành</label>
+                    <input type="text" class="form-control" th:field="*{khoa}" placeholder="Công nghệ thông tin, Cơ khí...">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold small">Năm thứ</label>
+                    <select class="form-select" th:field="*{namHoc}">
+                        <option value="1">Năm 1</option>
+                        <option value="2">Năm 2</option>
+                        <option value="3">Năm 3</option>
+                        <option value="4">Năm 4</option>
+                        <option value="5">Năm 5</option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold small">Diện ưu tiên xét duyệt</label>
+                    <select class="form-select" th:field="*{dienUuTien}">
+                        <option value="Không ưu tiên">Không thuộc diện ưu tiên</option>
+                        <option value="Con thương binh, liệt sĩ">Con thương binh, liệt sĩ, gia đình có công</option>
+                        <option value="Hộ nghèo, cận nghèo">Sinh viên thuộc hộ nghèo, cận nghèo</option>
+                        <option value="Vùng sâu, vùng xa">Vùng sâu, vùng xa, hải đảo</option>
+                        <option value="Dân tộc thiểu số">Con em đồng bào dân tộc thiểu số</option>
+                        <option value="Khuyết tật">Sinh viên khuyết tật</option>
+                        <option value="Thành tích xuất sắc">Sinh viên đạt giải thưởng, thủ khoa</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- PHẦN 3: TẢI LÊN ẢNH MINH CHỨNG (CLOUDINARY) -->
+            <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                <i class="fa-solid fa-camera text-primary me-2"></i>3. ẢNH MINH CHỨNG SINH VIÊN & GIẤY TỜ
+            </h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small">Ảnh Thẻ Sinh Viên / Giấy báo nhập học</label>
+                    <input type="file" class="form-control" name="anhTheSinhVienFile" accept="image/*">
+                    <div class="form-text small">Để xác minh bạn là sinh viên</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small">Ảnh Căn Cước Công Dân (Mặt trước)</label>
+                    <input type="file" class="form-control" name="anhCccdFile" accept="image/*">
+                    <div class="form-text small">Xác minh danh tính</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small">Ảnh Giấy tờ ưu tiên (Nếu có)</label>
+                    <input type="file" class="form-control" name="anhMinhChungUuTienFile" accept="image/*">
+                    <div class="form-text small">Sổ hộ nghèo, giấy xác nhận...</div>
+                </div>
+            </div>
+
+            <!-- PHẦN 4: NGUYỆN VỌNG PHÒNG Ở -->
+            <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                <i class="fa-solid fa-bed text-primary me-2"></i>4. NGUYỆN VỌNG LƯU TRÚ
+            </h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">Lựa chọn loại phòng mong muốn <span class="text-danger">*</span></label>
+                    <select class="form-select" th:field="*{maLoaiPhong}" required>
+                        <option value="">-- Chọn loại phòng --</option>
+                        <option th:each="lp : ${loaiPhongs}" th:value="${lp.maLoaiPhong}" 
+                                th:text="${lp.tenLoaiPhong} + ' (' + ${#numbers.formatDecimal(lp.giaPhong, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng)'">
+                        </option>
+                    </select>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('maLoaiPhong')}" th:errors="*{maLoaiPhong}"></div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">Ghi chú nguyện vọng thêm (nếu có)</label>
+                    <input type="text" class="form-control" th:field="*{ghiChu}" placeholder="Ví dụ: Mong muốn ở cùng bạn MSSV ..., ở tầng thấp...">
+                </div>
+            </div>
+
+            <div class="alert alert-info py-3 small mb-4 border-0 rounded-3">
+                <i class="fa-solid fa-shield-halved me-1"></i> <strong>Cam kết thông tin:</strong> 
+                Tôi cam đoan các thông tin kê khai trên là hoàn toàn chính xác và tôi hiện đang là sinh viên theo học tại trường Đại học/Cao đẳng đã khai báo.
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                    <i class="fa-solid fa-paper-plane me-2"></i>NỘP HỒ SƠ ĐĂNG KÝ NGAY
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

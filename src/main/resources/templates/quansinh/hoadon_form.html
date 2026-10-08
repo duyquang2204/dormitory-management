@@ -44,7 +44,7 @@
                                         <option value="">-- Chọn Phòng --</option>
                                         <option th:each="p : ${phongs}" 
                                                 th:value="${p.maPhong}" 
-                                                th:text="${p.khu.tenKhu + ' - ' + p.soPhong}"></option>
+                                                th:text="${'Phòng ' + p.soPhong}"></option>
                                     </select>
                                     <div class="text-danger" th:if="${#fields.hasErrors('maPhong')}" th:errors="*{maPhong}"></div>
                                 </div>

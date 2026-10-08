@@ -65,6 +65,9 @@
                                 </tr>
                             </tbody>
                         </table>
+                        
+                        <!-- PAGINATION -->
+                        <div th:replace="~{fragments/pagination :: pagination(pageObj=${congViecPage}, url='/nhanvien/sua-chua', queryParams='')}"></div>
                     </div>
                 </div>
             </div>

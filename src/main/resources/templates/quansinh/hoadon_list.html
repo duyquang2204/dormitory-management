@@ -70,7 +70,7 @@
                             <tbody>
                                 <tr th:each="hd : ${hoaDonPage.content}">
                                     <td class="fw-bold" th:text="${hd.sinhVien != null ? hd.sinhVien.hoTen : 'Trống'}"></td>
-                                    <td class="fw-bold text-primary" th:text="${hd.phong.khu.tenKhu + ' - ' + hd.phong.soPhong}"></td>
+                                    <td class="fw-bold text-primary" th:text="${hd.phong.soPhong}"></td>
                                     <td th:text="${hd.thang + '/' + hd.nam}"></td>
                                     <td>
                                         <span class="text-danger fw-bold" th:text="${hd.chiSoDienMoi - hd.chiSoDienCu}"></span>
@@ -84,17 +84,22 @@
                                               th:text="${hd.trangThai}"></span>
                                     </td>
                                     <td>
-                                        <div th:if="${hd.minhChungThanhToan != null}" class="mb-1">
-                                            <a th:href="${hd.minhChungThanhToan}" target="_blank" class="btn btn-sm btn-outline-info" title="Xem biên lai">
-                                                <i class="fas fa-image"></i> Lịch sử Biên lai
+                                        <div class="d-flex flex-column gap-1 align-items-center">
+                                            <a th:href="@{/quansinh/hoa-don/xuat-pdf/{id}(id=${hd.maHoaDon})}" class="btn btn-sm btn-outline-danger w-100" target="_blank" title="In / Tải hóa đơn PDF">
+                                                <i class="fas fa-file-pdf me-1"></i>Xuất PDF
                                             </a>
+                                            <div th:if="${hd.minhChungThanhToan != null}" class="w-100">
+                                                <a th:href="${hd.minhChungThanhToan}" target="_blank" class="btn btn-sm btn-outline-info w-100" title="Xem biên lai">
+                                                    <i class="fas fa-image me-1"></i>Biên lai
+                                                </a>
+                                            </div>
+                                            <span th:if="${hd.trangThai == 'Đã thanh toán'}" class="text-success small fw-bold"><i class="fas fa-check-circle me-1"></i>Đã thu VNPAY</span>
+                                            <span th:if="${hd.trangThai == 'Chưa thanh toán'}" class="text-muted small"><i class="fas fa-clock text-warning me-1"></i>Chờ nộp</span>
                                         </div>
-                                        <span th:if="${hd.trangThai == 'Đã thanh toán'}" class="text-muted small"><i class="fas fa-check-circle text-success"></i> Đã thu tự động qua VNPAY</span>
-                                        <span th:if="${hd.trangThai == 'Chưa thanh toán'}" class="text-muted small"><i class="fas fa-clock text-warning"></i> Chờ SV thanh toán</span>
                                     </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(hoaDonPage.content)}">
-                                    <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu hóa đơn</td>
+                                    <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu hóa đơn</td>
                                 </tr>
                             </tbody>
                         </table>

@@ -20,8 +20,6 @@ public class AdminController {
     private NguoiDungService nguoiDungService;
 
     @Autowired
-    private vn.iotstar.dormitory.service.SinhVienService sinhVienService;
-    @Autowired
     private vn.iotstar.dormitory.service.HoaDonService hoaDonService;
     @Autowired
     private vn.iotstar.dormitory.service.YeuCauSuaChuaService yeuCauSuaChuaService;
@@ -65,8 +63,40 @@ public class AdminController {
     }
 
     @GetMapping("/tai-khoan")
-    public String listTaiKhoan(Model model) {
-        model.addAttribute("users", nguoiDungService.findAll());
+    public String listTaiKhoan(
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            Model model) {
+        java.util.List<NguoiDung> fullList = nguoiDungService.findAll();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String kw = keyword.trim().toLowerCase();
+            fullList = fullList.stream().filter(u -> {
+                String ten = u.getHoTen() != null ? u.getHoTen().toLowerCase() : "";
+                String username = u.getTenDangNhap() != null ? u.getTenDangNhap().toLowerCase() : "";
+                String sdt = u.getSdt() != null ? u.getSdt().toLowerCase() : "";
+                String chucVu = u.getChucVu() != null ? u.getChucVu().toLowerCase() : "";
+                return ten.contains(kw) || username.contains(kw) || sdt.contains(kw) || chucVu.contains(kw);
+            }).toList();
+        }
+
+        int totalElements = fullList.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        if (totalPages == 0) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        int start = Math.min((page - 1) * size, totalElements);
+        int end = Math.min(start + size, totalElements);
+        java.util.List<NguoiDung> pagedList = fullList.subList(start, end);
+
+        org.springframework.data.domain.Page<NguoiDung> userPage =
+                new org.springframework.data.domain.PageImpl<>(pagedList, org.springframework.data.domain.PageRequest.of(page - 1, size), totalElements);
+
+        model.addAttribute("userPage", userPage);
+        model.addAttribute("users", userPage.getContent());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("queryParams", keyword != null && !keyword.isEmpty() ? "&keyword=" + keyword : "");
         return "admin/taikhoan_list";
     }
 

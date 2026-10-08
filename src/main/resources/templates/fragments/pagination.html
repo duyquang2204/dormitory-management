@@ -7,42 +7,46 @@
          - url: The base URL for pagination (e.g. '/quansinh/phong')
          - queryParams: Additional query parameters as a string (e.g. '&maKhu=' + ${maKhu})
     -->
-    <div th:fragment="pagination(pageObj, url, queryParams)" th:if="${pageObj.totalPages > 1}" class="mt-4">
+    <div th:fragment="pagination(pageObj, url, queryParams)" th:if="${pageObj != null and pageObj.totalPages > 1}" class="mt-4">
         <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
+            <ul class="pagination justify-content-center shadow-xs flex-wrap gap-1">
                 <!-- First Page -->
                 <li class="page-item" th:classappend="${pageObj.first ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{${url} + '?page=1' + ${queryParams != null ? queryParams : ''}}">
+                    <a class="page-link rounded-2" th:href="@{${url} + '?page=1' + ${queryParams != null ? queryParams : ''}}" title="Trang đầu">
                         <i class="fas fa-angle-double-left"></i>
                     </a>
                 </li>
                 <!-- Previous Page -->
                 <li class="page-item" th:classappend="${pageObj.first ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{${url} + '?page=' + ${pageObj.number} + ${queryParams != null ? queryParams : ''}}">
-                        Trang trước
+                    <a class="page-link rounded-2" th:href="@{${url} + '?page=' + ${pageObj.number} + ${queryParams != null ? queryParams : ''}}" title="Trang trước">
+                        <i class="fas fa-angle-left me-1"></i>Trước
                     </a>
                 </li>
                 
                 <!-- Page Numbers -->
                 <li class="page-item" th:each="i : ${#numbers.sequence(1, pageObj.totalPages)}" 
                     th:classappend="${pageObj.number + 1 == i ? 'active' : ''}">
-                    <a class="page-link" th:href="@{${url} + '?page=' + ${i} + ${queryParams != null ? queryParams : ''}}" th:text="${i}"></a>
+                    <a class="page-link rounded-2" th:href="@{${url} + '?page=' + ${i} + ${queryParams != null ? queryParams : ''}}" th:text="${i}"></a>
                 </li>
                 
                 <!-- Next Page -->
                 <li class="page-item" th:classappend="${pageObj.last ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{${url} + '?page=' + ${pageObj.number + 2} + ${queryParams != null ? queryParams : ''}}">
-                        Trang sau
+                    <a class="page-link rounded-2" th:href="@{${url} + '?page=' + ${pageObj.number + 2} + ${queryParams != null ? queryParams : ''}}" title="Trang sau">
+                        Sau<i class="fas fa-angle-right ms-1"></i>
                     </a>
                 </li>
                 <!-- Last Page -->
                 <li class="page-item" th:classappend="${pageObj.last ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{${url} + '?page=' + ${pageObj.totalPages} + ${queryParams != null ? queryParams : ''}}">
+                    <a class="page-link rounded-2" th:href="@{${url} + '?page=' + ${pageObj.totalPages} + ${queryParams != null ? queryParams : ''}}" title="Trang cuối">
                         <i class="fas fa-angle-double-right"></i>
                     </a>
                 </li>
             </ul>
         </nav>
+        <div class="text-center text-muted small mt-2">
+            Trang <strong class="text-primary" th:text="${pageObj.number + 1}">1</strong> / <strong th:text="${pageObj.totalPages}">4</strong> 
+            (Tổng cộng <strong th:text="${pageObj.totalElements}">48</strong> mục)
+        </div>
     </div>
 </body>
 </html>

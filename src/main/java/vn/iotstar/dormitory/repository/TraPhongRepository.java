@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TraPhongRepository extends JpaRepository<TraPhong, String> {
+    java.util.List<TraPhong> findByPhanPhong_MaPhanPhong(String maPhanPhong);
 }

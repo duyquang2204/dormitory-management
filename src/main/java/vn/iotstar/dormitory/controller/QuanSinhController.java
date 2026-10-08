@@ -12,9 +12,11 @@ import vn.iotstar.dormitory.entity.Phong;
 import vn.iotstar.dormitory.entity.SinhVien;
 import vn.iotstar.dormitory.entity.Khu;
 import vn.iotstar.dormitory.entity.LoaiPhong;
+import vn.iotstar.dormitory.entity.DangKyKTX;
 import vn.iotstar.dormitory.service.PhongService;
 import vn.iotstar.dormitory.service.SinhVienService;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -50,7 +52,7 @@ public class QuanSinhController {
     public String listSinhVien(
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "page", defaultValue = "1") int page,
-            @RequestParam(name = "size", defaultValue = "12") int size,
+            @RequestParam(name = "size", defaultValue = "10") int size,
             Model model) {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page - 1, size);
         org.springframework.data.domain.Page<SinhVien> pageData = sinhVienService.searchByKeyword(keyword, pageable);
@@ -123,6 +125,7 @@ public class QuanSinhController {
             dto.setCccd(sv.getCccd());
             dto.setSdt(sv.getSdt());
             dto.setKhoa(sv.getKhoa());
+            dto.setTruongDaiHoc(sv.getTruongDaiHoc());
             dto.setNamHoc(sv.getNamHoc());
             dto.setDienUuTien(sv.getDienUuTien());
             model.addAttribute("sinhVienDTO", dto);
@@ -147,23 +150,44 @@ public class QuanSinhController {
     
     @GetMapping("/phong")
     public String listPhong(
+            @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "maKhu", required = false) String maKhu,
+            @RequestParam(name = "tang", required = false) Integer tang,
+            @RequestParam(name = "gioiTinh", required = false) String gioiTinh,
+            @RequestParam(name = "trangThai", required = false) String trangThai,
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "12") int size,
             Model model) {
             
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page - 1, size);
-        org.springframework.data.domain.Page<Phong> phongPage;
+        org.springframework.data.domain.Pageable pageable = 
+                org.springframework.data.domain.PageRequest.of(page - 1, size);
+        org.springframework.data.domain.Page<Phong> phongPage = 
+                phongService.searchAndFilterPhong(keyword, maKhu, tang, gioiTinh, trangThai, pageable);
         
-        if (maKhu != null && !maKhu.isEmpty()) {
-            phongPage = phongService.findByKhu(maKhu, pageable);
-        } else {
-            // Return empty page if no zone is selected
-            phongPage = org.springframework.data.domain.Page.empty(pageable);
+        StringBuilder qp = new StringBuilder();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            qp.append("&keyword=").append(java.net.URLEncoder.encode(keyword.trim(), java.nio.charset.StandardCharsets.UTF_8));
         }
-        
+        if (maKhu != null && !maKhu.trim().isEmpty()) {
+            qp.append("&maKhu=").append(java.net.URLEncoder.encode(maKhu.trim(), java.nio.charset.StandardCharsets.UTF_8));
+        }
+        if (tang != null && tang > 0) {
+            qp.append("&tang=").append(tang);
+        }
+        if (gioiTinh != null && !gioiTinh.trim().isEmpty()) {
+            qp.append("&gioiTinh=").append(java.net.URLEncoder.encode(gioiTinh.trim(), java.nio.charset.StandardCharsets.UTF_8));
+        }
+        if (trangThai != null && !trangThai.trim().isEmpty()) {
+            qp.append("&trangThai=").append(java.net.URLEncoder.encode(trangThai.trim(), java.nio.charset.StandardCharsets.UTF_8));
+        }
+
         model.addAttribute("phongPage", phongPage);
-        model.addAttribute("maKhu", maKhu);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("maKhu", maKhu != null ? maKhu : "");
+        model.addAttribute("tang", tang != null ? tang : 0);
+        model.addAttribute("gioiTinh", gioiTinh != null ? gioiTinh : "");
+        model.addAttribute("trangThai", trangThai != null ? trangThai : "");
+        model.addAttribute("queryParams", qp.toString());
         model.addAttribute("khus", phongService.findAllKhu());
         return "quansinh/phong_list";
     }
@@ -241,14 +265,53 @@ public class QuanSinhController {
     private vn.iotstar.dormitory.service.PhanPhongService phanPhongService;
 
     @GetMapping("/dang-ky")
-    public String listDangKy(Model model) {
-        model.addAttribute("dangKyList", dangKyKTXService.findAll());
+    public String listDangKy(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "trangThai", required = false) String trangThai,
+            @RequestParam(value = "maLoaiPhong", required = false) String maLoaiPhong,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            Model model) {
+        List<DangKyKTX> fullList = dangKyKTXService.search(keyword, trangThai, maLoaiPhong);
+
+        int totalElements = fullList.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        if (totalPages == 0) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        int start = Math.min((page - 1) * size, totalElements);
+        int end = Math.min(start + size, totalElements);
+        List<DangKyKTX> pagedList = fullList.subList(start, end);
+
+        org.springframework.data.domain.Page<DangKyKTX> dangKyPage =
+                new org.springframework.data.domain.PageImpl<>(pagedList, org.springframework.data.domain.PageRequest.of(page - 1, size), totalElements);
+
+        StringBuilder qp = new StringBuilder();
+        if (keyword != null && !keyword.isEmpty()) qp.append("&keyword=").append(keyword);
+        if (trangThai != null && !trangThai.isEmpty()) qp.append("&trangThai=").append(trangThai);
+        if (maLoaiPhong != null && !maLoaiPhong.isEmpty()) qp.append("&maLoaiPhong=").append(maLoaiPhong);
+
+        model.addAttribute("dangKyPage", dangKyPage);
+        model.addAttribute("dangKyList", dangKyPage.getContent());
+        model.addAttribute("queryParams", qp.toString());
+        model.addAttribute("loaiPhongs", phongService.findAllLoaiPhong());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("trangThai", trangThai);
+        model.addAttribute("maLoaiPhong", maLoaiPhong);
         return "quansinh/dangky_list";
     }
 
     @PostMapping("/dang-ky/tu-choi/{id}")
-    public String tuChoiDangKy(@PathVariable("id") String id) {
-        dangKyKTXService.updateStatus(id, "Từ chối");
+    public String tuChoiDangKy(@PathVariable("id") String id,
+                               @RequestParam(value = "lyDoTuChoi", required = false, defaultValue = "Phòng đăng ký đã hết chỗ hoặc hồ sơ chưa đáp ứng tiêu chí đợt này.") String lyDoTuChoi,
+                               org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            dangKyKTXService.rejectRegistration(id, lyDoTuChoi);
+            redirectAttributes.addFlashAttribute("success", "Đã từ chối đơn đăng ký và tự động gửi email thông báo lý do tới sinh viên.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
         return "redirect:/quansinh/dang-ky";
     }
 
@@ -256,12 +319,45 @@ public class QuanSinhController {
     public String formDuyetDangKy(@PathVariable("id") String id, Model model) {
         java.util.Optional<vn.iotstar.dormitory.entity.DangKyKTX> dkOpt = dangKyKTXService.findById(id);
         if (dkOpt.isPresent()) {
-            model.addAttribute("dangKy", dkOpt.get());
-            model.addAttribute("phongs", phongService.findAll().stream()
-                    .filter(p -> p.getLoaiPhong() != null 
-                            && p.getLoaiPhong().getMaLoaiPhong().equals(dkOpt.get().getLoaiPhong().getMaLoaiPhong())
-                            && !"Đã đầy".equals(p.getTrangThai()))
-                    .toList());
+            vn.iotstar.dormitory.entity.DangKyKTX dk = dkOpt.get();
+            model.addAttribute("dangKy", dk);
+
+            String gioiTinh = dk.getGioiTinh();
+            if (gioiTinh == null && dk.getSinhVien() != null) {
+                gioiTinh = dk.getSinhVien().getGioiTinh();
+            }
+            final String finalGioiTinh = gioiTinh;
+
+            List<Phong> allPhongs = phongService.findAll();
+            
+            // 1. Tìm phòng đúng loại phòng yêu cầu và đúng giới tính
+            List<Phong> matchingPhongs = allPhongs.stream()
+                    .filter(p -> {
+                        boolean matchLoai = (dk.getLoaiPhong() == null) || (p.getLoaiPhong() != null && p.getLoaiPhong().getMaLoaiPhong().equals(dk.getLoaiPhong().getMaLoaiPhong()));
+                        boolean conCho = p.getSoChoTrong() > 0 && !"Đã đầy".equalsIgnoreCase(p.getTrangThai());
+                        boolean matchGioiTinh = (finalGioiTinh == null) || finalGioiTinh.equalsIgnoreCase(p.getGioiTinh());
+                        return matchLoai && conCho && matchGioiTinh;
+                    })
+                    .toList();
+
+            // 2. Nếu phòng loại đó hết chỗ, hiển thị tất cả các phòng khác cùng giới tính còn chỗ
+            List<Phong> displayPhongs = matchingPhongs;
+            if (displayPhongs.isEmpty()) {
+                displayPhongs = allPhongs.stream()
+                        .filter(p -> {
+                            boolean conCho = p.getSoChoTrong() > 0 && !"Đã đầy".equalsIgnoreCase(p.getTrangThai());
+                            boolean matchGioiTinh = (finalGioiTinh == null) || finalGioiTinh.equalsIgnoreCase(p.getGioiTinh());
+                            return conCho && matchGioiTinh;
+                        })
+                        .toList();
+                if (!displayPhongs.isEmpty() && dk.getLoaiPhong() != null) {
+                    model.addAttribute("warningMessage", "Loại phòng \"" + dk.getLoaiPhong().getTenLoaiPhong() + "\" hiện đã hết chỗ. Hệ thống gợi ý các phòng khác cùng giới tính (" + (finalGioiTinh != null ? finalGioiTinh : "") + ") còn trống để Quản sinh linh hoạt xếp phòng.");
+                }
+            }
+
+            model.addAttribute("phongs", displayPhongs);
+            model.addAttribute("homNay", java.time.LocalDate.now());
+            model.addAttribute("ngayKetThucMacDinh", java.time.LocalDate.now().plusMonths(6));
             return "quansinh/phanphong_form";
         }
         return "redirect:/quansinh/dang-ky";
@@ -270,13 +366,14 @@ public class QuanSinhController {
     @PostMapping("/dang-ky/duyet/{id}")
     public String luuDuyetDangKy(@PathVariable("id") String id, 
                                  @RequestParam("maPhong") String maPhong,
-                                 @RequestParam("ngayBatDau") java.time.LocalDate ngayBatDau,
-                                 @RequestParam("ngayKetThuc") java.time.LocalDate ngayKetThuc,
+                                 @RequestParam("ngayBatDau") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate ngayBatDau,
+                                 @RequestParam("ngayKetThuc") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate ngayKetThuc,
                                  org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         try {
-            phanPhongService.assignRoom(id, maPhong, ngayBatDau, ngayKetThuc);
-            return "redirect:/quansinh/dang-ky?success";
-        } catch (RuntimeException e) {
+            dangKyKTXService.approveRegistration(id, maPhong, ngayBatDau, ngayKetThuc);
+            redirectAttributes.addFlashAttribute("success", "Đã duyệt đơn, xếp phòng và gửi email chúc mừng trúng tuyển kèm thông tin tài khoản cho sinh viên thành công!");
+            return "redirect:/quansinh/dang-ky";
+        } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/quansinh/dang-ky/duyet/" + id;
         }
@@ -296,9 +393,15 @@ public class QuanSinhController {
             return "redirect:/quansinh/sinhvien";
         }
 
-        model.addAttribute("sinhVien", svOpt.get());
+        SinhVien sv = svOpt.get();
+        String gioiTinh = sv.getGioiTinh();
+        model.addAttribute("sinhVien", sv);
         model.addAttribute("phongs", phongService.findAll().stream()
-                .filter(p -> !"Đã đầy".equals(p.getTrangThai()))
+                .filter(p -> {
+                    boolean conCho = !"Đã đầy".equals(p.getTrangThai());
+                    boolean matchGioiTinh = (gioiTinh == null) || gioiTinh.equalsIgnoreCase(p.getGioiTinh());
+                    return conCho && matchGioiTinh;
+                })
                 .toList());
         return "quansinh/phanphong_nhanh_form";
     }
@@ -330,8 +433,26 @@ public class QuanSinhController {
     private vn.iotstar.dormitory.repository.NguoiDungRepository nguoiDungRepository;
 
     @GetMapping("/sua-chua")
-    public String listSuaChua(Model model) {
-        model.addAttribute("yeuCauList", yeuCauSuaChuaService.findAll());
+    public String listSuaChua(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            Model model) {
+        List<vn.iotstar.dormitory.entity.YeuCauSuaChua> fullList = yeuCauSuaChuaService.findAll();
+        int totalElements = fullList.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        if (totalPages == 0) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        int start = Math.min((page - 1) * size, totalElements);
+        int end = Math.min(start + size, totalElements);
+        List<vn.iotstar.dormitory.entity.YeuCauSuaChua> pagedList = fullList.subList(start, end);
+
+        org.springframework.data.domain.Page<vn.iotstar.dormitory.entity.YeuCauSuaChua> yeuCauPage =
+                new org.springframework.data.domain.PageImpl<>(pagedList, org.springframework.data.domain.PageRequest.of(page - 1, size), totalElements);
+
+        model.addAttribute("yeuCauPage", yeuCauPage);
+        model.addAttribute("yeuCauList", yeuCauPage.getContent());
         model.addAttribute("nhanViens", nguoiDungRepository.findAll().stream()
                 .filter(nd -> "Nhân viên sửa chữa".equals(nd.getChucVu()) && "Hoạt động".equals(nd.getTrangThai()))
                 .toList());
@@ -351,13 +472,59 @@ public class QuanSinhController {
         return "redirect:/quansinh/sua-chua?success";
     }
 
+    @PostMapping("/sua-chua/xoa/{id}")
+    public String xoaYeuCauSuaChua(@PathVariable("id") String id, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            yeuCauSuaChuaService.delete(id);
+            redirectAttributes.addFlashAttribute("success", "Đã xóa yêu cầu sửa chữa thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Không thể xóa yêu cầu sửa chữa: " + e.getMessage());
+        }
+        return "redirect:/quansinh/sua-chua";
+    }
+
     // --- QUẢN LÝ HỢP ĐỒNG ---
     @Autowired
     private vn.iotstar.dormitory.service.HopDongService hopDongService;
 
     @GetMapping("/hop-dong")
-    public String listHopDong(Model model) {
-        model.addAttribute("hopDongs", hopDongService.findAll());
+    public String listHopDong(
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            Model model) {
+        List<vn.iotstar.dormitory.entity.HopDong> fullList = hopDongService.findAll();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String kw = keyword.trim().toLowerCase();
+            fullList = fullList.stream().filter(hd -> {
+                String maHD = hd.getMaHopDong() != null ? hd.getMaHopDong().toLowerCase() : "";
+                String tenSV = (hd.getPhanPhong() != null && hd.getPhanPhong().getSinhVien() != null && hd.getPhanPhong().getSinhVien().getHoTen() != null)
+                        ? hd.getPhanPhong().getSinhVien().getHoTen().toLowerCase() : "";
+                String maSV = (hd.getPhanPhong() != null && hd.getPhanPhong().getSinhVien() != null && hd.getPhanPhong().getSinhVien().getMaSV() != null)
+                        ? hd.getPhanPhong().getSinhVien().getMaSV().toLowerCase() : "";
+                String phong = (hd.getPhanPhong() != null && hd.getPhanPhong().getPhong() != null && hd.getPhanPhong().getPhong().getSoPhong() != null)
+                        ? hd.getPhanPhong().getPhong().getSoPhong().toLowerCase() : "";
+                return maHD.contains(kw) || tenSV.contains(kw) || maSV.contains(kw) || phong.contains(kw);
+            }).toList();
+        }
+
+        int totalElements = fullList.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        if (totalPages == 0) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        int start = Math.min((page - 1) * size, totalElements);
+        int end = Math.min(start + size, totalElements);
+        List<vn.iotstar.dormitory.entity.HopDong> pagedList = fullList.subList(start, end);
+
+        org.springframework.data.domain.Page<vn.iotstar.dormitory.entity.HopDong> hopDongPage =
+                new org.springframework.data.domain.PageImpl<>(pagedList, org.springframework.data.domain.PageRequest.of(page - 1, size), totalElements);
+
+        model.addAttribute("hopDongPage", hopDongPage);
+        model.addAttribute("hopDongs", hopDongPage.getContent());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("queryParams", keyword != null && !keyword.isEmpty() ? "&keyword=" + keyword : "");
         return "quansinh/hopdong_list";
     }
 
@@ -574,5 +741,46 @@ public class QuanSinhController {
         viPhamService.xuLy(maViPham, hinhThucXuLy);
         redirectAttributes.addFlashAttribute("success", "Đã cập nhật hình thức xử lý thành công!");
         return "redirect:/quansinh/vi-pham";
+    }
+
+    // --- XUẤT FILE PDF ---
+    @Autowired
+    private vn.iotstar.dormitory.service.PdfExportService pdfExportService;
+
+    @Autowired
+    private vn.iotstar.dormitory.repository.HopDongRepository hopDongRepository;
+
+    @Autowired
+    private vn.iotstar.dormitory.repository.HoaDonRepository hoaDonRepository;
+
+    @GetMapping("/hop-dong/xuat-pdf/{id}")
+    public void xuatPdfHopDong(@PathVariable("id") String id, jakarta.servlet.http.HttpServletResponse response) throws Exception {
+        java.util.Optional<vn.iotstar.dormitory.entity.HopDong> hdOpt = hopDongRepository.findById(id);
+        if (hdOpt.isPresent()) {
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "inline; filename=\"HopDong_" + id + ".pdf\"");
+            pdfExportService.exportHopDongPdf(hdOpt.get(), response.getOutputStream());
+        } else {
+            response.sendError(jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy hợp đồng");
+        }
+    }
+
+    @GetMapping("/hoa-don/xuat-pdf/{id}")
+    public void xuatPdfHoaDon(@PathVariable("id") String id, jakarta.servlet.http.HttpServletResponse response) throws Exception {
+        java.util.Optional<vn.iotstar.dormitory.entity.HoaDon> hdOpt = hoaDonRepository.findById(id);
+        if (hdOpt.isPresent()) {
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "inline; filename=\"HoaDon_" + id + ".pdf\"");
+            pdfExportService.exportHoaDonPdf(hdOpt.get(), response.getOutputStream());
+        } else {
+            response.sendError(jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy hóa đơn");
+        }
+    }
+
+    // --- HỖ TRỢ TRỰC TUYẾN / LIVE CHAT ---
+    @GetMapping("/chat")
+    public String liveChatPage(@RequestParam(name = "maSV", required = false) String maSV, Model model) {
+        model.addAttribute("selectedMaSV", maSV != null ? maSV : "");
+        return "quansinh/chat";
     }
 }

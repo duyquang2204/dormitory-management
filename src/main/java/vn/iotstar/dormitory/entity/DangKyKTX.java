@@ -1,7 +1,7 @@
 package vn.iotstar.dormitory.entity;
 
 import jakarta.persistence.*;
-import java.util.List;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "DangKyKTX")
@@ -11,18 +11,51 @@ public class DangKyKTX {
     private String maDangKy;
 
     @ManyToOne
-    @JoinColumn(name = "maSV")
+    @JoinColumn(name = "maSV", nullable = true)
     private SinhVien sinhVien;
 
     @ManyToOne
     @JoinColumn(name = "maLoaiPhong")
     private LoaiPhong loaiPhong;
 
-    private java.time.LocalDate ngayDangKy;
+    private LocalDate ngayDangKy;
 
-    private String trangThai;
+    private String trangThai; // "Chờ duyệt", "Đã duyệt", "Từ chối"
 
+    @Column(columnDefinition = "TEXT")
     private String ghiChu;
+
+    // Các trường hồ sơ sinh viên nộp online
+    private String hoTen;
+
+    private LocalDate ngaySinh;
+
+    private String gioiTinh;
+
+    private String cccd;
+
+    private String sdt;
+
+    private String email;
+
+    private String queQuan;
+
+    private String truongDaiHoc; // Tên trường ĐH đang học
+
+    private String khoa; // Khoa / Chuyên ngành
+
+    private Integer namHoc; // Năm thứ mấy
+
+    private String dienUuTien; // Không ưu tiên, Con TB-LS, Hộ nghèo, Vùng sâu xa...
+
+    private String anhTheSinhVien; // URL Cloudinary ảnh thẻ SV hoặc giấy báo trúng tuyển
+
+    private String anhCccd; // URL Cloudinary ảnh CCCD
+
+    private String anhMinhChungUuTien; // URL Cloudinary giấy tờ chứng minh ưu tiên
+
+    @Column(columnDefinition = "TEXT")
+    private String lyDoTuChoi; // Lý do từ chối nếu BQL không duyệt
 
     public DangKyKTX() {}
 
@@ -50,11 +83,11 @@ public class DangKyKTX {
         this.loaiPhong = loaiPhong;
     }
 
-    public java.time.LocalDate getNgayDangKy() {
+    public LocalDate getNgayDangKy() {
         return ngayDangKy;
     }
 
-    public void setNgayDangKy(java.time.LocalDate ngayDangKy) {
+    public void setNgayDangKy(LocalDate ngayDangKy) {
         this.ngayDangKy = ngayDangKy;
     }
 
@@ -74,4 +107,123 @@ public class DangKyKTX {
         this.ghiChu = ghiChu;
     }
 
+    public String getHoTen() {
+        return hoTen;
+    }
+
+    public void setHoTen(String hoTen) {
+        this.hoTen = hoTen;
+    }
+
+    public LocalDate getNgaySinh() {
+        return ngaySinh;
+    }
+
+    public void setNgaySinh(LocalDate ngaySinh) {
+        this.ngaySinh = ngaySinh;
+    }
+
+    public String getGioiTinh() {
+        return gioiTinh;
+    }
+
+    public void setGioiTinh(String gioiTinh) {
+        this.gioiTinh = gioiTinh;
+    }
+
+    public String getCccd() {
+        return cccd;
+    }
+
+    public void setCccd(String cccd) {
+        this.cccd = cccd;
+    }
+
+    public String getSdt() {
+        return sdt;
+    }
+
+    public void setSdt(String sdt) {
+        this.sdt = sdt;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getQueQuan() {
+        return queQuan;
+    }
+
+    public void setQueQuan(String queQuan) {
+        this.queQuan = queQuan;
+    }
+
+    public String getTruongDaiHoc() {
+        return truongDaiHoc;
+    }
+
+    public void setTruongDaiHoc(String truongDaiHoc) {
+        this.truongDaiHoc = truongDaiHoc;
+    }
+
+    public String getKhoa() {
+        return khoa;
+    }
+
+    public void setKhoa(String khoa) {
+        this.khoa = khoa;
+    }
+
+    public Integer getNamHoc() {
+        return namHoc;
+    }
+
+    public void setNamHoc(Integer namHoc) {
+        this.namHoc = namHoc;
+    }
+
+    public String getDienUuTien() {
+        return dienUuTien;
+    }
+
+    public void setDienUuTien(String dienUuTien) {
+        this.dienUuTien = dienUuTien;
+    }
+
+    public String getAnhTheSinhVien() {
+        return anhTheSinhVien;
+    }
+
+    public void setAnhTheSinhVien(String anhTheSinhVien) {
+        this.anhTheSinhVien = anhTheSinhVien;
+    }
+
+    public String getAnhCccd() {
+        return anhCccd;
+    }
+
+    public void setAnhCccd(String anhCccd) {
+        this.anhCccd = anhCccd;
+    }
+
+    public String getAnhMinhChungUuTien() {
+        return anhMinhChungUuTien;
+    }
+
+    public void setAnhMinhChungUuTien(String anhMinhChungUuTien) {
+        this.anhMinhChungUuTien = anhMinhChungUuTien;
+    }
+
+    public String getLyDoTuChoi() {
+        return lyDoTuChoi;
+    }
+
+    public void setLyDoTuChoi(String lyDoTuChoi) {
+        this.lyDoTuChoi = lyDoTuChoi;
+    }
 }

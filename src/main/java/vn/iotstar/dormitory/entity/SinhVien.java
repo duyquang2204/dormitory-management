@@ -1,7 +1,6 @@
 package vn.iotstar.dormitory.entity;
 
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "SinhVien")
@@ -29,6 +28,18 @@ public class SinhVien {
     private Integer namHoc;
 
     private String dienUuTien;
+
+    private String truongDaiHoc;
+
+    private String anhTheSinhVien;
+
+    private String trangThai = "Hoạt động"; // Hoạt động, Chưa kích hoạt
+
+    private String diaChi;
+
+    private String sdtPhuHuynh;
+
+    private String hoTenPhuHuynh;
 
     private String matKhau;
 
@@ -128,6 +139,54 @@ public class SinhVien {
 
     public void setMatKhau(String matKhau) {
         this.matKhau = matKhau;
+    }
+
+    public String getTruongDaiHoc() {
+        return truongDaiHoc;
+    }
+
+    public void setTruongDaiHoc(String truongDaiHoc) {
+        this.truongDaiHoc = truongDaiHoc;
+    }
+
+    public String getAnhTheSinhVien() {
+        return anhTheSinhVien;
+    }
+
+    public void setAnhTheSinhVien(String anhTheSinhVien) {
+        this.anhTheSinhVien = anhTheSinhVien;
+    }
+
+    public String getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public String getDiaChi() {
+        return diaChi;
+    }
+
+    public void setDiaChi(String diaChi) {
+        this.diaChi = diaChi;
+    }
+
+    public String getSdtPhuHuynh() {
+        return sdtPhuHuynh;
+    }
+
+    public void setSdtPhuHuynh(String sdtPhuHuynh) {
+        this.sdtPhuHuynh = sdtPhuHuynh;
+    }
+
+    public String getHoTenPhuHuynh() {
+        return hoTenPhuHuynh;
+    }
+
+    public void setHoTenPhuHuynh(String hoTenPhuHuynh) {
+        this.hoTenPhuHuynh = hoTenPhuHuynh;
     }
 
 }

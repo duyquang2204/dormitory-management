@@ -20,7 +20,7 @@ public class KetQuaSuaChua {
         joinColumns = @JoinColumn(name = "maPhanCong"),
         inverseJoinColumns = @JoinColumn(name = "maNVSC")
     )
-    private java.util.List<NguoiDung> danhSachNhanVien = new java.util.ArrayList<>();
+    private List<NguoiDung> danhSachNhanVien = new java.util.ArrayList<>();
 
     private java.time.LocalDate ngayTiepNhan;
 
@@ -52,11 +52,11 @@ public class KetQuaSuaChua {
         this.yeuCauSuaChua = yeuCauSuaChua;
     }
 
-    public java.util.List<NguoiDung> getDanhSachNhanVien() {
+    public List<NguoiDung> getDanhSachNhanVien() {
         return danhSachNhanVien;
     }
 
-    public void setDanhSachNhanVien(java.util.List<NguoiDung> danhSachNhanVien) {
+    public void setDanhSachNhanVien(List<NguoiDung> danhSachNhanVien) {
         this.danhSachNhanVien = danhSachNhanVien;
     }
 

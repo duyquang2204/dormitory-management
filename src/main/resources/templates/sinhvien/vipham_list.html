@@ -51,6 +51,9 @@
                                     </tbody>
                                 </table>
                             </div>
+                            
+                            <!-- PAGINATION -->
+                            <div th:replace="~{fragments/pagination :: pagination(pageObj=${viPhamPage}, url='/sinhvien/vi-pham', queryParams='')}"></div>
                         </div>
                     </div>
                 </div>

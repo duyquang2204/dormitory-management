@@ -27,10 +27,10 @@
                                 <label for="keyword" class="col-form-label fw-bold">Tìm kiếm sinh viên:</label>
                             </div>
                             <div class="col-auto">
-                                <input type="text" class="form-control" id="keyword" name="keyword" th:value="${keyword}" placeholder="Nhập tên sinh viên...">
+                                <input type="text" class="form-control" id="keyword" name="keyword" th:value="${keyword}" placeholder="Nhập tên hoặc mã SV (VD: SV0001)..." style="min-width: 280px;">
                             </div>
                             <div class="col-auto">
-                                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-search me-1"></i>Tìm kiếm</button>
                                 <a th:href="@{/quansinh/sinhvien}" class="btn btn-outline-secondary">Xóa tìm kiếm</a>
                             </div>
                         </form>
@@ -70,7 +70,7 @@
                                         <div class="d-flex gap-1">
                                             <a th:href="@{/quansinh/phong/phan-nhanh/{id}(id=${sv.maSV})}" class="btn btn-sm btn-outline-success" title="Xếp phòng"><i class="fas fa-bed"></i></a>
                                             <a th:href="@{/quansinh/sinhvien/sua/{id}(id=${sv.maSV})}" class="btn btn-sm btn-outline-primary" title="Sửa"><i class="fas fa-edit"></i></a>
-                                            <form th:action="@{/quansinh/sinhvien/xoa/{id}(id=${sv.maSV})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sinh viên này không? Thao tác này không thể hoàn tác!');">
+                                            <form th:action="@{/quansinh/sinhvien/xoa/{id}(id=${sv.maSV})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sinh viên này không? Hệ thống sẽ xóa sạch dữ liệu liên quan và gửi email thông báo tới sinh viên.');">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="fas fa-trash"></i></button>
                                             </form>
                                         </div>

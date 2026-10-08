@@ -3,8 +3,6 @@ package vn.iotstar.dormitory.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vn.iotstar.dormitory.dto.YeuCauSuaChuaDTO;
-import vn.iotstar.dormitory.entity.Phong;
-import vn.iotstar.dormitory.entity.SinhVien;
 import vn.iotstar.dormitory.entity.YeuCauSuaChua;
 import vn.iotstar.dormitory.repository.PhongRepository;
 import vn.iotstar.dormitory.repository.SinhVienRepository;
@@ -32,6 +30,25 @@ public class YeuCauSuaChuaService {
 
     @Autowired
     private ThongBaoService thongBaoService;
+
+    @Autowired
+    private vn.iotstar.dormitory.repository.KetQuaSuaChuaRepository ketQuaSuaChuaRepository;
+
+    @org.springframework.transaction.annotation.Transactional
+    public void delete(String id) {
+        Optional<YeuCauSuaChua> opt = yeuCauRepository.findById(id);
+        if (opt.isPresent()) {
+            YeuCauSuaChua yc = opt.get();
+            if (yc.getKetQuaSuaChua() != null) {
+                vn.iotstar.dormitory.entity.KetQuaSuaChua kq = yc.getKetQuaSuaChua();
+                if (kq.getDanhSachNhanVien() != null) {
+                    kq.getDanhSachNhanVien().clear();
+                }
+                ketQuaSuaChuaRepository.delete(kq);
+            }
+            yeuCauRepository.delete(yc);
+        }
+    }
 
     public List<YeuCauSuaChua> findAll() {
         return yeuCauRepository.findAll();

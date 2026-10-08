@@ -33,9 +33,9 @@
 
                     <!-- Biểu mẫu Phân phòng -->
                     <div class="col-md-8">
-                        <div class="card shadow-sm border-success">
-                            <div class="card-header bg-success text-white">
-                                <h5 class="mb-0"><i class="fas fa-bed me-2"></i>Chọn phòng & Cấp phép lưu trú</h5>
+                        <div class="card shadow-xs border rounded-3">
+                            <div class="card-header bg-white border-bottom py-3">
+                                <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-bed text-primary me-2"></i>Chọn phòng & Cấp phép lưu trú</h5>
                             </div>
                             <div class="card-body">
                                 <div th:if="${error}" class="alert alert-danger">
@@ -55,7 +55,7 @@
                                         <label class="form-label fw-bold">Phòng được cấp <span class="text-danger">*</span></label>
                                         <select class="form-select form-select-lg" name="maPhong" required>
                                             <option value="">-- Chọn phòng trống --</option>
-                                            <option th:each="p : ${phongs}" th:value="${p.maPhong}" th:text="${p.soPhong + ' - Khu ' + p.khu.tenKhu + ' (' + p.trangThai + ') - ' + p.loaiPhong.tenLoaiPhong}"></option>
+                                            <option th:each="p : ${phongs}" th:value="${p.maPhong}" th:text="${'Phòng ' + p.soPhong + ' (' + (p.khu != null ? p.khu.tenKhu : '') + ' - Tầng ' + p.tang + ' - ' + p.gioiTinh + ') - ' + (p.loaiPhong != null ? p.loaiPhong.tenLoaiPhong : '') + ' (' + p.trangThai + ')'}"></option>
                                         </select>
                                         <small class="text-muted">Chỉ hiển thị các phòng chưa đầy.</small>
                                     </div>
@@ -72,7 +72,7 @@
                                     </div>
                                     
                                     <div class="d-flex justify-content-end mt-4">
-                                        <button type="submit" class="btn btn-success btn-lg"><i class="fas fa-check-circle me-2"></i>Xác nhận Xếp Phòng</button>
+                                        <button type="submit" class="btn btn-primary fw-semibold"><i class="fas fa-check-circle me-2"></i>Xác nhận Xếp Phòng</button>
                                     </div>
                                 </form>
                             </div>

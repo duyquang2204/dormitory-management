@@ -11,6 +11,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, String> {
     Page<HoaDon> findByPhong_Khu_MaKhu(String maKhu, Pageable pageable);
     Page<HoaDon> findByPhong_MaPhong(String maPhong, Pageable pageable);
     Page<HoaDon> findBySinhVien_MaSV(String maSV, Pageable pageable);
+    java.util.List<HoaDon> findAllBySinhVien_MaSV(String maSV);
     long countByPhong_MaPhongAndTrangThaiNot(String maPhong, String trangThai);
     long countBySinhVien_MaSVAndTrangThaiNot(String maSV, String trangThai);
     long countBySinhVien_MaSVAndTrangThai(String maSV, String trangThai);

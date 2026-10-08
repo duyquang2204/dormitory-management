@@ -18,20 +18,71 @@
                     Lưu thông tin phòng thành công!
                 </div>
 
-                <div class="card shadow-sm mb-3">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="m-0 fw-bold text-primary"><i class="fas fa-filter me-2"></i>Bộ Lọc & Tìm Kiếm Phòng</h6>
+                    </div>
                     <div class="card-body">
-                        <form th:action="@{/quansinh/phong}" method="get" class="row g-3 align-items-center">
-                            <div class="col-auto">
-                                <label for="maKhu" class="col-form-label fw-bold">Chọn Khu:</label>
+                        <form th:action="@{/quansinh/phong}" method="get" class="row g-3">
+                            <!-- Tìm kiếm số phòng -->
+                            <div class="col-md-3">
+                                <label for="keyword" class="form-label small fw-bold">Tìm số phòng:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" class="form-control" id="keyword" name="keyword" th:value="${keyword}" placeholder="VD: 101, 204...">
+                                </div>
                             </div>
-                            <div class="col-auto">
-                                <select class="form-select" id="maKhu" name="maKhu" onchange="this.form.submit()">
-                                    <option value="">-- Tất cả các khu --</option>
+
+                            <!-- Chọn Tòa / Khu -->
+                            <div class="col-md-3">
+                                <label for="maKhu" class="form-label small fw-bold">Tòa / Khu:</label>
+                                <select class="form-select" id="maKhu" name="maKhu">
+                                    <option value="" th:selected="${maKhu == null or maKhu == '' or maKhu == 'ALL'}">-- Tất cả các khu --</option>
                                     <option th:each="khu : ${khus}" 
                                             th:value="${khu.maKhu}" 
-                                            th:text="${khu.tenKhu}"
+                                            th:text="${khu.tenKhu} + ' (' + (${khu.maKhu == 'A'} ? 'Phòng 8 người' : (${khu.maKhu == 'B'} ? 'Phòng 6 người' : 'Phòng 4 người')) + ')'"
                                             th:selected="${khu.maKhu == maKhu}"></option>
                                 </select>
+                            </div>
+
+                            <!-- Chọn Tầng -->
+                            <div class="col-md-2">
+                                <label for="tang" class="form-label small fw-bold">Tầng:</label>
+                                <select class="form-select" id="tang" name="tang">
+                                    <option value="0" th:selected="${tang == null or tang == 0}">-- Tất cả các tầng --</option>
+                                    <option value="1" th:selected="${tang == 1}">Tầng 1</option>
+                                    <option value="2" th:selected="${tang == 2}">Tầng 2</option>
+                                    <option value="3" th:selected="${tang == 3}">Tầng 3</option>
+                                    <option value="4" th:selected="${tang == 4}">Tầng 4</option>
+                                </select>
+                            </div>
+
+                            <!-- Chọn Giới tính -->
+                            <div class="col-md-2">
+                                <label for="gioiTinh" class="form-label small fw-bold">Dành cho:</label>
+                                <select class="form-select" id="gioiTinh" name="gioiTinh">
+                                    <option value="" th:selected="${gioiTinh == null or gioiTinh == '' or gioiTinh == 'ALL'}">-- Tất cả giới tính --</option>
+                                    <option value="Nam" th:selected="${gioiTinh == 'Nam'}">Nam</option>
+                                    <option value="Nữ" th:selected="${gioiTinh == 'Nữ'}">Nữ</option>
+                                </select>
+                            </div>
+
+                            <!-- Chọn Trạng thái / Chỗ trống -->
+                            <div class="col-md-2">
+                                <label for="trangThai" class="form-label small fw-bold">Tình trạng phòng:</label>
+                                <select class="form-select" id="trangThai" name="trangThai">
+                                    <option value="" th:selected="${trangThai == null or trangThai == '' or trangThai == 'ALL'}">-- Tất cả trạng thái --</option>
+                                    <option value="CON_TRONG" th:selected="${trangThai == 'CON_TRONG'}">Còn trống (Chưa có ai ở)</option>
+                                    <option value="DANG_O" th:selected="${trangThai == 'DANG_O'}">Đang ở (Còn chỗ)</option>
+                                    <option value="DA_DAY" th:selected="${trangThai == 'DA_DAY'}">Đã đầy</option>
+                                    <option value="CON_CHO" th:selected="${trangThai == 'CON_CHO'}">Còn chỗ trống</option>
+                                </select>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="col-12 d-flex justify-content-end gap-2 pt-1">
+                                <button type="submit" class="btn btn-primary px-4"><i class="fas fa-filter me-1"></i>Lọc danh sách</button>
+                                <a th:href="@{/quansinh/phong}" class="btn btn-outline-secondary px-3"><i class="fas fa-undo me-1"></i>Đặt lại</a>
                             </div>
                         </form>
                     </div>
@@ -39,11 +90,12 @@
 
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <table class="table table-hover">
+                        <table class="table table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>Số phòng</th>
-                                    <th>Khu</th>
+                                    <th>Mã phòng</th>
+                                    <th>Khu & Tầng</th>
+                                    <th>Giới tính</th>
                                     <th>Loại phòng</th>
                                     <th>Số người tối đa</th>
                                     <th>Đơn giá</th>
@@ -54,30 +106,43 @@
                             <tbody>
                                 <tr th:each="p : ${phongPage.content}">
                                     <td th:text="${p.soPhong}" class="fw-bold"></td>
-                                    <td th:text="${p.khu != null ? p.khu.tenKhu : ''}"></td>
+                                    <td>
+                                        <span th:text="${p.khu != null ? p.khu.tenKhu : ''}"></span>
+                                        <span class="text-muted small"> (Tầng <span th:text="${p.tang}">1</span>)</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${p.gioiTinh == 'Nữ'}" class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle"><i class="fas fa-venus me-1"></i>Nữ</span>
+                                        <span th:if="${p.gioiTinh == 'Nam'}" class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle"><i class="fas fa-mars me-1"></i>Nam</span>
+                                    </td>
                                     <td th:text="${p.loaiPhong != null ? p.loaiPhong.tenLoaiPhong : ''}"></td>
                                     <td th:text="${p.loaiPhong != null ? p.loaiPhong.soNguoiToiDa : ''}"></td>
                                     <td th:text="${p.loaiPhong != null ? #numbers.formatDecimal(p.loaiPhong.donGia, 0, 'COMMA', 0, 'POINT') + ' đ' : ''}"></td>
                                     <td>
-                                        <span th:class="${p.trangThai == 'Trống' ? 'badge bg-success' : (p.trangThai == 'Đã đầy' ? 'badge bg-danger' : 'badge bg-warning')}" 
-                                              th:text="${p.trangThai}"></span>
+                                        <span th:if="${p.soChoTrong <= 0}" class="badge bg-danger">
+                                            <i class="fas fa-ban me-1"></i>Đã đầy (<span th:text="${p.soNguoiHienTai} + '/' + ${p.loaiPhong != null ? p.loaiPhong.soNguoiToiDa : 8}">8/8</span>)
+                                        </span>
+                                        <span th:if="${p.soChoTrong > 0 and p.soNguoiHienTai > 0}" class="badge bg-warning">
+                                            <i class="fas fa-user-group me-1"></i>Đang ở (<span th:text="${p.soNguoiHienTai} + '/' + ${p.loaiPhong != null ? p.loaiPhong.soNguoiToiDa : 8}">1/8</span>)
+                                        </span>
+                                        <span th:if="${p.soChoTrong > 0 and p.soNguoiHienTai == 0}" class="badge bg-success">
+                                            <i class="fas fa-door-open me-1"></i>Còn trống (<span th:text="${p.soChoTrong} + '/' + ${p.loaiPhong != null ? p.loaiPhong.soNguoiToiDa : 8}">8/8</span>)
+                                        </span>
                                     </td>
                                     <td>
                                         <a th:href="@{/quansinh/phong/sua/{id}(id=${p.maPhong})}" class="btn btn-sm btn-outline-primary" title="Sửa"><i class="fas fa-edit"></i></a>
                                     </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(phongPage.content)}">
-                                    <td colspan="7" class="text-center text-muted py-4">
+                                    <td colspan="8" class="text-center text-muted py-4">
                                         <i class="fas fa-info-circle mb-2" style="font-size: 24px;"></i><br/>
-                                        <span th:if="${maKhu == null or maKhu == ''}">Vui lòng chọn Khu ở trên để xem danh sách phòng.</span>
-                                        <span th:unless="${maKhu == null or maKhu == ''}">Không có phòng nào trong Khu này.</span>
+                                        <span>Không tìm thấy phòng nào phù hợp với bộ lọc hiện tại.</span>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                         
                         <!-- Pagination Fragment -->
-                        <div th:replace="~{fragments/pagination :: pagination(pageObj=${phongPage}, url='/quansinh/phong', queryParams=${maKhu != null ? '&maKhu=' + maKhu : ''})}"></div>
+                        <div th:replace="~{fragments/pagination :: pagination(pageObj=${phongPage}, url='/quansinh/phong', queryParams=${queryParams})}"></div>
                         
                     </div>
                 </div>

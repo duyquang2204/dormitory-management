@@ -18,6 +18,24 @@
                     Thao tác thành công!
                 </div>
 
+                <!-- SEARCH FORM -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <form th:action="@{/quansinh/hop-dong}" method="get" class="row g-2 align-items-center">
+                            <div class="col-md-5">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                                    <input type="text" name="keyword" th:value="${keyword}" class="form-control" placeholder="Tìm theo Mã HĐ, Tên SV, Mã SV, Số phòng...">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-filter me-1"></i>Tìm kiếm</button>
+                                <a th:if="${keyword != null and keyword != ''}" th:href="@{/quansinh/hop-dong}" class="btn btn-outline-secondary ms-1">Xóa lọc</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <table class="table table-hover">
@@ -27,7 +45,7 @@
                                     <th>Mã SV</th>
                                     <th>Phòng</th>
                                     <th>Thời hạn</th>
-                                    <th>Giá tiền</th>
+                                    <th>Giá thuê / tháng</th>
                                     <th>Trạng thái</th>
                                     <th>Yêu cầu SV</th>
                                     <th>Thao tác</th>
@@ -43,7 +61,7 @@
                                         <br>
                                         <span th:if="${hd.isSapHetHan()}" class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle"></i> Sắp hết</span>
                                     </td>
-                                    <td th:text="${#numbers.formatDecimal(hd.giaTien, 0, 'COMMA', 0, 'POINT')} + ' đ'" class="text-danger"></td>
+                                    <td th:text="${#numbers.formatDecimal(hd.giaTien, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng'" class="text-danger"></td>
                                     <td>
                                         <span th:class="${hd.trangThai == 'Đã hết hạn' or hd.trangThai == 'Đã thanh lý' ? 'badge bg-danger' : 'badge bg-success'}" 
                                               th:text="${hd.trangThai}"></span>
@@ -54,27 +72,35 @@
                                     </td>
                                     <td>
                                         <!-- Actions -->
-                                        <div class="d-flex gap-1" th:if="${hd.trangThai != 'Đã thanh lý'}">
-                                            <!-- Nếu xin gia hạn -->
-                                            <form th:if="${hd.yeuCauCuaSV == 'Xin gia hạn'}" th:action="@{/quansinh/hop-dong/duyet-gia-han}" method="post">
-                                                <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
-                                                <input type="hidden" name="soThang" value="12">
-                                                <button type="submit" class="btn btn-sm btn-success" title="Duyệt gia hạn 1 năm"><i class="fas fa-check"></i> Duyệt GH</button>
-                                            </form>
-                                            
-                                            <!-- Báo trả phòng hoặc Đã hết hạn -->
-                                            <form th:if="${hd.yeuCauCuaSV == 'Báo trả phòng' or hd.trangThai == 'Đã hết hạn'}" th:action="@{/quansinh/hop-dong/thanh-ly}" method="post">
-                                                <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn xác nhận thanh lý hợp đồng và thu hồi giường này?');" title="Thanh lý hợp đồng"><i class="fas fa-times-circle"></i> Thanh lý</button>
-                                            </form>
+                                        <div class="d-flex gap-1 align-items-center">
+                                            <a th:href="@{/quansinh/hop-dong/xuat-pdf/{id}(id=${hd.maHopDong})}" class="btn btn-sm btn-outline-danger" target="_blank" title="In / Tải hợp đồng PDF">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                            <th:block th:if="${hd.trangThai != 'Đã thanh lý'}">
+                                                <!-- Nếu xin gia hạn -->
+                                                <form th:if="${hd.yeuCauCuaSV == 'Xin gia hạn'}" th:action="@{/quansinh/hop-dong/duyet-gia-han}" method="post">
+                                                    <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
+                                                    <input type="hidden" name="soThang" value="12">
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Duyệt gia hạn 1 năm"><i class="fas fa-check"></i> Duyệt GH</button>
+                                                </form>
+                                                
+                                                <!-- Báo trả phòng hoặc Đã hết hạn -->
+                                                <form th:if="${hd.yeuCauCuaSV == 'Báo trả phòng' or hd.trangThai == 'Đã hết hạn'}" th:action="@{/quansinh/hop-dong/thanh-ly}" method="post">
+                                                    <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn xác nhận thanh lý hợp đồng và thu hồi giường này?');" title="Thanh lý hợp đồng"><i class="fas fa-times-circle"></i> Thanh lý</button>
+                                                </form>
+                                            </th:block>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(hopDongs)}">
-                                    <td colspan="7" class="text-center text-muted py-3">Không có hợp đồng nào</td>
+                                    <td colspan="8" class="text-center text-muted py-3">Không có hợp đồng nào</td>
                                 </tr>
                             </tbody>
                         </table>
+                        
+                        <!-- PAGINATION -->
+                        <div th:replace="~{fragments/pagination :: pagination(pageObj=${hopDongPage}, url='/quansinh/hop-dong', queryParams=${queryParams})}"></div>
                     </div>
                 </div>
             </div>

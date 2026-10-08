@@ -13,13 +13,22 @@
                     <h4>Quản lý Yêu Cầu Sửa Chữa</h4>
                 </div>
                 
-                <div th:if="${param.success}" class="alert alert-success">
-                    Phân công sửa chữa thành công!
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    Cập nhật thành công!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <table class="table table-hover">
+                        <table class="table table-hover align-middle">
                             <thead>
                                 <tr>
                                     <th>Ngày Gửi</th>
@@ -29,6 +38,7 @@
                                     <th>Hình ảnh</th>
                                     <th>Trạng thái</th>
                                     <th>Phân công</th>
+                                    <th class="text-center">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -58,16 +68,25 @@
                                         </button>
                                         <span th:if="${yc.trangThai == 'Đã hoàn thành' or yc.trangThai == 'Đã hủy'}" class="text-muted small">Đã đóng</span>
                                     </td>
+                                    <td class="text-center">
+                                        <form th:action="@{/quansinh/sua-chua/xoa/{id}(id=${yc.maYeuCau})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa yêu cầu sửa chữa này không? Dữ liệu liên quan sẽ bị xóa.');" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa yêu cầu">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(yeuCauList)}">
-                                    <td colspan="7" class="text-center text-muted py-3">Không có báo cáo sự cố nào</td>
+                                    <td colspan="8" class="text-center text-muted py-3">Không có báo cáo sự cố nào</td>
                                 </tr>
                             </tbody>
                         </table>
                         
-                                             </div>
-                 </div>
-             </div>
+                        <!-- PAGINATION -->
+                        <div th:replace="~{fragments/pagination :: pagination(pageObj=${yeuCauPage}, url='/quansinh/sua-chua', queryParams='')}"></div>
+                    </div>
+                </div>
+            </div>
          </div>
      </div>
      <!-- Modals at body level -->

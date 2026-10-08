@@ -20,9 +20,28 @@ public class NhanVienController {
     }
 
     @GetMapping("/sua-chua")
-    public String listCongViec(Model model, Authentication auth) {
+    public String listCongViec(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            Model model, Authentication auth) {
         String tenDangNhap = auth.getName();
-        model.addAttribute("congViecList", ketQuaSuaChuaService.findByNhanVienTenDangNhap(tenDangNhap));
+        java.util.List<vn.iotstar.dormitory.entity.KetQuaSuaChua> fullList = ketQuaSuaChuaService.findByNhanVienTenDangNhap(tenDangNhap);
+
+        int totalElements = fullList.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        if (totalPages == 0) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        int start = Math.min((page - 1) * size, totalElements);
+        int end = Math.min(start + size, totalElements);
+        java.util.List<vn.iotstar.dormitory.entity.KetQuaSuaChua> pagedList = fullList.subList(start, end);
+
+        org.springframework.data.domain.Page<vn.iotstar.dormitory.entity.KetQuaSuaChua> congViecPage =
+                new org.springframework.data.domain.PageImpl<>(pagedList, org.springframework.data.domain.PageRequest.of(page - 1, size), totalElements);
+
+        model.addAttribute("congViecPage", congViecPage);
+        model.addAttribute("congViecList", congViecPage.getContent());
         return "nhanvien/suachua_list";
     }
 

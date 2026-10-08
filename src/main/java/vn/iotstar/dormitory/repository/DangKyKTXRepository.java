@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DangKyKTXRepository extends JpaRepository<DangKyKTX, String> {
     long countByTrangThai(String trangThai);
+    java.util.List<DangKyKTX> findBySinhVien_MaSV(String maSV);
 }

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-10 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0 text-dark fw-bold">
+                        <i class="fas fa-comments text-primary me-2"></i>Trung Tâm Hỗ Trợ & Chat Trực Tuyến
+                    </h4>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2">
+                        <i class="fas fa-circle text-success me-1 small"></i>Hệ thống WebSocket sẵn sàng
+                    </span>
+                </div>
+
+                <div class="card shadow-sm border-0" style="height: calc(100vh - 160px); min-height: 550px;">
+                    <div class="row g-0 h-100">
+                        <!-- Danh sách hội thoại bên trái -->
+                        <div class="col-md-4 border-end h-100 d-flex flex-column bg-white">
+                            <div class="p-3 border-bottom">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                    <input type="text" id="searchConversation" class="form-control bg-light border-start-0" placeholder="Tìm sinh viên hoặc phòng...">
+                                </div>
+                            </div>
+                            <div id="conversationList" class="flex-grow-1 overflow-auto list-group list-group-flush">
+                                <div class="text-center text-muted p-4">
+                                    <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
+                                    <div>Đang tải hội thoại...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cửa sổ chat bên phải -->
+                        <div class="col-md-8 h-100 d-flex flex-column bg-light">
+                            <!-- Header cửa sổ chat -->
+                            <div id="chatHeader" class="p-3 bg-white border-bottom d-flex justify-content-between align-items-center shadow-sm">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle bg-primary text-white fw-bold me-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.1rem;" id="headerAvatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-dark" id="headerStudentName">Chọn sinh viên để trò chuyện</h6>
+                                        <small class="text-muted" id="headerStudentDetails">MSSV - Phòng</small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-light text-secondary border px-3 py-2" id="headerStatusBadge">
+                                    <i class="fas fa-comments me-1"></i>Kênh hỗ trợ KTX
+                                </span>
+                            </div>
+
+                            <!-- Thân tin nhắn -->
+                            <div id="messageLog" class="flex-grow-1 p-3 overflow-auto d-flex flex-column gap-2" style="background-color: #f4f6f9;">
+                                <div class="text-center text-muted my-auto" id="emptyStatePlaceholder">
+                                    <i class="fas fa-comments fa-4x text-secondary opacity-50 mb-3"></i>
+                                    <h5>Chưa chọn cuộc trò chuyện</h5>
+                                    <p class="text-muted small">Hãy chọn một sinh viên từ danh sách bên trái để xem nội dung và phản hồi thắc mắc.</p>
+                                </div>
+                            </div>
+
+                            <!-- Thanh nhập tin nhắn -->
+                            <div id="chatInputArea" class="p-3 bg-white border-top">
+                                <form id="chatForm" class="d-flex gap-2 m-0" onsubmit="event.preventDefault(); sendMessage();">
+                                    <input type="text" id="messageInput" class="form-control" placeholder="Nhập câu trả lời hoặc hướng dẫn cho sinh viên..." disabled autocomplete="off">
+                                    <button type="submit" id="sendBtn" class="btn btn-primary px-4 fw-bold" disabled>
+                                        <i class="fas fa-paper-plane me-1"></i>Gửi
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- WebSocket Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+    let currentSelectedMaSV = /*[[${selectedMaSV}]]*/ '';
+    let currentStudentName = '';
+    let conversations = [];
+    let stompClient = null;
+    let activeStudentSubscription = null;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        initWebSocket();
+        loadConversations();
+
+        document.getElementById('searchConversation').addEventListener('input', function(e) {
+            filterConversations(e.target.value.toLowerCase());
+        });
+    });
+
+    function initWebSocket() {
+        const socket = new SockJS('/ws-dormitory');
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        stompClient.connect({}, function () {
+            // Subscribe kênh chung Quản Sinh để nhận tin nhắn mới từ mọi sinh viên
+            stompClient.subscribe('/topic/chat/quansinh', function (message) {
+                const msg = JSON.parse(message.body);
+                handleIncomingMessage(msg);
+            });
+
+            if (currentSelectedMaSV) {
+                selectStudent(currentSelectedMaSV, currentStudentName);
+            }
+        });
+    }
+
+    function handleIncomingMessage(msg) {
+        // Cập nhật lại danh sách hội thoại
+        loadConversations();
+
+        // Nếu tin nhắn thuộc sinh viên đang mở
+        if (msg.maSV === currentSelectedMaSV) {
+            appendMessageToLog(msg);
+            // Đánh dấu đã đọc
+            fetch('/api/chat/read?maSV=' + currentSelectedMaSV + '&vaiTro=QUAN_SINH', { method: 'POST' });
+        }
+    }
+
+    function loadConversations() {
+        fetch('/api/chat/conversations')
+            .then(res => res.json())
+            .then(data => {
+                conversations = data;
+                renderConversations(data);
+                
+                // Cập nhật badge unread trên sidebar
+                let totalUnread = data.reduce((acc, c) => acc + (c.soTinChuaDoc || 0), 0);
+                const sidebarBadge = document.getElementById('managerSidebarChatBadge');
+                if (sidebarBadge) {
+                    if (totalUnread > 0) {
+                        sidebarBadge.innerText = totalUnread > 99 ? '99+' : totalUnread;
+                        sidebarBadge.classList.remove('d-none');
+                    } else {
+                        sidebarBadge.classList.add('d-none');
+                    }
+                }
+
+                // Nếu có URL param maSV mà chưa chọn
+                if (currentSelectedMaSV && !currentStudentName) {
+                    const found = conversations.find(c => c.maSV === currentSelectedMaSV);
+                    if (found) {
+                        selectStudent(found.maSV, found.tenSinhVien);
+                    }
+                }
+            })
+            .catch(err => console.error(err));
+    }
+
+    function renderConversations(list) {
+        const container = document.getElementById('conversationList');
+        if (list.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted p-4 small">Chưa có sinh viên nào nhắn tin</div>';
+            return;
+        }
+
+        container.innerHTML = list.map(c => `
+            <a href="javascript:void(0)" onclick="selectStudent('${c.maSV}', '${escapeHtml(c.tenSinhVien)}')"
+               class="list-group-item list-group-item-action p-3 border-bottom conversation-item ${c.maSV === currentSelectedMaSV ? 'active text-white' : ''}" id="conv-${c.maSV}">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong class="text-truncate ${c.maSV === currentSelectedMaSV ? 'text-white' : 'text-dark'}" style="max-width: 170px;">
+                        ${escapeHtml(c.tenSinhVien)}
+                    </strong>
+                    <small class="${c.maSV === currentSelectedMaSV ? 'text-white-50' : 'text-muted'}" style="font-size: 0.72rem;">${c.thoiGianCuoi || ''}</small>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-truncate small ${c.maSV === currentSelectedMaSV ? 'text-white-50' : 'text-muted'}" style="max-width: 210px;">
+                        <span class="badge ${c.maSV === currentSelectedMaSV ? 'bg-light text-dark' : 'bg-secondary bg-opacity-25 text-secondary'} me-1">${c.phong}</span>
+                        ${escapeHtml(c.tinNhanCuoi)}
+                    </div>
+                    ${c.soTinChuaDoc > 0 && c.maSV !== currentSelectedMaSV ? `<span class="badge bg-danger rounded-pill">${c.soTinChuaDoc}</span>` : ''}
+                </div>
+            </a>
+        `).join('');
+    }
+
+    function filterConversations(kw) {
+        const filtered = conversations.filter(c => 
+            c.tenSinhVien.toLowerCase().includes(kw) || 
+            c.maSV.toLowerCase().includes(kw) || 
+            c.phong.toLowerCase().includes(kw) ||
+            c.tinNhanCuoi.toLowerCase().includes(kw)
+        );
+        renderConversations(filtered);
+    }
+
+    function selectStudent(maSV, tenSV) {
+        currentSelectedMaSV = maSV;
+        currentStudentName = tenSV;
+
+        // Cập nhật UI list
+        document.querySelectorAll('.conversation-item').forEach(el => el.classList.remove('active', 'text-white'));
+        const activeEl = document.getElementById('conv-' + maSV);
+        if (activeEl) {
+            activeEl.classList.add('active', 'text-white');
+            const unreadBadge = activeEl.querySelector('.badge.bg-danger');
+            if (unreadBadge) unreadBadge.remove();
+        }
+
+        // Cập nhật Header
+        document.getElementById('headerStudentName').innerText = tenSV;
+        document.getElementById('headerStudentDetails').innerText = 'Mã SV: ' + maSV;
+        document.getElementById('headerAvatar').innerText = tenSV.substring(0, 1).toUpperCase();
+
+        // Bật input
+        document.getElementById('messageInput').disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        document.getElementById('messageInput').focus();
+
+        // Subscribe kênh riêng của sinh viên nếu có websocket
+        if (stompClient && stompClient.connected) {
+            if (activeStudentSubscription) {
+                activeStudentSubscription.unsubscribe();
+            }
+            activeStudentSubscription = stompClient.subscribe('/topic/chat/' + maSV, function (message) {
+                const msg = JSON.parse(message.body);
+                if (msg.vaiTroGui === 'SINH_VIEN') {
+                    appendMessageToLog(msg);
+                }
+            });
+        }
+
+        // Tải lịch sử tin nhắn
+        loadMessageHistory(maSV);
+
+        // Đánh dấu đã đọc
+        fetch('/api/chat/read?maSV=' + maSV + '&vaiTro=QUAN_SINH', { method: 'POST' })
+            .then(() => {
+                fetch('/api/chat/unread-count?vaiTro=QUAN_SINH')
+                    .then(res => res.json())
+                    .then(count => {
+                        const sb = document.getElementById('managerSidebarChatBadge');
+                        if (sb) {
+                            if (count > 0) {
+                                sb.innerText = count > 99 ? '99+' : count;
+                                sb.classList.remove('d-none');
+                            } else {
+                                sb.classList.add('d-none');
+                            }
+                        }
+                    });
+            });
+    }
+
+    function loadMessageHistory(maSV) {
+        const log = document.getElementById('messageLog');
+        log.innerHTML = '<div class="text-center text-muted my-auto"><div class="spinner-border spinner-border-sm text-primary"></div> Tải tin nhắn...</div>';
+
+        fetch('/api/chat/history?maSV=' + maSV)
+            .then(res => res.json())
+            .then(data => {
+                log.innerHTML = '';
+                if (data.length === 0) {
+                    log.innerHTML = '<div class="text-center text-muted my-auto small">Chưa có tin nhắn nào trong cuộc trò chuyện này. Hãy gửi lời chào đầu tiên!</div>';
+                    return;
+                }
+                data.forEach(appendMessageToLog);
+                scrollLogToBottom();
+            })
+            .catch(err => {
+                log.innerHTML = '<div class="text-center text-danger my-auto">Lỗi tải lịch sử tin nhắn</div>';
+            });
+    }
+
+    function appendMessageToLog(msg) {
+        const log = document.getElementById('messageLog');
+        const emptyState = document.getElementById('emptyStatePlaceholder');
+        if (emptyState) emptyState.remove();
+
+        const isMe = msg.vaiTroGui === 'QUAN_SINH';
+
+        const bubbleHtml = `
+            <div class="d-flex flex-column ${isMe ? 'align-items-end' : 'align-items-start'} mb-2">
+                <div class="d-flex align-items-center mb-1">
+                    <span class="small fw-bold text-secondary me-2" style="font-size: 0.75rem;">${isMe ? 'Ban Quản Sinh' : escapeHtml(msg.tenNguoiGui || 'Sinh viên')}</span>
+                    <span class="text-muted" style="font-size: 0.7rem;">${msg.thoiGianFormatted || ''}</span>
+                </div>
+                <div class="p-3 rounded-3 shadow-sm ${isMe ? 'bg-primary text-white' : 'bg-white text-dark border'}" style="max-width: 75%; word-break: break-word;">
+                    ${escapeHtml(msg.noiDung)}
+                </div>
+            </div>
+        `;
+
+        log.insertAdjacentHTML('beforeend', bubbleHtml);
+        scrollLogToBottom();
+    }
+
+    function scrollLogToBottom() {
+        const log = document.getElementById('messageLog');
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const content = input.value.trim();
+        if (!content || !currentSelectedMaSV) return;
+
+        const payload = {
+            maSV: currentSelectedMaSV,
+            nguoiGui: /*[[${#authentication != null ? #authentication.name : 'quansinh'}]]*/ 'quansinh',
+            tenNguoiGui: 'Ban Quản Sinh KTX',
+            vaiTroGui: 'QUAN_SINH',
+            noiDung: content
+        };
+
+        // Gửi qua WebSocket STOMP
+        if (stompClient && stompClient.connected) {
+            stompClient.send("/app/chat.send", {}, JSON.stringify(payload));
+            appendMessageToLog({
+                ...payload,
+                thoiGianFormatted: 'Vừa xong'
+            });
+            input.value = '';
+            loadConversations();
+        } else {
+            // Fallback REST API
+            fetch('/api/chat/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(saved => {
+                appendMessageToLog(saved);
+                input.value = '';
+                loadConversations();
+            });
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.innerText = text;
+        return div.innerHTML;
+    }
+    /*]]>*/
+    </script>
+</body>
+</html>

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ký Túc Xá Tư Nhân Cao Cấp - Không Gian Sống Tiện Nghi Cho Sinh Viên</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #172554 100%);
+            color: #ffffff;
+            padding: 95px 0 80px 0;
+            position: relative;
+        }
+        .hero-badge {
+            background: rgba(37, 99, 235, 0.18);
+            border: 1px solid rgba(147, 197, 253, 0.35);
+            color: #93c5fd;
+            font-size: 0.82rem;
+            letter-spacing: 0.02em;
+        }
+        .room-card {
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+            border-radius: 14px;
+            border: 1px solid var(--slate-200);
+            background: #ffffff;
+        }
+        .room-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-border);
+        }
+        .step-bubble {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+        }
+        .floor-card-male {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(30, 41, 59, 0.02) 100%);
+            border: 1px solid rgba(37, 99, 235, 0.25);
+            border-left: 5px solid #2563eb;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        .floor-card-male:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+        }
+        .floor-card-female {
+            background: linear-gradient(135deg, rgba(225, 29, 72, 0.05) 0%, rgba(254, 242, 242, 0.6) 100%);
+            border: 1px solid rgba(225, 29, 72, 0.25);
+            border-left: 5px solid #e11d48;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        .floor-card-female:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.12);
+        }
+        .security-divider-bar {
+            background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 0.82rem;
+            letter-spacing: 0.02em;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+        }
+        .navbar .nav-link {
+            white-space: nowrap;
+            font-size: 0.86rem;
+            font-weight: 500;
+            color: #475569;
+            padding: 0.4rem 0.55rem;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+        }
+        @media (min-width: 1400px) {
+            .navbar .nav-link {
+                font-size: 0.92rem;
+                padding: 0.45rem 0.75rem;
+            }
+        }
+        .navbar .nav-link:hover {
+            color: var(--primary);
+            background-color: rgba(37, 99, 235, 0.08);
+        }
+        .navbar .nav-link.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .navbar .btn {
+            white-space: nowrap;
+        }
+        @media (max-width: 1199.98px) {
+            .navbar-collapse {
+                padding-top: 1rem;
+                padding-bottom: 0.5rem;
+            }
+            .navbar-nav {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 0.25rem !important;
+            }
+            .navbar-nav .nav-link {
+                width: 100%;
+                padding: 0.6rem 0.75rem;
+            }
+            .navbar-actions {
+                margin-top: 0.75rem;
+                padding-top: 0.75rem;
+                border-top: 1px solid #e2e8f0;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .navbar-actions .btn {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-xl sticky-top bg-white border-bottom shadow-xs py-2 py-lg-3">
+    <div class="container-fluid px-xxl-5 px-xl-4 px-lg-3 px-3">
+        <a class="navbar-brand fw-bold d-flex align-items-center me-2 me-xxl-4 text-nowrap" th:href="@{/home}">
+            <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-2" style="width: 38px; height: 38px; min-width: 38px;">
+                <i class="fa-solid fa-building-user"></i>
+            </div>
+            <span class="text-dark fw-bold fs-6 fs-xxl-5" style="letter-spacing: -0.02em;">KTX TƯ NHÂN CAO CẤP</span>
+        </a>
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav mx-auto mb-2 mb-xl-0 d-flex flex-nowrap align-items-center gap-xxl-2 gap-1">
+                <li class="nav-item"><a class="nav-link text-nowrap active" th:href="@{/home}">Trang chủ</a></li>
+                <li class="nav-item"><a class="nav-link text-nowrap" href="#loai-phong">Loại phòng & Giá</a></li>
+                <li class="nav-item"><a class="nav-link text-nowrap" href="#phan-tang-nam-nu">Phân tầng Nam - Nữ</a></li>
+                <li class="nav-item"><a class="nav-link text-nowrap" href="#tien-ich">Tiện ích</a></li>
+                <li class="nav-item"><a class="nav-link text-nowrap" href="#chinh-sach">Chính sách ưu tiên</a></li>
+                <li class="nav-item"><a class="nav-link text-nowrap" th:href="@{/tra-cuu-phong}">Tra cứu chỗ trống</a></li>
+                <li class="nav-item"><a class="nav-link text-nowrap" th:href="@{/tra-cuu-ho-so}">Tra cứu hồ sơ</a></li>
+            </ul>
+            <div class="navbar-actions d-flex align-items-center gap-2 text-nowrap ms-xl-2">
+                <a th:href="@{/nop-don}" class="btn btn-primary btn-sm fw-semibold shadow-sm text-nowrap px-3 py-2">
+                    <i class="fa-solid fa-file-pen me-1"></i>Nộp hồ sơ ngay
+                </a>
+                <a th:href="@{/login}" class="btn btn-outline-dark btn-sm fw-semibold text-nowrap px-3 py-2">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i>Đăng nhập
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero-section text-center text-lg-start">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <span class="badge hero-badge px-3 py-2 rounded-pill fw-semibold mb-3 d-inline-flex align-items-center">
+                    <i class="fa-solid fa-shield-halved me-2"></i>Dành riêng cho sinh viên các trường ĐH & CĐ
+                </span>
+                <h1 class="display-5 fw-bold mb-3 lh-sm text-white">
+                    KHÔNG GIAN LƯU TRÚ VĂN MINH, TIỆN NGHI & AN TOÀN
+                </h1>
+                <p class="lead mb-4" style="color: #cbd5e1; font-size: 1.12rem;">
+                    Hệ thống Ký túc xá tư nhân chất lượng cao, trang bị đầy đủ máy lạnh, nước nóng, wifi cáp quang, an ninh 24/7 và môi trường tự học lý tưởng cho sinh viên toàn thành phố.
+                </p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+                    <a th:href="@{/nop-don}" class="btn btn-primary btn-lg fw-semibold px-4 py-3 shadow">
+                        <i class="fa-solid fa-paper-plane me-2"></i>Nộp Đơn Đăng Ký Online
+                    </a>
+                    <a th:href="@{/tra-cuu-phong}" class="btn btn-outline-light btn-lg fw-semibold px-4 py-3">
+                        <i class="fa-solid fa-magnifying-glass me-2"></i>Tra Cứu Chỗ Trống KTX
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-5">
+                <div class="card bg-white text-dark p-4 shadow-xl border-0 rounded-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                        <h5 class="fw-bold text-dark mb-0 d-flex align-items-center">
+                            <i class="fa-solid fa-chart-pie text-primary me-2"></i>Tình Trạng Lưu Trú KTX
+                        </h5>
+                        <span class="badge bg-success">Thời gian thực</span>
+                    </div>
+
+                    <div class="row text-center g-3">
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3 border border-light">
+                                <h3 class="fw-bold text-dark mb-1" th:text="${totalPhong}">0</h3>
+                                <div class="small text-muted fw-medium">Tổng số phòng</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3 border border-light">
+                                <h3 class="fw-bold text-primary mb-1" th:text="${phongConCho}">0</h3>
+                                <div class="small text-muted fw-medium">Phòng còn chỗ</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 rounded-3 text-start small border" style="background-color: var(--slate-50);">
+                        <div class="d-flex align-items-center mb-2 text-secondary">
+                            <i class="fa-solid fa-circle-check text-success me-2"></i>
+                            <span>Duyệt hồ sơ online & gửi kết quả qua Gmail</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2 text-secondary">
+                            <i class="fa-solid fa-circle-check text-success me-2"></i>
+                            <span>Thanh toán hóa đơn điện nước qua VNPAY</span>
+                        </div>
+                        <div class="d-flex align-items-center text-secondary">
+                            <i class="fa-solid fa-circle-check text-success me-2"></i>
+                            <span>Báo hỏng sửa chữa cơ sở vật chất 24/7</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 1: CÁC LOẠI PHÒNG & BẢNG GIÁ -->
+<section id="loai-phong" class="py-5">
+    <div class="container py-3">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary px-3 py-2 rounded-pill fw-semibold mb-2">LỰA CHỌN PHÒNG Ở</span>
+            <h2 class="fw-bold text-dark">CÁC HẠNG PHÒNG LƯU TRÚ</h2>
+            <p class="text-muted">Giá thuê minh bạch, trang bị đầy đủ nội thất và tiện nghi cần thiết cho sinh hoạt</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-4" th:each="lp : ${loaiPhongs}">
+                <div class="card h-100 room-card">
+                    <div class="p-4 border-bottom bg-light bg-opacity-50">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary" th:text="'Sức chứa: ' + ${lp.soNguoiToiDa} + ' Người'"></span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle"
+                                  th:if="${lp.soNguoiToiDa == 8}">Khu A &bull; Tiết kiệm</span>
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info-subtle"
+                                  th:if="${lp.soNguoiToiDa == 6}">Khu B &bull; Tiện nghi</span>
+                            <span class="badge bg-warning bg-opacity-10 text-dark border border-warning-subtle"
+                                  th:if="${lp.soNguoiToiDa == 4}">Khu C &bull; Cao cấp</span>
+                        </div>
+                        <h4 class="fw-bold mb-1 text-dark" th:text="${lp.tenLoaiPhong}">Phòng 4 người</h4>
+                        <div class="mt-3">
+                            <span class="fs-4 fw-bold text-primary" th:text="${#numbers.formatDecimal(lp.giaPhong, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                            <span class="text-muted small"> / người / tháng</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4 d-flex flex-column">
+                        <p class="small text-secondary mb-3" th:text="${lp.moTa}">Phòng đầy đủ tiện nghi sinh hoạt.</p>
+                        
+                        <!-- Cấu trúc phân tầng Nam/Nữ -->
+                        <div class="p-2 mb-3 rounded-3 bg-light border border-slate-200 small">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <span class="text-muted"><i class="fa-solid fa-venus me-1 text-danger"></i>Tầng 1 - 2:</span>
+                                <span class="badge bg-danger bg-opacity-10 text-danger fw-semibold">Dành riêng cho Nữ</span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="text-muted"><i class="fa-solid fa-mars me-1 text-primary"></i>Tầng 3 - 4:</span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold">Dành riêng cho Nam</span>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold small text-dark mb-2">TIỆN NGHI PHÒNG BAO GỒM:</h6>
+
+                        <!-- Tiện nghi: Phòng 4 người (LP04 - Khu C: Cao cấp full tiện nghi) -->
+                        <ul class="list-unstyled small mb-4 flex-grow-1" th:if="${lp.soNguoiToiDa == 4}">
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-snowflake text-primary me-2"></i><strong>Máy điều hòa Inverter 24/24</strong></li>
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-fan text-primary me-2"></i><strong>Quạt trần</strong> làm mát tự nhiên</li>
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-shower text-primary me-2"></i><strong>Bình nóng lạnh</strong> cao cấp trong phòng</li>
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-wifi text-primary me-2"></i>Wifi tốc độ cao riêng từng phòng</li>
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-bath text-primary me-2"></i>WC khép kín sạch đẹp</li>
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-bed text-primary me-2"></i>Giường tầng cao cấp + Nệm & Tủ khóa riêng</li>
+                        </ul>
+
+                        <!-- Tiện nghi: Phòng 6 người (LP06 - Khu B: Không điều hòa, Có quạt trần & nóng lạnh) -->
+                        <ul class="list-unstyled small mb-4 flex-grow-1" th:if="${lp.soNguoiToiDa == 6}">
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-fan text-primary me-2"></i><strong>Quạt trần</strong> công suất lớn làm mát đều phòng</li>
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-shower text-primary me-2"></i><strong>Bình nóng lạnh</strong> tiện lợi</li>
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-wifi text-primary me-2"></i>Wifi tốc độ cao phủ sóng toàn phòng</li>
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-bath text-primary me-2"></i>WC khép kín riêng biệt</li>
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-bed text-primary me-2"></i>Giường tầng + Nệm & Tủ cá nhân có khóa</li>
+                            <li class="mb-2 text-muted"><i class="fa-solid fa-ban text-secondary me-2"></i><span class="text-decoration-line-through">Không có máy điều hòa</span></li>
+                        </ul>
+
+                        <!-- Tiện nghi: Phòng 8 người (LP08 - Khu A: Có quạt trần, Không điều hòa, Không nóng lạnh) -->
+                        <ul class="list-unstyled small mb-4 flex-grow-1" th:if="${lp.soNguoiToiDa == 8}">
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-fan text-primary me-2"></i><strong>Quạt trần</strong> công suất lớn thoáng mát</li>
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-wifi text-primary me-2"></i>Wifi tốc độ cao miễn phí</li>
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-bath text-primary me-2"></i>Nhà vệ sinh khép kín trong phòng</li>
+                            <li class="mb-2 text-dark"><i class="fa-solid fa-bed text-primary me-2"></i>Giường tầng khung thép + Tủ cá nhân có khóa</li>
+                            <li class="mb-2 text-muted"><i class="fa-solid fa-ban text-secondary me-2"></i><span class="text-decoration-line-through">Không có máy điều hòa</span></li>
+                            <li class="mb-2 text-muted"><i class="fa-solid fa-ban text-secondary me-2"></i><span class="text-decoration-line-through">Không có bình nóng lạnh</span> <small>(Nước thường)</small></li>
+                        </ul>
+
+                        <div class="d-grid mt-auto">
+                            <a th:href="@{/nop-don(loaiPhong=${lp.maLoaiPhong})}" class="btn btn-outline-primary fw-semibold">
+                                <i class="fa-solid fa-check me-1"></i>Chọn Nộp Phòng Này
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION: MÔ HÌNH PHÂN TẦNG NAM - NỮ & AN NINH -->
+<section id="phan-tang-nam-nu" class="py-5 bg-light border-top border-bottom">
+    <div class="container py-3">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary px-3 py-2 rounded-pill fw-semibold mb-2">QUY HOẠCH AN NINH & RIÊNG TƯ</span>
+            <h2 class="fw-bold text-dark">MÔ HÌNH TÁCH BIỆT NAM - NỮ THEO TẦNG</h2>
+            <p class="text-muted" style="max-width: 760px; margin: 0 auto;">
+                Mỗi tòa nhà (Khu A, Khu B, Khu C) đều được xây dựng chuẩn mực <strong>4 tầng độc lập</strong>. Hệ thống phân tầng tách biệt tuyệt đối giữa sinh viên Nam và Nữ nhằm đảm bảo an toàn, riêng tư và nếp sống văn minh.
+            </p>
+        </div>
+
+        <div class="row g-5 align-items-center">
+            <!-- Cột trái: Sơ đồ mặt cắt 4 Tầng Tòa Nhà -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                        <span class="fw-bold text-dark"><i class="fa-solid fa-building me-2 text-primary"></i>SƠ ĐỒ CẤU TRÚC TÒA NHÀ (4 TẦNG)</span>
+                        <span class="badge bg-secondary small">Áp dụng: Khu A, B & C</span>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <!-- TẦNG 4: NAM -->
+                        <div class="p-3 floor-card-male">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-primary fs-6"><i class="fa-solid fa-mars me-2"></i>TẦNG 4 (LẦU CAO NHẤT)</span>
+                                <span class="badge bg-primary px-2 py-1">KHU VỰC NAM SINH</span>
+                            </div>
+                            <p class="small text-muted mb-0">Không gian yên tĩnh, view thoáng mát, sân phơi đồ đón nắng và ban công rộng rãi.</p>
+                        </div>
+
+                        <!-- TẦNG 3: NAM -->
+                        <div class="p-3 floor-card-male">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-primary fs-6"><i class="fa-solid fa-mars me-2"></i>TẦNG 3</span>
+                                <span class="badge bg-primary px-2 py-1">KHU VỰC NAM SINH</span>
+                            </div>
+                            <p class="small text-muted mb-0">Lối thang bộ riêng biệt, hệ thống quẹt thẻ từ cửa nam sinh, cách âm tốt.</p>
+                        </div>
+
+                        <!-- VẠCH PHÂN CÁCH AN NINH THÔNG MINH -->
+                        <div class="security-divider-bar text-center">
+                            <i class="fa-solid fa-lock text-warning me-2"></i>
+                            <strong>RANH GIỚI AN NINH: CỬA THẺ TỪ PHÂN TẦNG THÔNG MINH 24/7</strong>
+                        </div>
+
+                        <!-- TẦNG 2: NỮ -->
+                        <div class="p-3 floor-card-female">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-danger fs-6"><i class="fa-solid fa-venus me-2"></i>TẦNG 2</span>
+                                <span class="badge bg-danger px-2 py-1">KHU VỰC NỮ SINH</span>
+                            </div>
+                            <p class="small text-muted mb-0">Khu vực sinh hoạt nữ sinh riêng tư tuyệt đối, camera giám sát hành lang và cửa khóa từ.</p>
+                        </div>
+
+                        <!-- TẦNG 1: NỮ -->
+                        <div class="p-3 floor-card-female">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-danger fs-6"><i class="fa-solid fa-venus me-2"></i>TẦNG 1 (TẦNG DƯỚI CÙNG)</span>
+                                <span class="badge bg-danger px-2 py-1">KHU VỰC NỮ SINH</span>
+                            </div>
+                            <p class="small text-muted mb-0">Thuận tiện đi lại mang vác hành lý, sát bên sảnh Lễ tân, văn phòng Quản sinh & Bảo vệ trực 24/24.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: 4 Nguyên tắc An ninh & Văn minh -->
+            <div class="col-lg-6">
+                <span class="badge bg-primary px-3 py-2 rounded-pill fw-semibold mb-2">TIÊU CHUẨN QUẢN LÝ</span>
+                <h3 class="fw-bold mb-3 text-dark">VÌ SAO NÊN CHỌN MÔ HÌNH PHÂN TẦNG NÀY?</h3>
+                <p class="text-muted mb-4">
+                    Giải pháp phân chia theo tầng giúp phụ huynh và sinh viên hoàn toàn an tâm về môi trường sinh sống, xóa tan mọi lo ngại về việc xáo trộn nam nữ trong ký túc xá.
+                </p>
+
+                <div class="d-flex mb-4">
+                    <div class="me-3 fs-3 text-primary"><i class="fa-solid fa-door-closed"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-dark">Kiểm soát ra vào bằng thẻ từ phân tầng</h6>
+                        <p class="text-muted small mb-0">Sinh viên tầng nào chỉ có quyền quẹt thẻ mở cửa vào tầng đó. Nam sinh không thể vào khu vực Tầng 1 - 2, và ngược lại.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-4">
+                    <div class="me-3 fs-3 text-danger"><i class="fa-solid fa-shield-cat"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-dark">Bảo vệ tối đa cho nữ sinh (Tầng 1 & 2)</h6>
+                        <p class="text-muted small mb-0">Nữ sinh được bố trí ở 2 tầng thấp giúp việc di chuyển dễ dàng, không phải leo cao, đồng thời nằm ngay cạnh Phòng Trực Quản Sinh & Đội Bảo Vệ trực 24/24.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-4">
+                    <div class="me-3 fs-3 text-info"><i class="fa-solid fa-video"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-dark">Camera an ninh & Đội ngũ Quản sinh tuần tra</h6>
+                        <p class="text-muted small mb-0">Toàn bộ hành lang và khu vực công cộng được trang bị camera an ninh ghi hình liên tục, quản sinh đi tuần định kỳ mỗi tối.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex">
+                    <div class="me-3 fs-3 text-success"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-dark">Tôn trọng sự riêng tư và nếp sống văn minh</h6>
+                        <p class="text-muted small mb-0">Không gian học tập và sinh hoạt được phân định rành mạch, tạo nên cộng đồng cư dân ký túc xá văn minh, kỷ luật cao.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 2: TIỆN ÍCH DÀNH CHO CƯ DÂN -->
+<section id="tien-ich" class="py-5 bg-white border-top border-bottom">
+    <div class="container py-3">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary px-3 py-2 rounded-pill fw-semibold mb-2">HỆ SINH THÁI TIỆN ÍCH</span>
+            <h2 class="fw-bold text-dark">MÔI TRƯỜNG SỐNG LÝ TƯỞNG CHO HỌC TẬP</h2>
+            <p class="text-muted">Mọi nhu cầu sinh hoạt hàng ngày đều được đáp ứng ngay trong khuôn viên ký túc xá</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-box-soft h-100 text-center">
+                    <div class="icon-circle-soft">
+                        <i class="fa-solid fa-book-open-reader"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 text-dark">Phòng Tự Học Máy Lạnh</h5>
+                    <p class="text-muted small mb-0">Không gian tự học yên tĩnh mở cửa 24/7, trang bị bàn ghế tiêu chuẩn và ổ cắm điện đầy đủ.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-box-soft h-100 text-center">
+                    <div class="icon-circle-soft">
+                        <i class="fa-solid fa-shield-virus"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 text-dark">An Ninh Tuyệt Đối 24/7</h5>
+                    <p class="text-muted small mb-0">Hệ thống kiểm soát ra vào vân tay, camera giám sát toàn bộ hành lang và bảo vệ trực 24/24.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-box-soft h-100 text-center">
+                    <div class="icon-circle-soft">
+                        <i class="fa-solid fa-shirt"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 text-dark">Khu Giặt Sấy Tự Động</h5>
+                    <p class="text-muted small mb-0">Hệ thống máy giặt, máy sấy thông minh hoạt động tiện lợi giúp sinh viên tiết kiệm thời gian.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-box-soft h-100 text-center">
+                    <div class="icon-circle-soft">
+                        <i class="fa-solid fa-credit-card"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 text-dark">Thanh Toán Số VNPAY</h5>
+                    <p class="text-muted small mb-0">Tra cứu và thanh toán tiền phòng, tiền điện nước hàng tháng trực tiếp qua thẻ ngân hàng & quét QR.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 3: ĐỐI TƯỢNG ƯU TIÊN VÀ CHÍNH SÁCH -->
+<section id="chinh-sach" class="py-5">
+    <div class="container py-3">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="badge bg-primary px-3 py-2 rounded-pill fw-semibold mb-2">CHÍNH SÁCH TIẾP NHẬN</span>
+                <h2 class="fw-bold mb-3 text-dark">ĐIỀU KIỆN LƯU TRÚ & DIỆN ƯU TIÊN</h2>
+                <p class="text-muted mb-4">
+                    Ký túc xá tư nhân hoạt động theo nguyên tắc văn minh, ưu tiên hỗ trợ chỗ ở cho sinh viên có hoàn cảnh khó khăn và sinh viên vượt khó trong học tập.
+                </p>
+
+                <div class="d-flex mb-3">
+                    <div class="me-3 text-primary fs-4"><i class="fa-solid fa-circle-check"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-dark">Đối tượng tiếp nhận</h6>
+                        <p class="text-muted small">Chỉ tiếp nhận sinh viên đang theo học tại bất kỳ trường Đại học, Cao đẳng hoặc Học viện trên toàn quốc (yêu cầu đính kèm Thẻ sinh viên khi nộp đơn).</p>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-3">
+                    <div class="me-3 text-primary fs-4"><i class="fa-solid fa-award"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-dark">Các diện được ưu tiên xét duyệt</h6>
+                        <p class="text-muted small mb-0">&bull; Con thương binh, liệt sĩ, gia đình có công với cách mạng.</p>
+                        <p class="text-muted small mb-0">&bull; Sinh viên thuộc hộ nghèo, hộ cận nghèo, vùng sâu vùng xa.</p>
+                        <p class="text-muted small mb-0">&bull; Sinh viên khuyết tật hoặc có thành tích học tập xuất sắc.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white">
+                    <h5 class="fw-bold text-dark mb-4 pb-2 border-bottom"><i class="fa-solid fa-list-check text-primary me-2"></i>Quy Trình Nộp Đơn 4 Bước</h5>
+                    <div class="d-flex mb-3">
+                        <div class="me-3"><div class="step-bubble">1</div></div>
+                        <div>
+                            <h6 class="fw-bold mb-1 text-dark">Nộp hồ sơ trực tuyến</h6>
+                            <p class="text-muted small mb-0">Điền thông tin cá nhân, trường ĐH đang học và tải ảnh Thẻ sinh viên + CCCD lên hệ thống.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <div class="me-3"><div class="step-bubble">2</div></div>
+                        <div>
+                            <h6 class="fw-bold mb-1 text-dark">BQL xét duyệt hồ sơ (1 - 2 ngày)</h6>
+                            <p class="text-muted small mb-0">Ban quản lý kiểm tra tính hợp lệ và thẩm định minh chứng ưu tiên.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <div class="me-3"><div class="step-bubble">3</div></div>
+                        <div>
+                            <h6 class="fw-bold mb-1 text-dark">Nhận kết quả qua Gmail</h6>
+                            <p class="text-muted small mb-0">Hệ thống gửi thư thông báo kết quả, số phòng được xếp và tài khoản đăng nhập.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div class="me-3"><div class="step-bubble">4</div></div>
+                        <div>
+                            <h6 class="fw-bold mb-1 text-dark">Đến nhận phòng</h6>
+                            <p class="text-muted small mb-0">Mang CCCD đến văn phòng KTX để nhận thẻ phòng và bắt đầu lưu trú.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="text-white pt-5 pb-4" style="background-color: var(--slate-900); border-top: 1px solid var(--slate-800);">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <h5 class="fw-bold text-white mb-3 d-flex align-items-center">
+                    <i class="fa-solid fa-building-user text-primary me-2"></i>KÝ TÚC XÁ TƯ NHÂN CAO CẤP
+                </h5>
+                <p class="small pe-lg-4" style="color: #94a3b8;">
+                    Hệ thống lưu trú sinh viên chuyên nghiệp, văn minh và an toàn hàng đầu. Giải pháp chỗ ở hoàn hảo, đồng hành cùng thế hệ sinh viên trên con đường chinh phục tri thức.
+                </p>
+                <div class="small" style="color: #94a3b8;">
+                    <p class="mb-1"><i class="fa-solid fa-location-dot me-2 text-primary"></i>Khu đô thị Đại học, TP. Hồ Chí Minh</p>
+                    <p class="mb-1"><i class="fa-solid fa-phone me-2 text-primary"></i>Hotline BQL: 1900 6868</p>
+                    <p class="mb-1"><i class="fa-solid fa-envelope me-2 text-primary"></i>Email: hotro@ktx-housing.vn</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h6 class="fw-bold text-white mb-3">LIÊN KẾT NHANH</h6>
+                <ul class="list-unstyled small">
+                    <li class="mb-2"><a th:href="@{/tra-cuu-phong}" class="text-decoration-none" style="color: #94a3b8;">Tra cứu phòng còn trống</a></li>
+                    <li class="mb-2"><a th:href="@{/nop-don}" class="text-decoration-none" style="color: #94a3b8;">Nộp hồ sơ trực tuyến</a></li>
+                    <li class="mb-2"><a th:href="@{/tra-cuu-ho-so}" class="text-decoration-none" style="color: #94a3b8;">Tra cứu tiến độ hồ sơ</a></li>
+                    <li class="mb-2"><a th:href="@{/register}" class="text-decoration-none" style="color: #94a3b8;">Đăng ký tài khoản sinh viên</a></li>
+                    <li class="mb-2"><a th:href="@{/login}" class="text-decoration-none" style="color: #94a3b8;">Đăng nhập hệ thống</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <h6 class="fw-bold text-white mb-3">GIỜ LÀM VIỆC BAN QUẢN LÝ</h6>
+                <p class="small mb-2" style="color: #94a3b8;">Thứ 2 - Thứ 7: 07h30 - 20h00</p>
+                <p class="small mb-3" style="color: #94a3b8;">Chủ nhật & Ngày lễ: 08h00 - 17h00</p>
+                <div class="p-3 rounded-3 small border border-secondary border-opacity-25" style="background-color: var(--slate-800); color: #cbd5e1;">
+                    <i class="fa-solid fa-bell text-primary me-2"></i>Đội ngũ bảo vệ & hỗ trợ kỹ thuật trực 24/24 tất cả các ngày trong năm.
+                </div>
+            </div>
+        </div>
+        <hr class="mt-4 mb-3" style="border-color: var(--slate-800);">
+        <div class="text-center small" style="color: #64748b;">
+            &copy; 2026 Hệ thống Quản lý Ký túc xá Tư nhân. All rights reserved.
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -9,72 +9,150 @@
                 <div th:replace="~{fragments/sidebar :: sidebar}"></div>
             </div>
             <div class="col-md-10 p-4">
-                <h4 class="mb-4">Thông tin lưu trú của tôi</h4>
+                <h4 class="mb-4 fw-bold text-dark"><i class="fas fa-home text-primary me-2"></i>Thông tin lưu trú của tôi</h4>
                 
                 <div class="row">
-                    <!-- Phòng đang ở -->
+                    <!-- Phòng đang ở & Lịch sử phòng -->
                     <div class="col-md-6 mb-4">
-                        <div class="card shadow-sm border-primary h-100">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0"><i class="fas fa-door-open me-2"></i>Phòng hiện tại</h5>
+                        <div class="card shadow-sm border-0 rounded-3 h-100">
+                            <div class="card-header bg-primary text-white py-3">
+                                <h5 class="mb-0 fw-bold"><i class="fas fa-door-open me-2"></i>Phòng hiện tại</h5>
                             </div>
-                            <div class="card-body">
-                                <div th:if="${#lists.isEmpty(myRooms)}" class="text-center text-muted p-4">
-                                    <i class="fas fa-bed fa-3x mb-3"></i>
-                                    <p>Bạn chưa được phân phòng KTX.</p>
-                                    <a th:href="@{/sinhvien/dang-ky}" class="btn btn-outline-primary">Đăng ký ngay</a>
+                            <div class="card-body p-4">
+                                <!-- Trường hợp có phòng đang ở -->
+                                <div th:if="${currentRoomPp != null and currentRoomPp.phong != null}">
+                                    <div class="p-3 bg-primary bg-opacity-10 rounded-3 mb-3 border border-primary border-opacity-25">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h4 class="text-primary fw-bold mb-0">
+                                                <i class="fas fa-door-open me-2"></i>Phòng <span th:text="${currentRoomPp.phong.soPhong}"></span>
+                                            </h4>
+                                            <span th:class="${currentRoomPp.trangThai == 'Đang ở' ? 'badge bg-success px-3 py-2 fs-6 shadow-sm' : 'badge bg-secondary px-3 py-2 fs-6 shadow-sm'}">
+                                                <i th:class="${currentRoomPp.trangThai == 'Đang ở' ? 'fas fa-check-circle me-1' : 'fas fa-history me-1'}"></i>
+                                                <span th:text="${currentRoomPp.trangThai != null ? currentRoomPp.trangThai : 'Đang ở'}"></span>
+                                            </span>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-sm-6">
+                                                <div class="text-muted small">Khu ký túc xá</div>
+                                                <div class="fw-bold text-dark fs-6">
+                                                    <span th:if="${currentRoomPp.phong.khu != null}" th:text="'Khu ' + ${currentRoomPp.phong.khu.tenKhu}"></span>
+                                                    <span th:if="${currentRoomPp.phong.tang != null}" th:text="' (Tầng ' + ${currentRoomPp.phong.tang} + ')'"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="text-muted small">Loại phòng</div>
+                                                <div class="fw-bold text-dark fs-6" th:text="${currentRoomPp.phong.loaiPhong != null ? currentRoomPp.phong.loaiPhong.tenLoaiPhong : 'Tiêu chuẩn'}"></div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="text-muted small">Ngày vào ở</div>
+                                                <div class="fw-semibold text-dark" th:text="${#temporals.format(currentRoomPp.ngayBatDau, 'dd/MM/yyyy')}"></div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="text-muted small">Hạn kết thúc</div>
+                                                <div class="fw-semibold text-dark" th:text="${#temporals.format(currentRoomPp.ngayKetThuc, 'dd/MM/yyyy')}"></div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div th:each="pp : ${myRooms}" class="mb-3 border-bottom pb-3">
-                                    <h4 class="text-primary mb-3" th:text="'Phòng ' + ${pp.phong.soPhong}"></h4>
-                                    <p><strong>Khu:</strong> <span th:text="${pp.phong.khu.tenKhu}"></span></p>
-                                    <p><strong>Loại phòng:</strong> <span th:text="${pp.phong.loaiPhong.tenLoaiPhong}"></span></p>
-                                    <p><strong>Ngày vào ở:</strong> <span th:text="${#temporals.format(pp.ngayBatDau, 'dd/MM/yyyy')}"></span></p>
-                                    <p><strong>Ngày kết thúc:</strong> <span th:text="${#temporals.format(pp.ngayKetThuc, 'dd/MM/yyyy')}"></span></p>
-                                    <p><strong>Trạng thái:</strong> <span class="badge bg-success" th:text="${pp.trangThai}"></span></p>
+
+                                <!-- Trường hợp chưa có phòng đang ở -->
+                                <div th:if="${currentRoomPp == null}" class="text-center text-muted p-4 border rounded-3 bg-white mb-3">
+                                    <i class="fas fa-bed fa-3x mb-3 text-secondary opacity-50"></i>
+                                    <h6 class="fw-bold text-dark">Hiện tại bạn chưa được phân phòng KTX</h6>
+                                    <p class="small text-muted mb-3">Bạn chưa có phòng lưu trú nào đang hoạt động.</p>
+                                    <a th:href="@{/sinhvien/dang-ky}" class="btn btn-outline-primary btn-sm"><i class="fas fa-paper-plane me-1"></i>Đăng ký phòng ngay</a>
+                                </div>
+
+                                <!-- Lịch sử phòng từng ở -->
+                                <div th:if="${not #lists.isEmpty(oldRooms)}" class="mt-4 pt-3 border-top">
+                                    <h6 class="fw-bold text-secondary mb-3"><i class="fas fa-history me-2"></i>Lịch sử phòng từng ở</h6>
+                                    <div class="list-group list-group-flush border rounded-3 overflow-hidden shadow-xs">
+                                        <div th:each="old : ${oldRooms}" class="list-group-item list-group-item-action p-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <span class="fw-bold text-dark">
+                                                    <i class="fas fa-door-closed text-secondary me-2"></i>Phòng <span th:text="${old.phong.soPhong}"></span>
+                                                </span>
+                                                <span class="badge bg-secondary">Đã kết thúc</span>
+                                            </div>
+                                            <div class="text-muted small">
+                                                <span>Khu <span th:text="${old.phong.khu.tenKhu}"></span></span> • 
+                                                <span>Thời gian: <span th:text="${#temporals.format(old.ngayBatDau, 'dd/MM/yyyy') + ' - ' + #temporals.format(old.ngayKetThuc, 'dd/MM/yyyy')}"></span></span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Hợp đồng -->
+                    <!-- Hợp đồng lưu trú -->
                     <div class="col-md-6 mb-4">
-                        <div class="card shadow-sm border-success h-100">
-                            <div class="card-header bg-success text-white">
-                                <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Hợp đồng lưu trú</h5>
+                        <div class="card shadow-sm border-0 rounded-3 h-100">
+                            <div class="card-header bg-white border-bottom py-3">
+                                <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-file-contract text-primary me-2"></i>Hợp đồng lưu trú</h5>
                             </div>
-                            <div class="card-body">
-                                <div th:if="${#lists.isEmpty(hopDongs)}" class="text-center text-muted p-4">
-                                    <i class="fas fa-file-signature fa-3x mb-3"></i>
-                                    <p>Bạn chưa có hợp đồng nào.</p>
+                            <div class="card-body p-4">
+                                <div th:if="${#lists.isEmpty(hopDongs)}" class="text-center text-muted p-4 border rounded-3 bg-white">
+                                    <i class="fas fa-file-signature fa-3x mb-3 text-secondary opacity-50"></i>
+                                    <p class="mb-0">Bạn chưa có hợp đồng lưu trú nào.</p>
                                 </div>
-                                <div th:each="hd : ${hopDongs}" class="mb-3 border-bottom pb-3">
-                                    <p><strong>Mã HĐ:</strong> <span th:text="${hd.maHopDong}"></span></p>
-                                    <p><strong>Ngày lập:</strong> <span th:text="${#temporals.format(hd.ngayLap, 'dd/MM/yyyy')}"></span></p>
-                                    <p>
-                                        <strong>Thời hạn HĐ:</strong> 
-                                        <span th:text="${#temporals.format(hd.ngayBatDau, 'dd/MM/yyyy') + ' - ' + #temporals.format(hd.ngayKetThuc, 'dd/MM/yyyy')}"></span>
-                                        <span th:if="${hd.isSapHetHan()}" class="badge bg-warning text-dark ms-2"><i class="fas fa-exclamation-triangle"></i> Sắp hết hạn</span>
-                                    </p>
-                                    <p><strong>Tổng tiền:</strong> <span th:text="${#numbers.formatDecimal(hd.giaTien, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'" class="text-danger fw-bold"></span></p>
-                                    <p>
-                                        <strong>Trạng thái:</strong> 
-                                        <span th:class="${hd.trangThai == 'Đã hết hạn' or hd.trangThai == 'Đã thanh lý' ? 'badge bg-danger' : 'badge bg-success'}" th:text="${hd.trangThai}"></span>
-                                    </p>
-                                    
-                                    <div th:if="${hd.yeuCauCuaSV != null}" class="alert alert-info py-2">
-                                        <i class="fas fa-info-circle"></i> Đang chờ duyệt: <strong>[[${hd.yeuCauCuaSV}]]</strong>
+                                <div th:each="hd : ${hopDongs}" class="p-3 rounded-3 mb-3 border bg-white shadow-xs">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold fs-5 text-dark">
+                                            <i class="fas fa-file-contract text-primary me-2"></i><span th:text="${hd.maHopDong}"></span>
+                                        </span>
+                                        <span th:class="${hd.trangThai == 'Còn hạn' ? 'badge bg-success px-3 py-2' : (hd.trangThai == 'Đã hết hạn' ? 'badge bg-danger px-3 py-2' : 'badge bg-secondary px-3 py-2')}" 
+                                              th:text="${hd.trangThai}"></span>
                                     </div>
                                     
-                                    <div th:if="${hd.isSapHetHan() and hd.yeuCauCuaSV == null}" class="d-flex gap-2 mt-3">
+                                    <!-- Phòng lưu trú của hợp đồng -->
+                                    <div class="alert alert-light border py-2 px-3 mb-3 d-flex align-items-center justify-content-between rounded-2"
+                                         th:if="${hd.phanPhong != null and hd.phanPhong.phong != null}">
+                                        <div>
+                                            <span class="text-muted small d-block">Phòng lưu trú ký kết:</span>
+                                            <strong class="text-primary fs-6">
+                                                <i class="fas fa-bed me-1"></i>Phòng <span th:text="${hd.phanPhong.phong.soPhong}"></span>
+                                                <span th:if="${hd.phanPhong.phong.khu != null}">(Khu <span th:text="${hd.phanPhong.phong.khu.tenKhu}"></span>)</span>
+                                            </strong>
+                                        </div>
+                                        <span th:if="${hd.phanPhong.phong.loaiPhong != null}" class="badge bg-primary-subtle text-primary border border-primary-subtle" th:text="${hd.phanPhong.phong.loaiPhong.tenLoaiPhong}"></span>
+                                    </div>
+
+                                    <div class="row g-2 small mb-3">
+                                        <div class="col-sm-6">
+                                            <span class="text-muted">Ngày lập:</span> 
+                                            <span class="fw-semibold text-dark" th:text="${#temporals.format(hd.ngayLap, 'dd/MM/yyyy')}"></span>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <span class="text-muted">Giá thuê phòng:</span> 
+                                            <span class="fw-bold text-danger" th:text="${#numbers.formatDecimal(hd.giaTien, 0, 'COMMA', 0, 'POINT')} + ' VNĐ / tháng'"></span>
+                                        </div>
+                                        <div class="col-12">
+                                            <span class="text-muted">Thời hạn HĐ:</span> 
+                                            <span class="fw-semibold text-dark" th:text="${#temporals.format(hd.ngayBatDau, 'dd/MM/yyyy') + ' - ' + #temporals.format(hd.ngayKetThuc, 'dd/MM/yyyy')}"></span>
+                                            <span th:if="${hd.isSapHetHan()}" class="badge bg-warning text-dark ms-2"><i class="fas fa-exclamation-triangle"></i> Sắp hết hạn</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                                        <a th:href="@{/sinhvien/hop-dong/xuat-pdf/{id}(id=${hd.maHopDong})}" class="btn btn-sm btn-outline-danger shadow-xs" target="_blank" title="Tải bản hợp đồng PDF">
+                                            <i class="fas fa-file-pdf me-1"></i>Tải Hợp Đồng (PDF)
+                                        </a>
+                                        <div th:if="${hd.yeuCauCuaSV != null}" class="badge bg-info text-dark py-2 px-3">
+                                            <i class="fas fa-clock me-1"></i>Chờ duyệt: <strong th:text="${hd.yeuCauCuaSV}"></strong>
+                                        </div>
+                                    </div>
+
+                                    <div th:if="${hd.isSapHetHan() and hd.yeuCauCuaSV == null}" class="d-flex gap-2 mt-3 pt-2 border-top">
                                         <form th:action="@{/sinhvien/hop-dong/yeu-cau}" method="post">
                                             <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
                                             <input type="hidden" name="loaiYeuCau" value="Xin gia hạn">
-                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Bạn muốn gia hạn hợp đồng lưu trú thêm 1 năm?')"><i class="fas fa-calendar-plus"></i> Xin gia hạn</button>
+                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Bạn muốn gia hạn hợp đồng lưu trú thêm 1 năm?')"><i class="fas fa-calendar-plus me-1"></i> Xin gia hạn</button>
                                         </form>
                                         <form th:action="@{/sinhvien/hop-dong/yeu-cau}" method="post">
                                             <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
                                             <input type="hidden" name="loaiYeuCau" value="Báo trả phòng">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn xác nhận sẽ dọn khỏi KTX khi hết hạn?')"><i class="fas fa-sign-out-alt"></i> Báo trả phòng</button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn xác nhận sẽ dọn khỏi KTX khi hết hạn?')"><i class="fas fa-sign-out-alt me-1"></i> Báo trả phòng</button>
                                         </form>
                                     </div>
                                 </div>

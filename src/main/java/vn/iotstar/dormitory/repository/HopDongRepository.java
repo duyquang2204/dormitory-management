@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface HopDongRepository extends JpaRepository<HopDong, String> {
     long countByYeuCauCuaSVNotNull();
+    java.util.List<HopDong> findByPhanPhong_MaPhanPhong(String maPhanPhong);
+    java.util.List<HopDong> findByPhanPhong_SinhVien_MaSV(String maSV);
 }

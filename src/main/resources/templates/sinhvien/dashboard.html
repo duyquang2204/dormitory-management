@@ -9,90 +9,685 @@
                 <div th:replace="~{fragments/sidebar :: sidebar}"></div>
             </div>
             <div class="col-md-10 p-4">
-                <h4 class="mb-4">Bảng Điều Khiển Sinh Viên</h4>
-                
-                <!-- Khi sinh viên đã có phòng -->
-                <div th:if="${currentRoom != null}" class="row g-4">
-                    <!-- Thông tin phòng -->
-                    <div class="col-md-6 col-lg-3">
-                        <div class="card shadow-sm h-100 border-primary border-top border-4">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="card-title text-primary m-0">Phòng Hiện Tại</h5>
-                                    <i class="fas fa-door-open fa-2x text-muted"></i>
-                                </div>
-                                <h3 class="display-5 fw-bold" th:text="${currentRoom.soPhong}"></h3>
-                                <p class="text-muted mb-0" th:text="'Khu: ' + ${currentRoom.khu.tenKhu}"></p>
-                                <hr>
-                                <a th:href="@{/sinhvien/phong}" class="btn btn-outline-primary btn-sm w-100">Chi tiết hợp đồng</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Hóa đơn điện nước -->
-                    <div class="col-md-6 col-lg-3">
-                        <div class="card shadow-sm h-100 border-success border-top border-4 position-relative">
-                            <span th:if="${unpaidInvoices != null and unpaidInvoices > 0}" 
-                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                                  style="z-index: 10;">
-                                [[${unpaidInvoices}]] chưa thanh toán
-                            </span>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="card-title text-success m-0">Điện Nước</h5>
-                                    <i class="fas fa-file-invoice-dollar fa-2x text-muted"></i>
-                                </div>
-                                <p class="mb-3 small">Kiểm tra hóa đơn hàng tháng, theo dõi lượng điện nước tiêu thụ để thanh toán đúng hạn.</p>
-                                <a th:href="@{/sinhvien/hoa-don}" class="btn btn-success btn-sm w-100">Xem Hóa Đơn</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Báo cáo sự cố -->
-                    <div class="col-md-6 col-lg-3">
-                        <div class="card shadow-sm h-100 border-warning border-top border-4">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="card-title text-warning m-0">Báo Cáo Sự Cố</h5>
-                                    <i class="fas fa-tools fa-2x text-muted"></i>
-                                </div>
-                                <p class="mb-3 small">Phòng có thiết bị hỏng (đèn, quạt, giường...)? Báo cáo ngay cho ban quản lý để được sửa chữa.</p>
-                                <a th:href="@{/sinhvien/sua-chua}" class="btn btn-warning text-dark btn-sm w-100">Gửi Yêu Cầu</a>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Kỷ luật / Vi phạm -->
-                    <div class="col-md-6 col-lg-3">
-                        <div class="card shadow-sm h-100 border-danger border-top border-4 position-relative">
-                            <span th:if="${totalViolations != null and totalViolations > 0}" 
-                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                                  style="z-index: 10;">
-                                [[${totalViolations}]] vi phạm
-                            </span>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="card-title text-danger m-0">Kỷ Luật</h5>
-                                    <i class="fas fa-gavel fa-2x text-muted"></i>
+                <!-- 1. BANNER CHÀO MỪNG & THẺ ĐỊNH DANH SINH VIÊN -->
+                <div class="card shadow-xs border-0 mb-4 bg-white" style="border-radius: 16px; border-left: 5px solid var(--primary) !important;">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h4 class="fw-bold text-dark mb-0">
+                                        Xin chào, <span th:text="${sinhVien != null ? sinhVien.hoTen : 'Sinh viên'}">Nguyễn Văn A</span> 👋
+                                    </h4>
                                 </div>
-                                <p class="mb-3 small">Theo dõi hồ sơ vi phạm nội quy, kỷ luật của bạn trong thời gian lưu trú tại KTX.</p>
-                                <a th:href="@{/sinhvien/vi-pham}" class="btn btn-outline-danger btn-sm w-100">Xem Hồ Sơ</a>
+                                <div class="d-flex flex-wrap align-items-center gap-3 text-muted small mt-2">
+                                    <span><i class="fas fa-id-card text-primary me-1"></i> MSSV: <strong class="text-dark" th:text="${sinhVien != null ? sinhVien.maSV : '---'}">SV001</strong></span>
+                                    <span><i class="fas fa-graduation-cap text-info me-1"></i> Khoa: <span th:text="${sinhVien != null && sinhVien.khoa != null ? sinhVien.khoa : 'Công nghệ thông tin'}">CNTT</span></span>
+                                    <span><i class="fas fa-calendar-alt text-warning me-1"></i> Năm học: <span th:text="${sinhVien != null && sinhVien.namHoc != null ? 'Năm ' + sinhVien.namHoc : 'Năm 1'}">Năm 2</span></span>
+                                    <span><i class="fas fa-map-marker-alt text-danger me-1"></i> Quê quán: <span th:text="${sinhVien != null && sinhVien.queQuan != null ? sinhVien.queQuan : '---'}">Hồ Chí Minh</span></span>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Trạng thái: Đã có phòng -->
+                                <div th:if="${currentRoom != null}" class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill fs-6 fw-semibold">
+                                    <i class="fas fa-check-circle me-1"></i> Đang nội trú: Phòng <span th:text="${currentRoom.soPhong}">B-301</span>
+                                </div>
+                                <!-- Trạng thái: Đang chờ duyệt đơn -->
+                                <div th:if="${currentRoom == null and pendingRegistration != null}" class="badge bg-warning-subtle text-warning border border-warning px-3 py-2 rounded-pill fs-6 fw-semibold">
+                                    <i class="fas fa-clock me-1"></i> Hồ sơ chờ duyệt: <span th:text="${pendingRegistration.maDangKy}">DK001</span>
+                                </div>
+                                <!-- Trạng thái: Chưa có phòng và chưa đăng ký -->
+                                <div th:if="${currentRoom == null and pendingRegistration == null}" class="badge bg-secondary-subtle text-secondary border border-secondary px-3 py-2 rounded-pill fs-6 fw-semibold">
+                                    <i class="fas fa-user-clock me-1"></i> Chưa đăng ký nội trú
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Khi sinh viên chưa có phòng -->
-                <div th:if="${currentRoom == null}" class="card shadow-sm text-center py-5 border-info">
-                    <div class="card-body">
-                        <i class="fas fa-info-circle text-info mb-3" style="font-size: 3rem;"></i>
-                        <h5 class="text-dark">Bạn chưa được phân phòng</h5>
-                        <p class="text-muted">Bạn cần đăng ký phòng và chờ Ban quản lý xét duyệt để được cấp phòng.</p>
-                        <a th:href="@{/sinhvien/dang-ky}" class="btn btn-info text-white mt-3 px-4 py-2 fw-bold">
-                            <i class="fas fa-edit me-2"></i>Đăng Ký Phòng Ngay
-                        </a>
+                <!-- ========================================================================= -->
+                <!-- KỊCH BẢN 1: SINH VIÊN ĐÃ ĐƯỢC PHÂN PHÒNG (CURRENT ROOM != NULL) -->
+                <!-- ========================================================================= -->
+                <div th:if="${currentRoom != null}">
+                    <!-- 4 THẺ CHỈ SỐ NHANH -->
+                    <div class="row g-3 mb-4">
+                        <!-- Thẻ 1: Phòng hiện tại -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card shadow-xs border bg-white h-100" style="border-radius: 14px;">
+                                <div class="card-body p-3 p-md-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-muted small fw-semibold text-uppercase">Phòng ở hiện tại</span>
+                                        <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle" style="width: 42px; height: 42px;">
+                                            <i class="fas fa-door-open fs-5"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="fw-bold text-dark mb-1" th:text="${currentRoom.soPhong}">B-301</h3>
+                                    <div class="text-muted small">
+                                        Khu <span th:text="${currentRoom.khu.tenKhu}">B</span> • Tầng <span th:text="${currentRoom.tang}">3</span> • <span th:text="${currentRoom.loaiPhong.tenLoaiPhong}">4 người</span>
+                                    </div>
+                                    <div class="mt-3 pt-2 border-top">
+                                        <a th:href="@{/sinhvien/phong}" class="text-primary text-decoration-none small fw-semibold">
+                                            Xem chi tiết phòng <i class="fas fa-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thẻ 2: Hóa đơn điện nước & tiền phòng -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card shadow-xs border bg-white h-100" style="border-radius: 14px;">
+                                <div class="card-body p-3 p-md-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-muted small fw-semibold text-uppercase">Điện Nước & Lệ phí</span>
+                                        <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle" style="width: 42px; height: 42px;">
+                                            <i class="fas fa-file-invoice-dollar fs-5"></i>
+                                        </div>
+                                    </div>
+                                    <div th:if="${unpaidInvoices != null and unpaidInvoices > 0}">
+                                        <h3 class="fw-bold text-danger mb-1" th:text="${unpaidInvoices} + ' hóa đơn nợ'">1 hóa đơn nợ</h3>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger">Cần thanh toán</span>
+                                    </div>
+                                    <div th:if="${unpaidInvoices == null or unpaidInvoices == 0}">
+                                        <h3 class="fw-bold text-success mb-1">0 hóa đơn nợ</h3>
+                                        <span class="badge bg-success-subtle text-success border border-success">Đã hoàn tất</span>
+                                    </div>
+                                    <div class="mt-3 pt-2 border-top">
+                                        <a th:href="@{/sinhvien/hoa-don}" class="text-primary text-decoration-none small fw-semibold">
+                                            Thanh toán trực tuyến <i class="fas fa-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thẻ 3: Hợp đồng lưu trú -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card shadow-xs border bg-white h-100" style="border-radius: 14px;">
+                                <div class="card-body p-3 p-md-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-muted small fw-semibold text-uppercase">Hợp đồng lưu trú</span>
+                                        <div class="d-inline-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info rounded-circle" style="width: 42px; height: 42px;">
+                                            <i class="fas fa-file-contract fs-5"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="fw-bold text-dark mb-1" th:text="${activeContract != null ? activeContract.trangThai : 'Chưa có'}">Còn hạn</h3>
+                                    <div class="text-muted small">
+                                        Hết hạn: <span class="fw-semibold text-dark" th:text="${activeContract != null ? #temporals.format(activeContract.ngayKetThuc, 'dd/MM/yyyy') : '---'}">30/06/2026</span>
+                                    </div>
+                                    <div class="mt-3 pt-2 border-top">
+                                        <a th:href="@{/sinhvien/phong}" class="text-primary text-decoration-none small fw-semibold">
+                                            Xem chi tiết hợp đồng <i class="fas fa-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thẻ 4: Kỷ luật & Rèn luyện -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card shadow-xs border bg-white h-100" style="border-radius: 14px;">
+                                <div class="card-body p-3 p-md-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-muted small fw-semibold text-uppercase">Nội quy & Kỷ luật</span>
+                                        <div class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-15 text-warning rounded-circle" style="width: 42px; height: 42px;">
+                                            <i class="fas fa-shield-alt fs-5"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="fw-bold text-dark mb-1" th:text="${totalViolations != null and totalViolations > 0 ? totalViolations + ' vi phạm' : '0 vi phạm'}">0 vi phạm</h3>
+                                    <div class="text-muted small">
+                                        <span th:if="${totalViolations == null or totalViolations == 0}" class="text-success"><i class="fas fa-check me-1"></i>Hạnh kiểm tốt</span>
+                                        <span th:if="${totalViolations != null and totalViolations > 0}" class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Cần chấp hành nội quy</span>
+                                    </div>
+                                    <div class="mt-3 pt-2 border-top">
+                                        <a th:href="@{/sinhvien/vi-pham}" class="text-primary text-decoration-none small fw-semibold">
+                                            Hồ sơ kỷ luật <i class="fas fa-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BỐ CỤC 2 CỘT CHÍNH -->
+                    <div class="row g-4">
+                        <!-- CỘT TRÁI (8 PHẦN): BẠN CÙNG PHÒNG & HÓA ĐƠN GẦN NHẤT & SỬA CHỮA -->
+                        <div class="col-lg-8">
+                            <!-- CARD: BẠN CÙNG PHÒNG (RẤT THỰC TẾ & THIẾT YẾU CHO SINH VIÊN) -->
+                            <div class="card shadow-xs border bg-white mb-4" style="border-radius: 14px;">
+                                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 fw-bold text-dark">
+                                        <i class="fas fa-users text-primary me-2"></i>Bạn Cùng Phòng (<span th:text="${currentRoom.soPhong}">B-301</span>)
+                                    </h6>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                        Sĩ số: <span th:text="${roommates != null ? (roommates.size() + 1) : 1}">1</span> / <span th:text="${currentRoom.loaiPhong.soNguoiToiDa}">4</span> bạn
+                                    </span>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div th:if="${roommates == null or #lists.isEmpty(roommates)}" class="p-4 text-center text-muted">
+                                        <i class="fas fa-user-friends fa-2x mb-2 text-slate-400"></i>
+                                        <p class="mb-0 small">Hiện tại chưa có sinh viên khác được phân vào phòng này.</p>
+                                    </div>
+                                    <div th:if="${roommates != null and not #lists.isEmpty(roommates)}" class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light small text-muted">
+                                                <tr>
+                                                    <th class="ps-3 py-3">Họ Tên</th>
+                                                    <th class="py-3">MSSV</th>
+                                                    <th class="py-3">Khoa</th>
+                                                    <th class="py-3">Quê Quán</th>
+                                                    <th class="py-3 pe-3 text-end">Liên Hệ</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="rm : ${roommates}">
+                                                    <td class="ps-3 py-3">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-circle bg-primary-subtle text-primary me-2">
+                                                                <i class="fas fa-user"></i>
+                                                            </div>
+                                                            <div>
+                                                                <strong class="text-dark" th:text="${rm.sinhVien.hoTen}">Trần Văn B</strong>
+                                                                <span class="d-block small text-muted" th:text="${rm.sinhVien.gioiTinh}">Nam</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-3">
+                                                        <span class="badge bg-light text-dark border" th:text="${rm.sinhVien.maSV}">SV002</span>
+                                                    </td>
+                                                    <td class="py-3 text-muted small" th:text="${rm.sinhVien.khoa ?: 'CNTT'}">CNTT</td>
+                                                    <td class="py-3 text-muted small" th:text="${rm.sinhVien.queQuan ?: '---'}">Đà Nẵng</td>
+                                                    <td class="py-3 pe-3 text-end">
+                                                        <a th:if="${rm.sinhVien.sdt != null and !rm.sinhVien.sdt.isEmpty()}" 
+                                                           th:href="'tel:' + ${rm.sinhVien.sdt}" 
+                                                           class="btn btn-sm btn-outline-primary py-1 px-2" 
+                                                           title="Gọi điện">
+                                                            <i class="fas fa-phone-alt me-1"></i><span th:text="${rm.sinhVien.sdt}">0901234567</span>
+                                                        </a>
+                                                        <span th:if="${rm.sinhVien.sdt == null or rm.sinhVien.sdt.isEmpty()}" class="text-muted small">Chưa có SĐT</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CARD: HÓA ĐƠN GẦN NHẤT & CHỈ SỐ TIÊU THỤ -->
+                            <div class="card shadow-xs border bg-white mb-4" style="border-radius: 14px;">
+                                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 fw-bold text-dark">
+                                        <i class="fas fa-receipt text-success me-2"></i>Hóa Đơn Tháng Gần Nhất
+                                    </h6>
+                                    <a th:href="@{/sinhvien/hoa-don}" class="text-primary small text-decoration-none fw-semibold">
+                                        Xem lịch sử tất cả hóa đơn <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div th:if="${latestInvoice == null}" class="text-center text-muted py-3">
+                                        <i class="fas fa-file-invoice fa-2x mb-2 text-slate-400"></i>
+                                        <p class="mb-0 small">Chưa phát sinh hóa đơn nào cho phòng của bạn trong kỳ này.</p>
+                                    </div>
+                                    <div th:if="${latestInvoice != null}">
+                                        <div class="row g-3 align-items-center mb-3 pb-3 border-bottom">
+                                            <div class="col-md-4">
+                                                <span class="text-muted small">Kỳ thu phí</span>
+                                                <h5 class="fw-bold text-dark mb-0">Tháng <span th:text="${latestInvoice.thang}">10</span> / <span th:text="${latestInvoice.nam}">2026</span></h5>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <span class="text-muted small">Trạng thái</span>
+                                                <div>
+                                                    <span th:if="${latestInvoice.trangThai == 'Đã thanh toán'}" class="badge bg-success-subtle text-success border border-success px-2 py-1">
+                                                        <i class="fas fa-check-circle me-1"></i> Đã thanh toán
+                                                    </span>
+                                                    <span th:if="${latestInvoice.trangThai == 'Chờ duyệt'}" class="badge bg-warning-subtle text-warning border border-warning px-2 py-1">
+                                                        <i class="fas fa-clock me-1"></i> Chờ duyệt xác nhận
+                                                    </span>
+                                                    <span th:if="${latestInvoice.trangThai == 'Chưa thanh toán'}" class="badge bg-danger-subtle text-danger border border-danger px-2 py-1">
+                                                        <i class="fas fa-exclamation-circle me-1"></i> Chưa thanh toán
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 text-md-end">
+                                                <span class="text-muted small">Tổng tiền thanh toán</span>
+                                                <h4 class="fw-bold text-danger mb-0" th:text="${#numbers.formatDecimal(latestInvoice.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'">150,000 đ</h4>
+                                            </div>
+                                        </div>
+
+                                        <!-- Chi tiết điện nước & phòng -->
+                                        <div class="row g-2 text-center">
+                                            <div class="col-4">
+                                                <div class="p-2 bg-light rounded-3">
+                                                    <span class="text-muted small d-block"><i class="fas fa-bolt text-warning me-1"></i> Tiền Điện</span>
+                                                    <strong class="text-dark small" th:text="${latestInvoice.tienDien != null ? #numbers.formatDecimal(latestInvoice.tienDien, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">50,000 đ</strong>
+                                                    <div class="text-muted" style="font-size: 0.72rem;">
+                                                        Tiêu thụ: <span th:text="${(latestInvoice.chiSoDienMoi != null and latestInvoice.chiSoDienCu != null) ? (latestInvoice.chiSoDienMoi - latestInvoice.chiSoDienCu) : 0}">20</span> kWh
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="p-2 bg-light rounded-3">
+                                                    <span class="text-muted small d-block"><i class="fas fa-tint text-info me-1"></i> Tiền Nước</span>
+                                                    <strong class="text-dark small" th:text="${latestInvoice.tienNuoc != null ? #numbers.formatDecimal(latestInvoice.tienNuoc, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">30,000 đ</strong>
+                                                    <div class="text-muted" style="font-size: 0.72rem;">
+                                                        Tiêu thụ: <span th:text="${(latestInvoice.chiSoNuocMoi != null and latestInvoice.chiSoNuocCu != null) ? (latestInvoice.chiSoNuocMoi - latestInvoice.chiSoNuocCu) : 0}">3</span> m³
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="p-2 bg-light rounded-3">
+                                                    <span class="text-muted small d-block"><i class="fas fa-home text-primary me-1"></i> Tiền Phòng</span>
+                                                    <strong class="text-dark small" th:text="${latestInvoice.tienPhong != null ? #numbers.formatDecimal(latestInvoice.tienPhong, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">0 đ</strong>
+                                                    <div class="text-muted" style="font-size: 0.72rem;">Tiền phòng theo tháng</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3 text-end" th:if="${latestInvoice.trangThai == 'Chưa thanh toán'}">
+                                            <a th:href="@{/sinhvien/hoa-don}" class="btn btn-primary btn-sm px-3 fw-semibold">
+                                                <i class="fas fa-qrcode me-1"></i> Thanh toán VNPAY / Chuyển khoản ngay
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CARD: YÊU CẦU SỬA CHỮA THIẾT BỊ GẦN NHẤT -->
+                            <div class="card shadow-xs border bg-white mb-4" style="border-radius: 14px;">
+                                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 fw-bold text-dark">
+                                        <i class="fas fa-tools text-warning me-2"></i>Sự Cố Thiết Bị & Sửa Chữa
+                                    </h6>
+                                    <a th:href="@{/sinhvien/sua-chua}" class="btn btn-outline-primary btn-sm py-1 px-3">
+                                        <i class="fas fa-plus me-1"></i> Báo hỏng thiết bị mới
+                                    </a>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div th:if="${recentRepairs == null or #lists.isEmpty(recentRepairs)}" class="p-4 text-center text-muted">
+                                        <i class="fas fa-shield-alt fa-2x mb-2 text-slate-400"></i>
+                                        <p class="mb-0 small">Thiết bị phòng hiện tại hoạt động bình thường, chưa có báo hỏng nào.</p>
+                                    </div>
+                                    <div th:if="${recentRepairs != null and not #lists.isEmpty(recentRepairs)}" class="list-group list-group-flush">
+                                        <div th:each="rp : ${recentRepairs}" class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong class="text-dark d-block" th:text="${rp.noiDungSuCo}">Hỏng đèn tuýp phòng tắm</strong>
+                                                <span class="text-muted small">
+                                                    <i class="far fa-clock me-1"></i>Ngày gửi: <span th:text="${#temporals.format(rp.ngayGui, 'dd/MM/yyyy HH:mm')}">01/10/2026</span>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span th:if="${rp.trangThai == 'Chờ xử lý'}" class="badge bg-warning-subtle text-warning border border-warning">Chờ tiếp nhận</span>
+                                                <span th:if="${rp.trangThai == 'Đang xử lý'}" class="badge bg-info-subtle text-info border border-info">Thợ đang sửa</span>
+                                                <span th:if="${rp.trangThai == 'Hoàn thành'}" class="badge bg-success-subtle text-success border border-success">Đã hoàn thành</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CỘT PHẢI (4 PHẦN): PHÍM TẮT & THÔNG BÁO BQL & HOTLINE -->
+                        <div class="col-lg-4">
+                            <!-- PHÍM TẮT THAO TÁC NHANH -->
+                            <div class="card shadow-xs border bg-white mb-4" style="border-radius: 14px;">
+                                <div class="card-header bg-white border-bottom py-3">
+                                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-bolt text-primary me-2"></i>Thao Tác Nhanh</h6>
+                                </div>
+                                <div class="card-body p-3 d-flex flex-column gap-2">
+                                    <a th:href="@{/sinhvien/sua-chua}" class="quick-action-btn">
+                                        <i class="fas fa-hammer text-warning"></i>
+                                        <span>Báo hỏng đồ đạc / Thiết bị</span>
+                                    </a>
+                                    <a th:href="@{/sinhvien/hoa-don}" class="quick-action-btn">
+                                        <i class="fas fa-file-invoice-dollar text-success"></i>
+                                        <span>Đóng tiền điện nước / Lệ phí</span>
+                                    </a>
+                                    <a th:href="@{/sinhvien/phong}" class="quick-action-btn">
+                                        <i class="fas fa-file-contract text-info"></i>
+                                        <span>Xem hợp đồng & Giấy tờ lưu trú</span>
+                                    </a>
+                                    <a th:href="@{/sinhvien/vi-pham}" class="quick-action-btn">
+                                        <i class="fas fa-shield-alt text-danger"></i>
+                                        <span>Nội quy & Điểm rèn luyện KTX</span>
+                                    </a>
+                                    <a th:href="@{/sinhvien/profile}" class="quick-action-btn">
+                                        <i class="fas fa-user-edit text-primary"></i>
+                                        <span>Cập nhật hồ sơ sinh viên</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- NỘI QUY & KHUNG GIỜ HOẠT ĐỘNG KTX -->
+                            <div class="card shadow-xs border bg-white mb-4" style="border-radius: 14px;">
+                                <div class="card-header bg-white border-bottom py-3">
+                                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-clock text-info me-2"></i>Khung Giờ Hoạt Động KTX</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small text-muted">
+                                        <li class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                                            <span><i class="fas fa-door-open text-success me-2"></i>Mở cổng ký túc xá:</span>
+                                            <strong class="text-dark">05:00 sáng</strong>
+                                        </li>
+                                        <li class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                                            <span><i class="fas fa-door-closed text-danger me-2"></i>Đóng cổng KTX (Điểm danh):</span>
+                                            <strong class="text-danger">23:00 tối</strong>
+                                        </li>
+                                        <li class="d-flex justify-content-between align-items-center py-1">
+                                            <span><i class="fas fa-volume-mute text-warning me-2"></i>Giờ yên tĩnh nghỉ ngơi:</span>
+                                            <strong class="text-dark">23:00 - 05:00</strong>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- ĐƯỜNG DÂY NÓNG HỖ TRỢ 24/7 -->
+                            <div class="card shadow-xs border-0 bg-primary-subtle text-primary mb-4" style="border-radius: 14px;">
+                                <div class="card-body p-3">
+                                    <h6 class="fw-bold text-dark mb-2"><i class="fas fa-phone-volume text-primary me-2"></i>Hotline Trực Ban KTX</h6>
+                                    <p class="small text-muted mb-3">Liên hệ ngay khi gặp sự cố an ninh, y tế hoặc sự cố điện nước khẩn cấp:</p>
+                                    <div class="d-flex flex-column gap-2 small">
+                                        <div class="d-flex justify-content-between bg-white p-2 rounded-2 border">
+                                            <span><i class="fas fa-shield-alt text-danger me-1"></i> Bảo vệ (24/7):</span>
+                                            <strong class="text-dark">028.3896.7900</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between bg-white p-2 rounded-2 border">
+                                            <span><i class="fas fa-user-tie text-primary me-1"></i> Ban Quản Sinh:</span>
+                                            <strong class="text-dark">028.3897.1234</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between bg-white p-2 rounded-2 border">
+                                            <span><i class="fas fa-first-aid text-success me-1"></i> Trạm Y Tế KTX:</span>
+                                            <strong class="text-dark">028.3897.5555</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <!-- ========================================================================= -->
+                <!-- KỊCH BẢN 2: SINH VIÊN CHƯA CÓ PHÒNG (CURRENT ROOM == NULL) -->
+                <!-- ========================================================================= -->
+                <div th:if="${currentRoom == null}">
+                    
+                    <!-- TRƯỜNG HỢP A: SINH VIÊN ĐÃ GỬI ĐƠN VÀ ĐANG CHỜ BAN QUẢN SINH XÉT DUYỆT -->
+                    <div th:if="${pendingRegistration != null}" class="card shadow-xs border bg-white mb-4" style="border-radius: 16px;">
+                        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold text-dark">
+                                <i class="fas fa-tasks text-warning me-2"></i>Tiến Trình Xét Duyệt Hồ Sơ Nội Trú
+                            </h5>
+                            <span class="badge bg-warning-subtle text-warning border border-warning px-3 py-2 rounded-pill">
+                                Mã đơn: <strong th:text="${pendingRegistration.maDangKy}">DK001</strong>
+                            </span>
+                        </div>
+                        <div class="card-body p-4">
+                            <!-- THANH TIẾN TRÌNH 4 BƯỚC (INTERACTIVE STEPPER TRACKER) -->
+                            <div class="stepper-track">
+                                <!-- Bước 1: Nộp đơn online -->
+                                <div class="stepper-step completed">
+                                    <div class="stepper-icon">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="stepper-title">1. Nộp Hồ Sơ</div>
+                                    <div class="stepper-desc">Đã gửi thành công (<span th:text="${#temporals.format(pendingRegistration.ngayDangKy, 'dd/MM/yyyy')}">08/10/2026</span>)</div>
+                                </div>
+
+                                <!-- Bước 2: Thẩm tra điều kiện (Đang xử lý) -->
+                                <div class="stepper-step active">
+                                    <div class="stepper-icon">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                    <div class="stepper-title">2. Thẩm Tra & Xét Duyệt</div>
+                                    <div class="stepper-desc text-primary fw-semibold">Quản sinh đang xét duyệt (24h - 48h)</div>
+                                </div>
+
+                                <!-- Bước 3: Phân phòng & Hợp đồng -->
+                                <div class="stepper-step">
+                                    <div class="stepper-icon">3</div>
+                                    <div class="stepper-title">3. Cấp Phòng & Hợp Đồng</div>
+                                    <div class="stepper-desc">Xếp phòng theo nguyện vọng</div>
+                                </div>
+
+                                <!-- Bước 4: Nhận phòng & Check in -->
+                                <div class="stepper-step">
+                                    <div class="stepper-icon">4</div>
+                                    <div class="stepper-title">4. Nhận Phòng</div>
+                                    <div class="stepper-desc">Nhận chìa khóa & check-in</div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <!-- THÔNG TIN NGUYỆN VỌNG ĐÃ NỘP -->
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-8">
+                                    <h6 class="fw-bold text-dark mb-2"><i class="fas fa-info-circle text-primary me-2"></i>Chi tiết thông tin đăng ký:</h6>
+                                    <div class="row g-2 text-muted small">
+                                        <div class="col-sm-6">
+                                            <strong>Loại phòng đăng ký:</strong> 
+                                            <span class="text-dark" th:text="${pendingRegistration.loaiPhong != null ? pendingRegistration.loaiPhong.tenLoaiPhong : 'Tiêu chuẩn'}">Phòng 4 người</span>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <strong>Đơn giá dự kiến:</strong> 
+                                            <span class="text-danger fw-semibold" th:text="${pendingRegistration.loaiPhong != null ? #numbers.formatDecimal(pendingRegistration.loaiPhong.donGia, 0, 'COMMA', 0, 'POINT') + ' đ / tháng' : 'Theo quy định'}">1.500.000 đ / tháng</span>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <strong>Diện ưu tiên khai báo:</strong> 
+                                            <span class="text-dark" th:text="${pendingRegistration.dienUuTien != null and !pendingRegistration.dienUuTien.isEmpty() ? pendingRegistration.dienUuTien : 'Không có'}">Con thương binh</span>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <strong>Thời gian gửi:</strong> 
+                                            <span class="text-dark" th:text="${#temporals.format(pendingRegistration.ngayDangKy, 'dd/MM/yyyy')}">08/10/2026</span>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info py-2 px-3 mt-3 mb-0 small">
+                                        <i class="fas fa-bell me-1"></i> Hồ sơ của bạn đã được ghi nhận trên hệ thống KTX. Bạn sẽ nhận được thông báo ngay khi Ban Quản sinh hoàn tất xét duyệt và xếp phòng.
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-md-end">
+                                    <a th:href="@{/sinhvien/dang-ky}" class="btn btn-outline-primary btn-sm px-3 py-2 w-100 mb-2">
+                                        <i class="fas fa-eye me-1"></i> Xem chi tiết hồ sơ đã nộp
+                                    </a>
+                                    <a href="tel:02838971234" class="btn btn-light btn-sm px-3 py-2 w-100 border text-muted">
+                                        <i class="fas fa-phone-alt me-1"></i> Liên hệ Quản sinh hỗ trợ
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TRƯỜNG HỢP B: CHƯA NỘP ĐƠN ĐĂNG KÝ PHÒNG -->
+                    <div th:if="${pendingRegistration == null}">
+                        <!-- Cảnh báo nếu đơn trước đó vừa bị từ chối -->
+                        <div th:if="${latestRegistration != null and latestRegistration.trangThai == 'Từ chối'}" class="alert alert-danger shadow-xs mb-4 p-3 rounded-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle fa-2x text-danger me-3"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Đơn đăng ký gần nhất của bạn không được phê duyệt</h6>
+                                    <p class="mb-1 small">
+                                        Lý do: <strong th:text="${latestRegistration.lyDoTuChoi != null ? latestRegistration.lyDoTuChoi : 'Hết chỗ hoặc thông tin minh chứng chưa hợp lệ'}">Thông tin chưa hợp lệ</strong>
+                                    </p>
+                                    <span class="small text-muted">Bạn có thể chỉnh sửa lại hồ sơ hoặc đăng ký nguyện vọng loại phòng khác dưới đây.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BANNER KÊU GỌI & HƯỚNG DẪN ĐĂNG KÝ LƯU TRÚ -->
+                        <div class="card shadow-xs border-0 mb-4 bg-white" style="border-radius: 16px; background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);">
+                            <div class="card-body p-4 p-md-5">
+                                <div class="row align-items-center g-4">
+                                    <div class="col-lg-8">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill mb-2">
+                                            Tuyển Sinh Nội Trú Năm Học Mới
+                                        </span>
+                                        <h3 class="fw-bold text-dark mb-2">Đăng Ký Phòng Ký Túc Xá Ngay Hôm Nay</h3>
+                                        <p class="text-muted mb-4 lead fs-6">
+                                            Ký túc xá cung cấp không gian sinh hoạt an toàn, tiện nghi với chi phí hợp lý. Chỉ với 3 bước đơn giản trên hệ thống trực tuyến:
+                                        </p>
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-md-4">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <span class="badge bg-primary rounded-circle p-2" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;">1</span>
+                                                    <div>
+                                                        <strong class="text-dark small d-block">Chọn loại phòng</strong>
+                                                        <span class="text-muted" style="font-size: 0.78rem;">Xem bảng giá & tiện nghi</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <span class="badge bg-primary rounded-circle p-2" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;">2</span>
+                                                    <div>
+                                                        <strong class="text-dark small d-block">Điền hồ sơ online</strong>
+                                                        <span class="text-muted" style="font-size: 0.78rem;">Đính kèm ảnh CCCD & thẻ SV</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <span class="badge bg-primary rounded-circle p-2" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;">3</span>
+                                                    <div>
+                                                        <strong class="text-dark small d-block">Nhận phòng KTX</strong>
+                                                        <span class="text-muted" style="font-size: 0.78rem;">Quản sinh duyệt & cấp phòng</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <a th:href="@{/sinhvien/dang-ky}" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm">
+                                            <i class="fas fa-edit me-2"></i> Đăng Ký Phòng Trực Tuyến Ngay
+                                        </a>
+                                    </div>
+                                    <div class="col-lg-4 text-center d-none d-lg-block">
+                                        <div class="p-4 bg-white rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center" style="width: 160px; height: 160px;">
+                                            <i class="fas fa-building text-primary" style="font-size: 4.5rem;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BẢNG GIÁ & DANH MỤC CÁC LOẠI PHÒNG HIỆN CÓ ĐỂ SINH VIÊN THAM KHẢO -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0"><i class="fas fa-bed text-primary me-2"></i>Các Hạng Loại Phòng Ký Túc Xá</h5>
+                                <span class="text-muted small">Bảng giá niêm yết minh bạch và tiện nghi đi kèm</span>
+                            </div>
+                            <a th:href="@{/sinhvien/dang-ky}" class="btn btn-outline-primary btn-sm fw-semibold">
+                                Đi tới form đăng ký <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+
+                        <div class="row g-3">
+                            <div th:each="lp : ${loaiPhongs}" class="col-md-4">
+                                <div class="room-tier-card h-100 p-4 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" th:text="${lp.maLoaiPhong}">LP04</span>
+                                            <span class="text-muted small"><i class="fas fa-user-friends me-1"></i> Tối đa <strong th:text="${lp.soNguoiToiDa}">4</strong> bạn/phòng</span>
+                                        </div>
+                                        <h5 class="fw-bold text-dark mb-2" th:text="${lp.tenLoaiPhong}">Phòng 4 người</h5>
+                                        <h4 class="text-primary fw-bold mb-3">
+                                            <span th:text="${#numbers.formatDecimal(lp.donGia, 0, 'COMMA', 0, 'POINT')}">1,500,000</span> <small class="text-muted fs-6 fw-normal">đ / tháng</small>
+                                        </h4>
+                                        <p class="text-muted small mb-3" th:text="${lp.moTa}">
+                                            Phòng cao cấp: Điều hòa Inverter 24/24, quạt trần, bình nóng lạnh, wifi riêng, nệm êm ái
+                                        </p>
+                                    </div>
+                                    <div class="pt-3 border-top">
+                                        <a th:href="@{/sinhvien/dang-ky}" class="btn btn-outline-primary btn-sm w-100 fw-semibold">
+                                            <i class="fas fa-check-circle me-1"></i> Chọn đăng ký loại này
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- THÔNG TIN HƯỚNG DẪN HỒ SƠ & TƯ VẤN HỖ TRỢ (2 CỘT CÂN ĐỐI) -->
+                    <div class="row g-4">
+                        <!-- CỘT 1: HỒ SƠ CẦN CHUẨN BỊ KHI ĐẾN NHẬN PHÒNG -->
+                        <div class="col-lg-6">
+                            <div class="card shadow-xs border bg-white h-100" style="border-radius: 14px;">
+                                <div class="card-header bg-white border-bottom py-3">
+                                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-clipboard-list text-info me-2"></i>Quy Định & Giấy Tờ Chuẩn Bị Khi Đến Nhận Phòng</h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <ul class="list-unstyled mb-0 d-flex flex-column gap-3 small text-muted">
+                                        <li class="d-flex align-items-start">
+                                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                            <div>
+                                                <strong class="text-dark">1. Căn cước công dân (CCCD):</strong>
+                                                <div>Bản sao công chứng hoặc mang bản gốc để Quản sinh đối chiếu thông tin cư trú.</div>
+                                            </div>
+                                        </li>
+                                        <li class="d-flex align-items-start">
+                                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                            <div>
+                                                <strong class="text-dark">2. Thẻ sinh viên hoặc Giấy báo trúng tuyển:</strong>
+                                                <div>Đối với tân sinh viên mang theo giấy báo nhập học; sinh viên khóa trước mang thẻ sinh viên hợp lệ.</div>
+                                            </div>
+                                        </li>
+                                        <li class="d-flex align-items-start">
+                                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                            <div>
+                                                <strong class="text-dark">3. Minh chứng diện ưu tiên (Nếu có):</strong>
+                                                <div>Giấy xác nhận hộ nghèo/cận nghèo, con thương binh - liệt sĩ để được xét duyệt ưu tiên và miễn giảm phí.</div>
+                                            </div>
+                                        </li>
+                                        <li class="d-flex align-items-start">
+                                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                            <div>
+                                                <strong class="text-dark">4. Ảnh thẻ 3x4 (02 ảnh):</strong>
+                                                <div>Dùng để làm thẻ ra vào cổng ký túc xá và hồ sơ lưu trữ nội trú.</div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CỘT 2: KÊNH TƯ VẤN & HỖ TRỢ TUYỂN SINH NỘI TRÚ -->
+                        <div class="col-lg-6">
+                            <div class="card shadow-xs border bg-white h-100" style="border-radius: 14px;">
+                                <div class="card-header bg-white border-bottom py-3">
+                                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-headset text-primary me-2"></i>Hỗ Trợ Tuyển Sinh & Tư Vấn Chỗ Ở</h6>
+                                </div>
+                                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <p class="small text-muted mb-3">
+                                            Sinh viên cần hướng dẫn làm hồ sơ, thay đổi nguyện vọng hoặc giải đáp thắc mắc về chỗ ở, vui lòng liên hệ Ban Quản Sinh qua các kênh:
+                                        </p>
+                                        <div class="d-flex flex-column gap-2 small mb-3">
+                                            <div class="d-flex justify-content-between bg-light p-2 rounded-2 border">
+                                                <span><i class="fas fa-phone-alt text-primary me-2"></i>Hotline Quản sinh:</span>
+                                                <strong class="text-dark">028.3897.1234</strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between bg-light p-2 rounded-2 border">
+                                                <span><i class="fas fa-shield-alt text-danger me-2"></i>Bảo vệ KTX (24/7):</span>
+                                                <strong class="text-dark">028.3896.7900</strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between bg-light p-2 rounded-2 border">
+                                                <span><i class="fas fa-envelope text-info me-2"></i>Email tiếp nhận:</span>
+                                                <strong class="text-dark">ktx@hcmute.edu.vn</strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between bg-light p-2 rounded-2 border">
+                                                <span><i class="fas fa-map-marker-alt text-danger me-2"></i>Văn phòng tiếp sinh viên:</span>
+                                                <strong class="text-dark">Phòng 101, Tòa nhà A (Tầng 1)</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info py-2 px-3 mb-0 small">
+                                        <i class="fas fa-info-circle me-1"></i> Giờ tiếp sinh viên: Sáng 07:30 - 11:30 | Chiều 13:30 - 17:00 (Từ Thứ Hai đến Thứ Sáu).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
         </div>
     </div>

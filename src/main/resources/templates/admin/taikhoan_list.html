@@ -18,6 +18,23 @@
                     Lưu thông tin tài khoản thành công!
                 </div>
 
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <form th:action="@{/admin/tai-khoan}" method="get" class="row g-2 align-items-center">
+                            <div class="col-md-5">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                                    <input type="text" name="keyword" th:value="${keyword}" class="form-control" placeholder="Tìm theo Họ tên, Tên đăng nhập, SĐT, Chức vụ...">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-filter me-1"></i>Tìm kiếm</button>
+                                <a th:if="${keyword != null and keyword != ''}" th:href="@{/admin/tai-khoan}" class="btn btn-outline-secondary ms-1">Xóa lọc</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <table class="table table-hover">
@@ -56,6 +73,9 @@
                                 </tr>
                             </tbody>
                         </table>
+                        
+                        <!-- PAGINATION -->
+                        <div th:replace="~{fragments/pagination :: pagination(pageObj=${userPage}, url='/admin/tai-khoan', queryParams=${queryParams})}"></div>
                     </div>
                 </div>
             </div>

@@ -26,6 +26,7 @@ public class SinhVienDTO {
     private String email;
     
     private String khoa;
+    private String truongDaiHoc;
     private Integer namHoc;
     private String dienUuTien;
     
@@ -58,6 +59,9 @@ public class SinhVienDTO {
 
     public String getKhoa() { return khoa; }
     public void setKhoa(String khoa) { this.khoa = khoa; }
+
+    public String getTruongDaiHoc() { return truongDaiHoc; }
+    public void setTruongDaiHoc(String truongDaiHoc) { this.truongDaiHoc = truongDaiHoc; }
 
     public Integer getNamHoc() { return namHoc; }
     public void setNamHoc(Integer namHoc) { this.namHoc = namHoc; }

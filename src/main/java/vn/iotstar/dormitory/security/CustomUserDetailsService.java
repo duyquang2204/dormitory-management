@@ -14,6 +14,7 @@ import vn.iotstar.dormitory.repository.SinhVienRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -26,6 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // 1. Kiểm tra tài khoản cán bộ / quản trị / nhân viên
         NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhap(username);
         if (nguoiDung != null) {
             if ("Bị khóa".equals(nguoiDung.getTrangThai())) {
@@ -44,13 +46,25 @@ public class CustomUserDetailsService implements UserDetailsService {
             return new CustomUserDetails(nguoiDung.getTenDangNhap(), nguoiDung.getMatKhau(), authorities, nguoiDung.getHoTen());
         }
 
+        // 2. Kiểm tra tài khoản sinh viên (tìm theo Mã SV hoặc theo Email)
         SinhVien sinhVien = sinhVienRepository.findByMaSV(username);
+        if (sinhVien == null) {
+            Optional<SinhVien> svEmailOpt = sinhVienRepository.findByEmail(username);
+            if (svEmailOpt.isPresent()) {
+                sinhVien = svEmailOpt.get();
+            }
+        }
+
         if (sinhVien != null) {
+            if ("Chưa kích hoạt".equalsIgnoreCase(sinhVien.getTrangThai())) {
+                throw new UsernameNotFoundException("Tài khoản chưa được kích hoạt mã OTP qua Email");
+            }
             if (sinhVien.getMatKhau() == null || sinhVien.getMatKhau().isEmpty()) {
                 throw new UsernameNotFoundException("Tài khoản sinh viên chưa được thiết lập mật khẩu");
             }
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority("ROLE_SINH_VIEN"));
+            // Lưu username là maSV để đồng bộ phiên làm việc
             return new CustomUserDetails(sinhVien.getMaSV(), sinhVien.getMatKhau(), authorities, sinhVien.getHoTen());
         }
 

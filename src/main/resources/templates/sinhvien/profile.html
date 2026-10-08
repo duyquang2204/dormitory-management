@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 p-0">
+                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-10 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold text-success mb-1">
+                            <i class="fa-solid fa-user-circle me-2"></i>Hồ Sơ Cư Dân Ký Túc Xá
+                        </h4>
+                        <p class="text-muted small mb-0">Quản lý thông tin cá nhân và cập nhật số điện thoại liên lạc khẩn cấp</p>
+                    </div>
+                    <a th:href="@{/doi-mat-khau}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa-solid fa-key me-1"></i>Đổi mật khẩu
+                    </a>
+                </div>
+
+                <!-- ALERTS -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-circle-check me-2"></i><span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div class="row g-4">
+                    <!-- THÔNG TIN ĐỊNH DANH CƯ DÂN (READONLY) -->
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm border-0 rounded-4 text-center p-4 bg-white h-100">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mb-3 mx-auto" style="width: 80px; height: 80px;">
+                                <i class="fa-solid fa-user-graduate fa-3x"></i>
+                            </div>
+                            <h5 class="fw-bold mb-1" th:text="${sinhVien.hoTen}">Trần Văn Nam</h5>
+                            <p class="text-muted small mb-3">Mã Cư Dân: <strong class="text-primary" th:text="${sinhVien.maSV}">SV0001</strong></p>
+
+                            <!-- Phòng đang ở -->
+                            <div class="p-3 bg-light rounded-3 text-start mb-3 border">
+                                <div class="small text-muted mb-1"><i class="fa-solid fa-door-open me-1 text-success"></i>Tình trạng lưu trú:</div>
+                                <div th:if="${currentRoom != null}">
+                                    <div class="fw-bold text-success fs-5">Phòng <span th:text="${currentRoom.soPhong}"></span></div>
+                                    <div class="small text-muted" th:text="'Khu: ' + ${currentRoom.khu != null ? currentRoom.khu.tenKhu : 'N/A'}"></div>
+                                </div>
+                                <div th:if="${currentRoom == null}">
+                                    <span class="badge bg-secondary">Chưa xếp phòng / Đang chờ duyệt</span>
+                                </div>
+                            </div>
+
+                            <div class="text-start small text-muted">
+                                <p class="mb-2"><i class="fa-solid fa-graduation-cap me-2 text-primary"></i><strong>Trường:</strong> 
+                                    <span th:text="${sinhVien.truongDaiHoc != null and !#strings.isEmpty(sinhVien.truongDaiHoc) and sinhVien.truongDaiHoc != 'N/A' ? sinhVien.truongDaiHoc : 'Chưa cập nhật'}"
+                                          th:classappend="${sinhVien.truongDaiHoc == null or #strings.isEmpty(sinhVien.truongDaiHoc) or sinhVien.truongDaiHoc == 'N/A'} ? 'text-warning fw-semibold' : ''"></span>
+                                </p>
+                                <p class="mb-2"><i class="fa-solid fa-book me-2 text-primary"></i><strong>Khoa:</strong> 
+                                    <span th:text="${sinhVien.khoa != null and !#strings.isEmpty(sinhVien.khoa) and sinhVien.khoa != 'N/A' ? sinhVien.khoa : 'Chưa cập nhật'}"
+                                          th:classappend="${sinhVien.khoa == null or #strings.isEmpty(sinhVien.khoa) or sinhVien.khoa == 'N/A'} ? 'text-warning fw-semibold' : ''"></span>
+                                </p>
+                                <p class="mb-2"><i class="fa-solid fa-id-card me-2 text-primary"></i><strong>CCCD:</strong> <span th:text="${sinhVien.cccd}">0123456789</span></p>
+                                <p class="mb-2"><i class="fa-solid fa-venus-mars me-2 text-primary"></i><strong>Giới tính:</strong> <span th:text="${sinhVien.gioiTinh}">Nam</span></p>
+                                <p class="mb-0"><i class="fa-solid fa-award me-2 text-warning"></i><strong>Ưu tiên:</strong> <span th:text="${sinhVien.dienUuTien}">Không ưu tiên</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FORM CẬP NHẬT THÔNG TIN LIÊN HỆ & HỌC TẬP -->
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
+                            <h5 class="fw-bold text-success border-bottom pb-3 mb-3">
+                                <i class="fa-solid fa-address-book me-2"></i>CẬP NHẬT THÔNG TIN HỌC TẬP & LIÊN LẠC
+                            </h5>
+                            <form th:action="@{/sinhvien/profile/cap-nhat}" method="post">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">Số điện thoại di động <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="fa-solid fa-phone"></i></span>
+                                            <input type="tel" class="form-control" name="sdt" th:value="${sinhVien.sdt}" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">Địa chỉ Email <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="fa-solid fa-envelope"></i></span>
+                                            <input type="email" class="form-control" name="email" th:value="${sinhVien.email}" required>
+                                        </div>
+                                    </div>
+
+                                    <!-- BỔ SUNG TRƯỜNG VÀ KHOA NẾU BQL CHƯA NHẬP -->
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">
+                                            Trường Đại học / Cao đẳng
+                                            <span th:if="${sinhVien.truongDaiHoc == null or #strings.isEmpty(sinhVien.truongDaiHoc) or sinhVien.truongDaiHoc == 'N/A'}" class="badge bg-warning text-dark ms-1" style="font-size: 0.7rem;">Bổ sung</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="fa-solid fa-graduation-cap text-primary"></i></span>
+                                            <input type="text" class="form-control" name="truongDaiHoc" 
+                                                   th:value="${sinhVien.truongDaiHoc != null and sinhVien.truongDaiHoc != 'N/A' ? sinhVien.truongDaiHoc : ''}" 
+                                                   placeholder="Nhập tên trường ĐH / CĐ...">
+                                        </div>
+                                        <div class="form-text text-muted small" style="font-size: 0.72rem;">* Sinh viên nhập bổ sung nếu quản sinh chưa cập nhật</div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">
+                                            Khoa / Chuyên ngành
+                                            <span th:if="${sinhVien.khoa == null or #strings.isEmpty(sinhVien.khoa) or sinhVien.khoa == 'N/A'}" class="badge bg-warning text-dark ms-1" style="font-size: 0.7rem;">Bổ sung</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="fa-solid fa-book text-primary"></i></span>
+                                            <input type="text" class="form-control" name="khoa" 
+                                                   th:value="${sinhVien.khoa != null and sinhVien.khoa != 'N/A' ? sinhVien.khoa : ''}" 
+                                                   placeholder="Nhập tên khoa / ngành...">
+                                        </div>
+                                        <div class="form-text text-muted small" style="font-size: 0.72rem;">* Sinh viên nhập bổ sung nếu quản sinh chưa cập nhật</div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold small">Quê quán (Tỉnh / Thành phố) <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="queQuan" th:value="${sinhVien.queQuan}" required>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold small">Địa chỉ thường trú chi tiết</label>
+                                        <input type="text" class="form-control" name="diaChi" th:value="${sinhVien.diaChi}" placeholder="Số nhà, đường, thôn/xã, quận/huyện...">
+                                    </div>
+                                </div>
+
+                                <h6 class="fw-bold text-danger border-bottom pb-2 mb-3 mt-4">
+                                    <i class="fa-solid fa-phone-volume me-2"></i>THÔNG TIN LIÊN HỆ KHẨN CẤP (PHỤ HUYNH)
+                                </h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">Họ và tên Phụ huynh / Người giám hộ</label>
+                                        <input type="text" class="form-control" name="hoTenPhuHuynh" th:value="${sinhVien.hoTenPhuHuynh}" placeholder="Ví dụ: Bác Nguyễn Văn A (Bố)">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">Số điện thoại Phụ huynh</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light text-danger"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                                            <input type="tel" class="form-control" name="sdtPhuHuynh" th:value="${sinhVien.sdtPhuHuynh}" placeholder="09xxxxxxxx">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-success fw-semibold px-4">
+                                        <i class="fa-solid fa-floppy-disk me-2"></i>Lưu thay đổi
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

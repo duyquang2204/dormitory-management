@@ -1,7 +1,6 @@
 package vn.iotstar.dormitory.entity;
 
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "LoaiPhong")
@@ -45,6 +44,10 @@ public class LoaiPhong {
     }
 
     public Double getDonGia() {
+        return donGia;
+    }
+
+    public Double getGiaPhong() {
         return donGia;
     }
 

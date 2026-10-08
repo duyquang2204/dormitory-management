@@ -3,39 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - Quản lý Ký túc xá</title>
+    <title>Đăng nhập - Ký Túc Xá Tư Nhân Cao Cấp</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="bg-light">
-<div class="container d-flex justify-content-center align-items-center vh-100">
-    <div class="card shadow-sm p-4" style="width: 400px; border-radius: 10px;">
+<div class="container d-flex justify-content-center align-items-center min-vh-100 py-4">
+    <div class="card shadow-lg p-4 p-md-5 border bg-white" style="max-width: 440px; width: 100%; border-radius: 16px;">
         <div class="text-center mb-4">
-            <h3 class="text-success">Ký Túc Xá</h3>
-            <p class="text-muted">Đăng nhập vào hệ thống</p>
+            <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 64px; height: 64px;">
+                <i class="fa-solid fa-building-user fa-2x"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-1">KÝ TÚC XÁ TƯ NHÂN</h3>
+            <p class="text-muted small">Cổng thông tin & Dịch vụ lưu trú sinh viên</p>
         </div>
         
-        <div th:if="${param.error}" class="alert alert-danger" role="alert">
-            Tên đăng nhập hoặc mật khẩu không chính xác!
+        <!-- Alerts -->
+        <div th:if="${param.error}" class="alert alert-danger py-2 small border-0 rounded-3" role="alert">
+            <i class="fa-solid fa-circle-exclamation me-1"></i> Tên đăng nhập/Email hoặc mật khẩu không chính xác!
         </div>
-        <div th:if="${param.logout}" class="alert alert-info" role="alert">
-            Bạn đã đăng xuất thành công!
+        <div th:if="${param.logout}" class="alert alert-info py-2 small border-0 rounded-3" role="alert">
+            <i class="fa-solid fa-circle-info me-1"></i> Bạn đã đăng xuất thành công!
         </div>
+        <div th:if="${param.verified}" class="alert alert-success py-2 small border-0 rounded-3" role="alert">
+            <i class="fa-solid fa-circle-check me-1"></i> Tài khoản đã được kích hoạt thành công! Vui lòng đăng nhập.
+        </div>
+        <div th:if="${param.resetSuccess}" class="alert alert-success py-2 small border-0 rounded-3" role="alert">
+            <i class="fa-solid fa-circle-check me-1"></i> Đổi mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.
+        </div>
+        <div th:if="${successMessage}" class="alert alert-success py-2 small border-0 rounded-3" role="alert" th:text="${successMessage}"></div>
 
         <form th:action="@{/login}" method="post">
             <div class="mb-3">
-                <label for="username" class="form-label">Tên đăng nhập / MSSV</label>
-                <input type="text" class="form-control" id="username" name="username" required autofocus>
+                <label for="username" class="form-label fw-semibold small">Mã Cư Dân / MSSV / Email</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-user"></i></span>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Nhập Mã SV hoặc Email..." required autofocus>
+                </div>
             </div>
-            <div class="mb-4">
-                <label for="password" class="form-label">Mật khẩu</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+            
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label for="password" class="form-label fw-semibold small mb-0">Mật khẩu</label>
+                    <a th:href="@{/forgot-password}" class="text-decoration-none small text-primary">Quên mật khẩu?</a>
+                </div>
+                <div class="input-group mt-1">
+                    <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-lock"></i></span>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Nhập mật khẩu..." required>
+                </div>
             </div>
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-success">Đăng nhập</button>
+
+            <div class="d-grid gap-2 mb-3">
+                <button type="submit" class="btn btn-primary py-2 fw-semibold shadow-sm">
+                    <i class="fa-solid fa-right-to-bracket me-2"></i>Đăng nhập
+                </button>
             </div>
         </form>
+
+        <div class="text-center pt-3 border-top">
+            <p class="small text-muted mb-2">Chưa có tài khoản sinh viên?</p>
+            <a th:href="@{/register}" class="btn btn-outline-primary btn-sm px-3 fw-semibold">
+                <i class="fa-solid fa-user-plus me-1"></i>Đăng ký tài khoản mới (Xác thực OTP)
+            </a>
+        </div>
+
+        <div class="text-center mt-3">
+            <a th:href="@{/home}" class="text-decoration-none small text-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i>Quay lại Trang chủ Ký túc xá
+            </a>
+        </div>
     </div>
 </div>
 <!-- Bootstrap JS -->

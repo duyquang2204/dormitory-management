@@ -23,7 +23,7 @@
                 </div>
 
                 <div class="alert alert-info" th:if="${currentRoom != null}">
-                    <i class="fas fa-info-circle me-2"></i> Bạn đang xem hóa đơn của phòng <strong><span th:text="${currentRoom.soPhong} + ' (Khu ' + ${currentRoom.khu.tenKhu} + ')'"></span></strong>.
+                    <i class="fas fa-info-circle me-2"></i> Bạn đang xem hóa đơn của phòng <strong><span th:text="${currentRoom.soPhong} + ' (' + ${currentRoom.khu.tenKhu} + ')'"></span></strong>.
                 </div>
                 
                 <div class="alert alert-warning" th:if="${currentRoom == null}">
@@ -78,19 +78,25 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <a th:if="${hd.trangThai == 'Chưa thanh toán'}" th:href="@{/sinhvien/vnpay/thanh-toan(maHoaDon=${hd.maHoaDon})}" class="btn btn-sm btn-primary mb-1 shadow-sm" style="background-color: #005a9e; border-color: #005a9e;">
-                                            <i class="fas fa-credit-card me-1"></i>Thanh toán VNPAY
-                                        </a>
-                                        
-                                        <div th:if="${hd.minhChungThanhToan != null}" class="mb-1">
-                                            <a th:href="${hd.minhChungThanhToan}" target="_blank" class="btn btn-sm btn-outline-info" title="Xem biên lai">
-                                                <i class="fas fa-image me-1"></i>Biên lai cũ
+                                        <div class="d-flex flex-column gap-1 align-items-center">
+                                            <a th:if="${hd.trangThai == 'Chưa thanh toán'}" th:href="@{/sinhvien/vnpay/thanh-toan(maHoaDon=${hd.maHoaDon})}" class="btn btn-sm btn-primary w-100 shadow-sm" style="background-color: #005a9e; border-color: #005a9e;">
+                                                <i class="fas fa-credit-card me-1"></i>Thanh toán VNPAY
                                             </a>
+                                            
+                                            <a th:href="@{/sinhvien/hoa-don/xuat-pdf/{id}(id=${hd.maHoaDon})}" class="btn btn-sm btn-outline-danger w-100" target="_blank" title="Tải hóa đơn PDF">
+                                                <i class="fas fa-file-pdf me-1"></i>Xuất PDF
+                                            </a>
+                                            
+                                            <div th:if="${hd.minhChungThanhToan != null}" class="w-100">
+                                                <a th:href="${hd.minhChungThanhToan}" target="_blank" class="btn btn-sm btn-outline-info w-100" title="Xem biên lai">
+                                                    <i class="fas fa-image me-1"></i>Biên lai cũ
+                                                </a>
+                                            </div>
+                                            
+                                            <span th:if="${hd.trangThai != 'Chưa thanh toán' and hd.minhChungThanhToan == null}" class="text-muted small">
+                                                <i class="fas fa-check-circle text-success me-1"></i>Đã xong
+                                            </span>
                                         </div>
-                                        
-                                        <span th:if="${hd.trangThai != 'Chưa thanh toán' and hd.minhChungThanhToan == null}" class="text-muted small">
-                                            <i class="fas fa-check-circle text-success me-1"></i>Đã xong
-                                        </span>
                                     </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(hoaDonPage.content)}">

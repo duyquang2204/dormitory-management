@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface YeuCauSuaChuaRepository extends JpaRepository<YeuCauSuaChua, String> {
     long countByTrangThai(String trangThai);
+    java.util.List<YeuCauSuaChua> findBySinhVien_MaSV(String maSV);
 }

@@ -118,6 +118,9 @@ public class ThongBaoService {
         return dto;
     }
 
+    @Autowired(required = false)
+    private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
+
     public void taoThongBao(String nguoiNhan, String tieuDe, String noiDung, String loaiThongBao, String link) {
         ThongBao tb = new ThongBao();
         tb.setMaThongBao(UUID.randomUUID().toString());
@@ -129,6 +132,21 @@ public class ThongBaoService {
         tb.setNgayTao(LocalDateTime.now());
         tb.setDaDoc(false);
         thongBaoRepository.save(tb);
+
+        if (messagingTemplate != null) {
+            try {
+                java.util.Map<String, Object> payload = new java.util.HashMap<>();
+                payload.put("maThongBao", tb.getMaThongBao());
+                payload.put("tieuDe", tb.getTieuDe());
+                payload.put("noiDung", tb.getNoiDung());
+                payload.put("loaiThongBao", tb.getLoaiThongBao());
+                payload.put("link", tb.getLink());
+                payload.put("ngayTao", tb.getNgayTao().toString());
+                payload.put("nguoiNhan", tb.getNguoiNhan());
+                messagingTemplate.convertAndSend((String) ("/topic/thong-bao/" + nguoiNhan), (Object) payload);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     public String markAsRead(String maThongBao) {

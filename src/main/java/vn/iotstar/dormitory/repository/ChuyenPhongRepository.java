@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ChuyenPhongRepository extends JpaRepository<ChuyenPhong, String> {
+    java.util.List<ChuyenPhong> findByPhanPhong_MaPhanPhong(String maPhanPhong);
 }

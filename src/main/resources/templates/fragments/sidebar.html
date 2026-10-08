@@ -36,6 +36,17 @@
                 <i class="fas fa-gavel me-2 text-danger"></i>Kỷ luật - Vi phạm
             </a>
         </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('SINH_VIEN')">
+            <a class="nav-link" th:href="@{/sinhvien/profile}">
+                <i class="fas fa-user-circle me-2 text-primary"></i>Hồ sơ cá nhân
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('SINH_VIEN')">
+            <a class="nav-link text-primary fw-semibold d-flex align-items-center justify-content-between" href="javascript:void(0)" onclick="if(window.toggleStudentChatBox){window.toggleStudentChatBox();}else{window.location.href='/sinhvien/chat';}">
+                <span><i class="fas fa-comments me-2 text-primary"></i>Hỗ trợ & Chat BQL</span>
+                <span id="studentSidebarChatBadge" class="badge rounded-pill bg-danger d-none badge-chat-pulse" style="font-size: 0.7rem;">0</span>
+            </a>
+        </li>
 
         <!-- Quản sinh -->
         <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_SINH')">
@@ -76,6 +87,12 @@
         <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_SINH')">
             <a class="nav-link" th:href="@{/quansinh/vi-pham}">
                 <i class="fas fa-exclamation-triangle me-2 text-danger"></i>Kỷ luật - Vi phạm
+            </a>
+        </li>
+        <li class="nav-item mb-2" sec:authorize="hasRole('QUAN_SINH')">
+            <a class="nav-link d-flex align-items-center justify-content-between" th:href="@{/quansinh/chat}">
+                <span><i class="fas fa-comments me-2 text-primary"></i>Hỗ trợ Trực tuyến</span>
+                <span id="managerSidebarChatBadge" class="badge rounded-pill bg-danger d-none badge-chat-pulse" style="font-size: 0.7rem;">0</span>
             </a>
         </li>
 

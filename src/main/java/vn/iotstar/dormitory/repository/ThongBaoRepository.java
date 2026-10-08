@@ -22,4 +22,5 @@ public interface ThongBaoRepository extends JpaRepository<ThongBao, String> {
     void markAllAsRead(List<String> nguoiNhans);
 
     boolean existsByNguoiNhanAndLoaiThongBaoAndTieuDe(String nguoiNhan, String loaiThongBao, String tieuDe);
+    List<ThongBao> findByNguoiNhan(String nguoiNhan);
 }

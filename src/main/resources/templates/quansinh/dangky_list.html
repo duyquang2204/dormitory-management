@@ -10,54 +10,194 @@
             </div>
             <div class="col-md-10 p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4>Quản lý Đơn Đăng Ký Phòng</h4>
-                </div>
-                
-                <div th:if="${param.success}" class="alert alert-success">
-                    Xử lý đơn đăng ký thành công!
-                </div>
-
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Ngày Gửi</th>
-                                    <th>Mã SV</th>
-                                    <th>Họ Tên</th>
-                                    <th>Loại phòng ĐK</th>
-                                    <th>Ghi chú</th>
-                                    <th>Trạng thái</th>
-                                    <th>Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="dk : ${dangKyList}">
-                                    <td th:text="${dk.ngayDangKy}"></td>
-                                    <td th:text="${dk.sinhVien != null ? dk.sinhVien.maSV : ''}" class="fw-bold"></td>
-                                    <td th:text="${dk.sinhVien != null ? dk.sinhVien.hoTen : ''}"></td>
-                                    <td th:text="${dk.loaiPhong != null ? dk.loaiPhong.tenLoaiPhong : ''}"></td>
-                                    <td th:text="${dk.ghiChu}"></td>
-                                    <td>
-                                        <span th:class="${dk.trangThai == 'Đã duyệt' ? 'badge bg-success' : (dk.trangThai == 'Từ chối' ? 'badge bg-danger' : 'badge bg-warning text-dark')}" 
-                                              th:text="${dk.trangThai}"></span>
-                                    </td>
-                                    <td>
-                                        <div th:if="${dk.trangThai == 'Chờ duyệt'}">
-                                            <a th:href="@{/quansinh/dang-ky/duyet/{id}(id=${dk.maDangKy})}" class="btn btn-sm btn-success mb-1" title="Duyệt / Phân phòng"><i class="fas fa-check"></i> Duyệt</a>
-                                            <form th:action="@{/quansinh/dang-ky/tu-choi/{id}(id=${dk.maDangKy})}" method="post" style="display: inline;">
-                                                <button type="submit" class="btn btn-sm btn-danger mb-1" title="Từ chối" onclick="return confirm('Bạn có chắc muốn từ chối đơn này?');"><i class="fas fa-times"></i></button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr th:if="${#lists.isEmpty(dangKyList)}">
-                                    <td colspan="7" class="text-center text-muted py-3">Không có đơn đăng ký nào</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div>
+                        <h4 class="fw-bold text-success mb-1">
+                            <i class="fa-solid fa-file-signature me-2"></i>Xét Duyệt Hồ Sơ Đăng Ký Ký Túc Xá
+                        </h4>
+                        <p class="text-muted small mb-0">Tiếp nhận hồ sơ online, kiểm tra minh chứng sinh viên, phân phòng và gửi kết quả tự động qua Email</p>
                     </div>
                 </div>
+                
+                <!-- ALERTS -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-circle-check me-2"></i><span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-circle-exclamation me-2"></i><span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- SEARCH & FILTER -->
+                <div class="card shadow-sm border-0 rounded-3 mb-4 bg-white">
+                    <div class="card-body p-3">
+                        <form th:action="@{/quansinh/dang-ky}" method="get" class="row g-2 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label small fw-semibold text-muted mb-1">Tìm kiếm từ khóa</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                    <input type="text" class="form-control" name="keyword" th:value="${keyword}" 
+                                           placeholder="Tên SV, Mã SV, CCCD, Email, SĐT, Trường ĐH...">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-muted mb-1">Trạng thái hồ sơ</label>
+                                <select name="trangThai" class="form-select">
+                                    <option value="ALL">-- Tất cả trạng thái --</option>
+                                    <option value="Chờ duyệt" th:selected="${trangThai == 'Chờ duyệt'}">Chờ duyệt</option>
+                                    <option value="Đã duyệt" th:selected="${trangThai == 'Đã duyệt'}">Đã duyệt</option>
+                                    <option value="Từ chối" th:selected="${trangThai == 'Từ chối'}">Từ chối</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-muted mb-1">Loại phòng</label>
+                                <select name="maLoaiPhong" class="form-select">
+                                    <option value="ALL">-- Tất cả loại phòng --</option>
+                                    <option th:each="lp : ${loaiPhongs}" th:value="${lp.maLoaiPhong}" th:text="${lp.tenLoaiPhong}" 
+                                            th:selected="${lp.maLoaiPhong == maLoaiPhong}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-1 d-grid">
+                                <button type="submit" class="btn btn-success fw-semibold">
+                                    <i class="fa-solid fa-filter me-1"></i>Lọc
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- TABLE LIST -->
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Mã ĐK / Ngày</th>
+                                        <th>Sinh Viên</th>
+                                        <th>Trường ĐH & Khoa</th>
+                                        <th>Nguyện Vọng</th>
+                                        <th>Ưu Tiên</th>
+                                        <th>Minh Chứng</th>
+                                        <th>Trạng Thái</th>
+                                        <th class="text-end pe-3">Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="dk : ${dangKyList}">
+                                        <td class="ps-3">
+                                            <div class="fw-bold text-primary" th:text="${dk.maDangKy}">DK12345</div>
+                                            <div class="small text-muted" th:text="${#temporals.format(dk.ngayDangKy, 'dd/MM/yyyy')}">01/01/2026</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold" th:text="${dk.hoTen != null ? dk.hoTen : (dk.sinhVien != null ? dk.sinhVien.hoTen : 'N/A')}">Nguyễn Văn An</div>
+                                            <div class="small text-muted">
+                                                <span class="badge bg-light text-secondary me-1" th:text="${dk.gioiTinh != null ? dk.gioiTinh : (dk.sinhVien != null ? dk.sinhVien.gioiTinh : '')}">Nam</span>
+                                                <span th:text="${dk.sdt != null ? dk.sdt : (dk.sinhVien != null ? dk.sinhVien.sdt : '')}">0901234567</span>
+                                            </div>
+                                            <div class="small text-secondary" th:text="${dk.email != null ? dk.email : (dk.sinhVien != null ? dk.sinhVien.email : '')}">email@gmail.com</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold text-dark small" th:text="${dk.truongDaiHoc != null ? dk.truongDaiHoc : (dk.sinhVien != null ? dk.sinhVien.truongDaiHoc : 'Chưa cập nhật')}">ĐH Sư Phạm Kỹ Thuật</div>
+                                            <div class="small text-muted" th:text="${dk.khoa != null ? dk.khoa : (dk.sinhVien != null ? dk.sinhVien.khoa : '')}">CNTT</div>
+                                        </td>
+                                        <td>
+                                            <div class="badge bg-info bg-opacity-10 text-info fw-bold" th:text="${dk.loaiPhong != null ? dk.loaiPhong.tenLoaiPhong : 'Tiêu chuẩn'}">Phòng 4 người</div>
+                                            <div class="small text-muted text-truncate" style="max-width: 150px;" th:title="${dk.ghiChu}" th:text="${dk.ghiChu}">Nguyện vọng...</div>
+                                        </td>
+                                        <td>
+                                            <span th:class="${dk.dienUuTien != null and dk.dienUuTien != 'Không ưu tiên'} ? 'badge bg-warning text-dark' : 'badge bg-light text-secondary'"
+                                                  th:text="${dk.dienUuTien != null ? dk.dienUuTien : 'Không ưu tiên'}"></span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                <!-- Ảnh thẻ SV -->
+                                                <a th:if="${dk.anhTheSinhVien != null and !dk.anhTheSinhVien.isEmpty()}" 
+                                                   th:href="${dk.anhTheSinhVien}" target="_blank" 
+                                                   class="btn btn-outline-primary btn-sm p-1" title="Xem Thẻ Sinh Viên">
+                                                    <i class="fa-solid fa-id-badge"></i> Thẻ
+                                                </a>
+                                                <!-- Ảnh CCCD -->
+                                                <a th:if="${dk.anhCccd != null and !dk.anhCccd.isEmpty()}" 
+                                                   th:href="${dk.anhCccd}" target="_blank" 
+                                                   class="btn btn-outline-secondary btn-sm p-1" title="Xem CCCD">
+                                                    <i class="fa-solid fa-address-card"></i> CCCD
+                                                </a>
+                                                <!-- Ảnh Ưu tiên -->
+                                                <a th:if="${dk.anhMinhChungUuTien != null and !dk.anhMinhChungUuTien.isEmpty()}" 
+                                                   th:href="${dk.anhMinhChungUuTien}" target="_blank" 
+                                                   class="btn btn-outline-warning btn-sm p-1 text-dark" title="Xem Giấy Ưu Tiên">
+                                                    <i class="fa-solid fa-file-image"></i> Ưu tiên
+                                                </a>
+                                                <span th:if="${dk.anhTheSinhVien == null and dk.anhCccd == null and dk.anhMinhChungUuTien == null}" class="text-muted small">Không đính kèm</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span th:if="${dk.trangThai == 'Chờ duyệt'}" class="badge bg-warning text-dark"><i class="fa-solid fa-clock me-1"></i>Chờ duyệt</span>
+                                            <span th:if="${dk.trangThai == 'Đã duyệt'}" class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Đã duyệt</span>
+                                            <span th:if="${dk.trangThai == 'Từ chối'}" class="badge bg-danger"><i class="fa-solid fa-xmark me-1"></i>Từ chối</span>
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <div th:if="${dk.trangThai == 'Chờ duyệt'}" class="d-inline-flex gap-1">
+                                                <a th:href="@{/quansinh/dang-ky/duyet/{id}(id=${dk.maDangKy})}" 
+                                                   class="btn btn-sm btn-success fw-semibold" title="Phân phòng & Gửi email chúc mừng">
+                                                    <i class="fa-solid fa-check me-1"></i>Duyệt
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                        data-bs-toggle="modal" 
+                                                        th:data-bs-target="'#rejectModal' + ${dk.maDangKy}" title="Từ chối hồ sơ">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </button>
+                                            </div>
+                                            <div th:if="${dk.trangThai != 'Chờ duyệt'}" class="text-muted small">
+                                                <span th:if="${dk.sinhVien != null}">Cư dân: <strong th:text="${dk.sinhVien.maSV}"></strong></span>
+                                                <span th:if="${dk.trangThai == 'Từ chối' and dk.lyDoTuChoi != null}" class="d-block text-danger small" th:text="${dk.lyDoTuChoi}"></span>
+                                            </div>
+
+                                            <!-- MODAL TỪ CHỐI -->
+                                            <div class="modal fade text-start" th:id="'rejectModal' + ${dk.maDangKy}" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <form th:action="@{/quansinh/dang-ky/tu-choi/{id}(id=${dk.maDangKy})}" method="post">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-circle-exclamation me-2"></i>Từ chối hồ sơ đăng ký</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p class="small text-muted mb-2">Hệ thống sẽ cập nhật trạng thái "Từ chối" và <strong>tự động gửi email thông báo lý do</strong> đến sinh viên <strong th:text="${dk.hoTen}"></strong> (<span th:text="${dk.email}"></span>).</p>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-semibold small">Lý do từ chối cụ thể <span class="text-danger">*</span></label>
+                                                                    <textarea class="form-control" name="lyDoTuChoi" rows="3" required placeholder="Ví dụ: Phòng đăng ký đã hết chỗ đợt này; Minh chứng sinh viên không rõ nét; Giấy tờ ưu tiên quá hạn..."></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                                                                <button type="submit" class="btn btn-danger btn-sm fw-semibold">
+                                                                    <i class="fa-solid fa-paper-plane me-1"></i>Xác nhận & Gửi mail từ chối
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(dangKyList)}">
+                                        <td colspan="8" class="text-center text-muted py-5">
+                                            <i class="fa-regular fa-folder-open fa-3x mb-3 text-secondary"></i>
+                                            <div>Không có hồ sơ đăng ký nào phù hợp với bộ lọc</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGINATION -->
+                <div th:replace="~{fragments/pagination :: pagination(pageObj=${dangKyPage}, url='/quansinh/dang-ky', queryParams=${queryParams})}"></div>
+
             </div>
         </div>
     </div>

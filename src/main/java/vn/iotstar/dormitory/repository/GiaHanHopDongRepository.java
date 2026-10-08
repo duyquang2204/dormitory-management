@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GiaHanHopDongRepository extends JpaRepository<GiaHanHopDong, String> {
+    java.util.List<GiaHanHopDong> findByHopDong_MaHopDong(String maHopDong);
 }
