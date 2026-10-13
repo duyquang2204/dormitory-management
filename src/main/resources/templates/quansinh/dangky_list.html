@@ -150,7 +150,7 @@
                                                 </button>
                                             </div>
                                             <div th:if="${dk.trangThai != 'Chờ duyệt'}" class="text-muted small">
-                                                <span th:if="${dk.sinhVien != null}">Cư dân: <strong th:text="${dk.sinhVien.maSV}"></strong></span>
+                                                <span th:if="${dk.sinhVien != null}">Mã SV: <strong th:text="${dk.sinhVien.maSV}"></strong></span>
                                                 <span th:if="${dk.trangThai == 'Từ chối' and dk.lyDoTuChoi != null}" class="d-block text-danger small" th:text="${dk.lyDoTuChoi}"></span>
                                             </div>
 

@@ -126,7 +126,7 @@ public class EmailService {
 
                     <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; border: 1px solid #bbdefb; margin: 15px 0;">
                         <h4 style="color: #1565c0; margin-top: 0; margin-bottom: 10px;">🔑 TÀI KHOẢN ĐĂNG NHẬP HỆ THỐNG:</h4>
-                        <p style="margin: 4px 0;">&bull; <strong>Mã cư dân (Tên đăng nhập):</strong> <span style="font-weight: bold; color: #0d47a1;">%s</span></p>
+                        <p style="margin: 4px 0;">&bull; <strong>Tên đăng nhập (Mã SV):</strong> <span style="font-weight: bold; color: #0d47a1;">%s</span></p>
                         <p style="margin: 4px 0;">&bull; <strong>Mật khẩu khởi tạo:</strong> <span style="font-weight: bold; color: #d32f2f;">%s</span></p>
                         <p style="margin: 4px 0; font-size: 13px; color: #666;"><em>(Vui lòng đăng nhập vào hệ thống và đổi mật khẩu cá nhân ở lần đầu tiên)</em></p>
                     </div>

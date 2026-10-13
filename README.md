@@ -21,9 +21,9 @@ Hệ thống Quản lý Ký túc xá Thông minh được xây dựng trên nề
 
 ## 🌟 ĐIỂM NHẤN NỔI BẬT CỦA HỆ THỐNG
 
-- 🚀 **Số hóa quy trình tiếp nhận 100% trực tuyến:** Sinh viên ở bất kỳ trường ĐH nào cũng có thể nộp đơn online, tải ảnh thẻ sinh viên, CCCD và giấy tờ ưu tiên lên đám mây Cloudinary. Mã sinh viên cư dân được tự động sinh theo mẫu chuẩn (`SVxxxxxx`).
+- 🚀 **Số hóa quy trình tiếp nhận 100% trực tuyến:** Sinh viên ở bất kỳ trường ĐH nào cũng có thể nộp đơn online, tải ảnh thẻ sinh viên, CCCD và giấy tờ ưu tiên lên đám mây Cloudinary. Mã sinh viên được tự động sinh theo mẫu chuẩn (`SVxxxxxx`).
 - 🎓 **Hồ sơ sinh viên linh hoạt & Tự bổ sung Trường/Khoa:** Cho phép sinh viên chủ động cập nhật, bổ sung tên Trường Đại học và Khoa/Chuyên ngành trên trang cá nhân nếu Ban Quản Lý chưa điền, đồng bộ tức thời với cơ sở dữ liệu.
-- 🔐 **Xác thực bảo mật đa tầng:** Mã hóa mật khẩu một chiều với **BCrypt**, cơ chế gửi mã OTP 6 số qua Email (SMTP Gmail) khi kích hoạt tài khoản cư dân và đặt lại mật khẩu.
+- 🔐 **Xác thực bảo mật đa tầng:** Mã hóa mật khẩu một chiều với **BCrypt**, cơ chế gửi mã OTP 6 số qua Email (SMTP Gmail) khi kích hoạt tài khoản sinh viên và đặt lại mật khẩu.
 - 🔔 **Thông báo đẩy tức thời (Real-time Push Notification):** Kiến trúc WebSocket STOMP qua SockJS, tự động nhảy số chuông và hiển thị popup Toast ngay khi có cập nhật mà không cần tải lại trang.
 - 💬 **Live Chat Trực Tuyến Đa Nền Tảng (Sinh viên & Quản sinh):** 
   - Widget chat nổi dạng viên thuốc (Pill Button) cố định ở góc dưới bên phải màn hình cho cả **Sinh viên ("Chat với BQL")** và **Quản sinh ("Tin nhắn SV")**.
@@ -68,8 +68,8 @@ Hệ thống tích hợp sẵn cơ chế **DataSeeder tự động**. Khi chạy
 |---|---|---|---|---|
 | **Quản trị viên (Admin)** | `admin` | `123456` | `ROLE_QUAN_TRI` | Giám đốc KTX: Thống kê doanh thu, quản lý tài khoản nhân sự |
 | **Quản sinh (Manager)** | `quansinh` | `123456` | `ROLE_QUAN_SINH` | Cán bộ quản lý: Duyệt hồ sơ online, phân phòng, lập hóa đơn, chat với SV |
-| **Nhân viên kỹ thuật (Staff)** | `nhanvien` | `123456` | `ROLE_NHAN_VIEN` | Kỹ thuật viên: Tiếp nhận sửa chữa phòng, chụp ảnh nghiệm thu hoàn thành |
-| **Sinh viên cư dân (Student)** | `SV001` | `123456` | `ROLE_SINH_VIEN` | Sinh viên nội trú: Xem phòng, tải hợp đồng PDF, thanh toán VNPAY, live chat |
+| **Nhân viên sửa chữa (Staff)** | `nhanvien` | `123456` | `ROLE_NHAN_VIEN` | Thợ sửa chữa: Tiếp nhận sửa chữa phòng, chụp ảnh nghiệm thu hoàn thành |
+| **Sinh viên nội trú (Student)** | `SV001` | `123456` | `ROLE_SINH_VIEN` | Sinh viên nội trú: Xem phòng, tải hợp đồng PDF, thanh toán VNPAY, live chat |
 
 > 📌 **Ghi chú tài khoản Sinh viên:**  
 > - Sinh viên mới đăng ký online hoặc được duyệt hồ sơ sẽ có tên đăng nhập chính là **Mã Sinh Viên** (VD: `SV001`, `SV3625958`), mật khẩu mặc định là `123456` (hoặc mật khẩu do sinh viên tạo qua trang `/register`).
@@ -114,10 +114,10 @@ Khi thực hiện thanh toán hóa đơn bằng cổng **VNPAY**, sử dụng th
 
 ---
 
-### 1. Sinh Viên Cư Dân (Student - `/sinhvien/**`)
-- **Dashboard Cư Dân:** Thẻ thông tin phòng đang ở, số hóa đơn chưa thanh toán, lịch sử vi phạm, thông báo mới.
+### 1. Sinh Viên Nội Trú (Student - `/sinhvien/**`)
+- **Dashboard Sinh Viên:** Thẻ thông tin phòng đang ở, số hóa đơn chưa thanh toán, lịch sử vi phạm, thông báo mới.
 - **Hồ Sơ Cá Nhân (`/sinhvien/profile`):** 
-  - Xem thông tin cư dân, CCCD, giới tính, tình trạng phòng ở.
+  - Xem thông tin sinh viên, CCCD, giới tính, tình trạng phòng ở.
   - Cập nhật số điện thoại, email, quê quán, địa chỉ thường trú, thông tin phụ huynh liên hệ khẩn cấp.
   - **Bổ sung Trường Đại học & Khoa:** Cho phép sinh viên tự điền/bổ sung tên trường và khoa nếu Quản sinh chưa nhập khi lập hồ sơ.
 - **Thông Tin Phòng Ở & Hợp Đồng (`/sinhvien/phong`):**
@@ -163,7 +163,7 @@ Khi thực hiện thanh toán hóa đơn bằng cổng **VNPAY**, sử dụng th
 
 ---
 
-### 3. Nhân Viên Kỹ Thuật (Staff - `/nhanvien/**`)
+### 3. Nhân Viên Sửa Chữa (Staff - `/nhanvien/**`)
 - **Dashboard Công Việc:** Xem danh sách sự cố hư hỏng phòng được Quản sinh phân công.
 - **Báo Cáo Nghiệm Thu Hoàn Thành:** Ghi chú nội dung công việc và linh kiện thay thế, chụp và tải lên **ảnh minh chứng sau khi sửa xong** (Cloudinary).
 - **Thông Báo Giao Việc:** Nhận thông báo tức thời ngay khi có công việc mới hoặc công việc bị hủy.
@@ -359,7 +359,7 @@ dormitory-management/
 │   │       │   ├── guest/          # Giao diện Tra cứu phòng, Tra cứu hồ sơ, Nộp đơn online
 │   │       │   ├── quansinh/       # Giao diện Quản sinh & Trung tâm Live Chat (/quansinh/chat)
 │   │       │   ├── sinhvien/       # Giao diện Sinh viên nội trú
-│   │       │   ├── nhanvien/       # Giao diện Nhân viên kỹ thuật sửa chữa
+│   │       │   ├── nhanvien/       # Giao diện Nhân viên sửa chữa
 │   │       │   ├── fragments/      # Header (WebSocket Toast), Sidebar, Chat Widget, Pagination
 │   │       │   ├── home.html       # Landing page giới thiệu KTX
 │   │       │   ├── login.html      # Trang đăng nhập hệ thống

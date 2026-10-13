@@ -111,9 +111,9 @@ public class SinhVienService {
         if (sv.getEmail() != null && !sv.getEmail().trim().isEmpty()) {
             String subject = "Thông báo: Xóa hồ sơ tài khoản Ký túc xá";
             String htmlContent = "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px;'>"
-                + "<h2 style='color: #dc3545; margin-top: 0;'>Thông Báo Xóa Hồ Sơ Cư Dân Ký Túc Xá</h2>"
+                + "<h2 style='color: #dc3545; margin-top: 0;'>Thông Báo Xóa Hồ Sơ Sinh Viên Ký Túc Xá</h2>"
                 + "<p>Chào <strong>" + sv.getHoTen() + "</strong> (MSSV: <strong>" + sv.getMaSV() + "</strong>),</p>"
-                + "<p>Ban Quản lý Ký túc xá xin thông báo: Hồ sơ và tài khoản cư dân của bạn đã được Quản sinh xóa khỏi hệ thống Ký túc xá.</p>"
+                + "<p>Ban Quản lý Ký túc xá xin thông báo: Hồ sơ và tài khoản sinh viên của bạn đã được Quản sinh xóa khỏi hệ thống Ký túc xá.</p>"
                 + "<div style='background-color: #f8f9fa; border-left: 4px solid #dc3545; padding: 12px; margin: 16px 0;'>"
                 + "<p style='margin: 0;'><strong>Thông tin chi tiết:</strong></p>"
                 + "<ul style='margin: 8px 0 0 0; padding-left: 20px;'>"
@@ -345,7 +345,7 @@ public class SinhVienService {
         
         // Gửi email thông báo tài khoản nếu là sinh viên mới tạo và có email
         if (isNew && sv.getEmail() != null && !sv.getEmail().isEmpty()) {
-            String subject = "Thông báo: Tài khoản cư dân Ký túc xá";
+            String subject = "Thông báo: Tài khoản sinh viên Ký túc xá";
             String body = "Chào " + sv.getHoTen() + ",\n\n" +
                           "Hồ sơ của bạn đã được khởi tạo tài khoản trên hệ thống Ký túc xá.\n" +
                           "Dưới đây là thông tin đăng nhập hệ thống:\n" +
