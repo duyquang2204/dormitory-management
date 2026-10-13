@@ -40,7 +40,7 @@ public class EmailService {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            helper.setFrom("Hệ Thống KTX Tư Nhân <duyquang22042005@gmail.com>");
+            helper.setFrom("Hệ Thống KTX Sinh Viên <duyquang22042005@gmail.com>");
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlContent, true);
@@ -56,7 +56,7 @@ public class EmailService {
         String content = """
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 25px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #fbfbfb;">
                 <div style="text-align: center; border-bottom: 2px solid #198754; padding-bottom: 15px;">
-                    <h2 style="color: #198754; margin: 0;">🏢 HỆ THỐNG KÝ TÚC XÁ TƯ NHÂN</h2>
+                    <h2 style="color: #198754; margin: 0;">🏢 HỆ THỐNG KÝ TÚC XÁ SINH VIÊN</h2>
                     <p style="color: #666; font-size: 13px; margin: 5px 0 0 0;">An toàn - Tiện nghi - Đồng hành cùng Sinh viên</p>
                 </div>
                 <div style="padding: 25px 0;">
@@ -69,7 +69,7 @@ public class EmailService {
                     <p style="font-size: 14px; color: #555; margin-top: 20px;">Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.</p>
                 </div>
                 <div style="border-top: 1px solid #e0e0e0; padding-top: 15px; text-align: center; font-size: 12px; color: #888;">
-                    Ban Quản lý Ký túc xá tư nhân cao cấp &bull; Hotline: 1900 6868 &bull; Email: hotro@ktx-housing.vn
+                    Ban Quản lý Ký túc xá sinh viên &bull; Hotline: 1900 6868 &bull; Email: hotro@ktx-housing.vn
                 </div>
             </div>
             """.formatted(purpose, otpCode);
@@ -85,7 +85,7 @@ public class EmailService {
                 </div>
                 <div style="padding: 20px 0; font-size: 15px; color: #333;">
                     <p>Kính gửi bạn <strong>%s</strong>,</p>
-                    <p>Hệ thống Ký túc xá tư nhân đã nhận được hồ sơ đăng ký lưu trú trực tuyến của bạn.</p>
+                    <p>Hệ thống Ký túc xá sinh viên đã nhận được hồ sơ đăng ký lưu trú trực tuyến của bạn.</p>
                     <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #0d6efd; margin: 15px 0;">
                         <p style="margin: 5px 0;"><strong>Mã hồ sơ:</strong> <span style="color: #0d6efd; font-weight: bold;">%s</span></p>
                         <p style="margin: 5px 0;"><strong>Trạng thái:</strong> <span style="color: #ffc107; font-weight: bold; background: #333; padding: 2px 8px; border-radius: 4px;">Chờ duyệt</span></p>
@@ -94,7 +94,7 @@ public class EmailService {
                     <p>Ban Quản lý sẽ thẩm tra thông tin và kiểm tra minh chứng sinh viên của bạn. Kết quả phân phòng sẽ được gửi qua email này ngay khi hoàn tất.</p>
                 </div>
                 <div style="border-top: 1px solid #e0e0e0; padding-top: 15px; text-align: center; font-size: 12px; color: #888;">
-                    Ban Quản lý Ký túc xá tư nhân cao cấp &bull; Hotline: 1900 6868
+                    Ban Quản lý Ký túc xá sinh viên &bull; Hotline: 1900 6868
                 </div>
             </div>
             """.formatted(hoTen, maDangKy);
@@ -105,7 +105,7 @@ public class EmailService {
                                    String soPhong, String tenKhu, String loaiPhong, Double giaPhong, LocalDate ngayBatDau) {
         String formattedGia = giaPhong != null ? NumberFormat.getNumberInstance(Locale.GERMANY).format(giaPhong) + " VNĐ/tháng" : "Theo quy định";
         String formattedNgay = ngayBatDau != null ? ngayBatDau.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "Ngay hôm nay";
-        String subject = "🎉 CHÚC MỪNG BẠN ĐÃ TRÚNG TUYỂN KÝ TÚC XÁ TƯ NHÂN";
+        String subject = "🎉 CHÚC MỪNG BẠN ĐÃ TRÚNG TUYỂN KÝ TÚC XÁ SINH VIÊN";
         String content = """
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 25px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #ffffff;">
                 <div style="text-align: center; border-bottom: 3px solid #198754; padding-bottom: 15px;">
@@ -140,7 +140,7 @@ public class EmailService {
                     </div>
                 </div>
                 <div style="border-top: 1px solid #e0e0e0; padding-top: 15px; text-align: center; font-size: 12px; color: #888;">
-                    Ban Quản lý Ký túc xá tư nhân cao cấp &bull; Hotline hỗ trợ: 1900 6868
+                    Ban Quản lý Ký túc xá sinh viên &bull; Hotline hỗ trợ: 1900 6868
                 </div>
             </div>
             """.formatted(hoTen, soPhong, tenKhu, loaiPhong, formattedGia, formattedNgay, maSV, matKhau);
@@ -166,7 +166,7 @@ public class EmailService {
                     <p style="font-size: 14px; color: #555;">Bạn có thể liên hệ lại Ban Quản lý để được hỗ trợ chuyển đổi sang loại phòng khác hoặc đăng ký vào danh sách chờ đợt sau.</p>
                 </div>
                 <div style="border-top: 1px solid #e0e0e0; padding-top: 15px; text-align: center; font-size: 12px; color: #888;">
-                    Ban Quản lý Ký túc xá tư nhân cao cấp &bull; Hotline: 1900 6868 &bull; Email: hotro@ktx-housing.vn
+                    Ban Quản lý Ký túc xá sinh viên &bull; Hotline: 1900 6868 &bull; Email: hotro@ktx-housing.vn
                 </div>
             </div>
             """.formatted(hoTen, (lyDo != null && !lyDo.isEmpty() ? lyDo : "Phòng đăng ký đã hết chỗ hoặc hồ sơ chưa đáp ứng tiêu chí."));

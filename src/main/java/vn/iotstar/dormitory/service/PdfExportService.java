@@ -100,7 +100,7 @@ public class PdfExportService {
         tableA.setWidths(new float[]{30f, 70f});
         tableA.setSpacingAfter(10);
 
-        addTableRow(tableA, "Đại diện cơ sở:", "Ban Quản Lý Ký Túc Xá Tư Nhân Sinh Viên", boldFont, normalFont);
+        addTableRow(tableA, "Đại diện cơ sở:", "Ban Quản Lý Ký Túc Xá Sinh Viên", boldFont, normalFont);
         addTableRow(tableA, "Địa chỉ:", "Khu đô thị Đại học, TP. Hồ Chí Minh", boldFont, normalFont);
         addTableRow(tableA, "Hotline hỗ trợ:", "028.3896.8888 - 0909.123.456", boldFont, normalFont);
         addTableRow(tableA, "Email liên hệ:", "dormitory.mgmt.system@gmail.com", boldFont, normalFont);

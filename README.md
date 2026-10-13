@@ -1,6 +1,6 @@
-# 🏢 HỆ THỐNG QUẢN LÝ KÝ TÚC XÁ TƯ NHÂN (SMART DORMITORY MANAGEMENT SYSTEM)
+# 🏢 HỆ THỐNG QUẢN LÝ KÝ TÚC XÁ SINH VIÊN (SMART DORMITORY MANAGEMENT SYSTEM)
 
-Hệ thống Quản lý Ký túc xá Thông minh được xây dựng trên nền tảng **Java 21 LTS**, **Spring Boot 3.x**, **Spring Security 6** và **Thymeleaf**, áp dụng kiến trúc MVC chuẩn mực. Hệ thống định hướng phát triển theo mô hình **Ký túc xá Tư nhân Cao cấp** dành riêng cho sinh viên các trường Đại học và Cao đẳng. Toàn bộ quy trình từ khâu tìm hiểu, đăng ký phòng, xét duyệt, thanh toán, hợp đồng, phản ánh sự cố cho đến hỗ trợ trực tuyến đều được **số hóa 100% trên nền tảng web**, loại bỏ hoàn toàn các thủ tục giấy tờ truyền thống.
+Hệ thống Quản lý Ký túc xá Thông minh được xây dựng trên nền tảng **Java 21 LTS**, **Spring Boot 3.x**, **Spring Security 6** và **Thymeleaf**, áp dụng kiến trúc MVC chuẩn mực. Hệ thống định hướng phát triển theo mô hình **Ký túc xá Sinh viên Hiện đại** dành riêng cho sinh viên các trường Đại học và Cao đẳng. Toàn bộ quy trình từ khâu tìm hiểu, đăng ký phòng, xét duyệt, thanh toán, hợp đồng, phản ánh sự cố cho đến hỗ trợ trực tuyến đều được **số hóa 100% trên nền tảng web**, loại bỏ hoàn toàn các thủ tục giấy tờ truyền thống.
 
 ---
 
@@ -100,7 +100,7 @@ Khi thực hiện thanh toán hóa đơn bằng cổng **VNPAY**, sử dụng th
 ## 🌟 TOÀN BỘ CHỨC NĂNG PHÂN THEO 5 VAI TRÒ
 
 ### 0. Khách Vãng Lai & Người Dùng Chưa Đăng Nhập (Guest)
-- **Trang chủ KTX (`/` và `/home`):** Giới thiệu mô hình KTX tư nhân cao cấp, tiêu chuẩn phòng ở, an ninh 24/7, không gian tự học.
+- **Trang chủ KTX (`/` và `/home`):** Giới thiệu mô hình KTX sinh viên hiện đại, tiêu chuẩn phòng ở, an ninh 24/7, không gian tự học.
 - **Bảng giá & Các loại phòng:** Chi tiết các loại phòng (phòng 4 người, phòng 6 người, phòng 8 người), đơn giá lưu trú, hình ảnh và trang thiết bị.
 - **Tra cứu phòng trống trực tuyến (`/tra-cuu-phong`):** Bộ lọc đa năng theo Tòa/Khu (Khu Nam, Khu Nữ), loại phòng, trạng thái phòng còn chỗ.
 - **Nộp đơn đăng ký ở KTX Online 100% (`/nop-don`):**
@@ -429,4 +429,4 @@ Toàn bộ các luồng nghiệp vụ từ Guest, Xác thực OTP, Sinh viên, Q
 
 ---
 
-*Dự án Hệ thống Quản lý Ký túc xá Tư nhân Thông minh - Giải pháp số hóa toàn diện cho công tác quản lý và nâng cao chất lượng cuộc sống sinh viên.*
+*Dự án Hệ thống Quản lý Ký túc xá Sinh Viên Thông Minh - Giải pháp số hóa toàn diện cho công tác quản lý và nâng cao chất lượng cuộc sống sinh viên.*
