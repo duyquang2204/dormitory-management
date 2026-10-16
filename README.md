@@ -69,10 +69,12 @@ Hệ thống tích hợp sẵn cơ chế **DataSeeder tự động**. Khi chạy
 | **Quản trị viên (Admin)** | `admin` | `123456` | `ROLE_QUAN_TRI` | Giám đốc KTX: Thống kê doanh thu, quản lý tài khoản nhân sự |
 | **Quản sinh (Manager)** | `quansinh` | `123456` | `ROLE_QUAN_SINH` | Cán bộ quản lý: Duyệt hồ sơ online, phân phòng, lập hóa đơn, chat với SV |
 | **Nhân viên sửa chữa (Staff)** | `nhanvien` | `123456` | `ROLE_NHAN_VIEN` | Thợ sửa chữa: Tiếp nhận sửa chữa phòng, chụp ảnh nghiệm thu hoàn thành |
-| **Sinh viên nội trú (Student)** | `SV001` | `123456` | `ROLE_SINH_VIEN` | Sinh viên nội trú: Xem phòng, tải hợp đồng PDF, thanh toán VNPAY, live chat |
+| **Sinh viên nội trú (Student 1)** | `SV0001` | `123456` | `ROLE_SINH_VIEN` | Sinh viên Nguyễn Duy Quang: Xem phòng, tải hợp đồng PDF, thanh toán VNPAY, live chat |
+| **Sinh viên nội trú (Student 2)** | `SV0002` | `123456` | `ROLE_SINH_VIEN` | Sinh viên Nguyễn Quang Duy: Xem phòng, tải hợp đồng PDF, thanh toán VNPAY, live chat |
 
 > 📌 **Ghi chú tài khoản Sinh viên:**  
-> - Sinh viên mới đăng ký online hoặc được duyệt hồ sơ sẽ có tên đăng nhập chính là **Mã Sinh Viên** (VD: `SV001`, `SV3625958`), mật khẩu mặc định là `123456` (hoặc mật khẩu do sinh viên tạo qua trang `/register`).
+> - Sinh viên mẫu có sẵn trong hệ thống gồm **`SV0001`** và **`SV0002`** (mật khẩu mặc định: `123456`).
+> - Sinh viên mới đăng ký online hoặc được duyệt hồ sơ sẽ có tên đăng nhập chính là **Mã Sinh Viên** (VD: `SV3625958`, `SV202401`), mật khẩu do sinh viên tạo hoặc được cấp tự động qua Email.
 > - Có thể đổi mật khẩu bất kỳ lúc nào tại mục *Đổi mật khẩu* hoặc dùng tính năng *Quên mật khẩu* qua Email OTP.
 
 ---
