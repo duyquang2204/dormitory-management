@@ -7,8 +7,8 @@
          - url: The base URL for pagination (e.g. '/quansinh/phong')
          - queryParams: Additional query parameters as a string (e.g. '&maKhu=' + ${maKhu})
     -->
-    <div th:fragment="pagination(pageObj, url, queryParams)" th:if="${pageObj != null and pageObj.totalPages > 1}" class="mt-4">
-        <nav aria-label="Page navigation">
+    <div th:fragment="pagination(pageObj, url, queryParams)" th:if="${pageObj != null and pageObj.totalElements > 0}" class="mt-4">
+        <nav aria-label="Page navigation" th:if="${pageObj.totalPages > 1}">
             <ul class="pagination justify-content-center shadow-xs flex-wrap gap-1">
                 <!-- First Page -->
                 <li class="page-item" th:classappend="${pageObj.first ? 'disabled' : ''}">

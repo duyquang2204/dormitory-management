@@ -70,17 +70,17 @@
                 <div class="card shadow-sm border-0 rounded-3">
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                            <table class="table table-hover align-middle mb-0 table-dang-ky" style="min-width: 1180px;">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="ps-3">Mã ĐK / Ngày</th>
-                                        <th>Sinh Viên</th>
-                                        <th>Trường ĐH & Khoa</th>
-                                        <th>Nguyện Vọng</th>
-                                        <th>Ưu Tiên</th>
-                                        <th>Minh Chứng</th>
-                                        <th>Trạng Thái</th>
-                                        <th class="text-end pe-3">Thao Tác</th>
+                                        <th class="ps-3" style="min-width: 130px;">Mã ĐK / Ngày</th>
+                                        <th style="min-width: 220px;">Sinh Viên</th>
+                                        <th style="min-width: 190px;">Trường ĐH & Khoa</th>
+                                        <th style="min-width: 170px;">Nguyện Vọng</th>
+                                        <th style="min-width: 120px;">Ưu Tiên</th>
+                                        <th style="min-width: 170px;">Minh Chứng</th>
+                                        <th style="min-width: 130px;">Trạng Thái</th>
+                                        <th class="text-end pe-3" style="min-width: 150px;">Thao Tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -137,7 +137,7 @@
                                             <span th:if="${dk.trangThai == 'Đã duyệt'}" class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Đã duyệt</span>
                                             <span th:if="${dk.trangThai == 'Từ chối'}" class="badge bg-danger"><i class="fa-solid fa-xmark me-1"></i>Từ chối</span>
                                         </td>
-                                        <td class="text-end pe-3">
+                                        <td class="text-end pe-3 text-nowrap">
                                             <div th:if="${dk.trangThai == 'Chờ duyệt'}" class="d-inline-flex gap-1">
                                                 <a th:href="@{/quansinh/dang-ky/duyet/{id}(id=${dk.maDangKy})}" 
                                                    class="btn btn-sm btn-success fw-semibold" title="Phân phòng & Gửi email chúc mừng">

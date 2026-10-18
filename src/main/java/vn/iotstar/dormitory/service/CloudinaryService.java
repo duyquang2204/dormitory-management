@@ -26,7 +26,8 @@ public class CloudinaryService {
         try {
             if (cloudName != null && !cloudName.trim().isEmpty()) {
                 Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-                return uploadResult.get("url").toString();
+                Object secureUrl = uploadResult.get("secure_url");
+                return secureUrl != null ? secureUrl.toString() : uploadResult.get("url").toString();
             } else {
                 String uploadDirStr = "uploads/";
                 java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDirStr);

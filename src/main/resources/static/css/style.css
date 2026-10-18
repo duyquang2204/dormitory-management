@@ -677,4 +677,67 @@ h1, h2, h3, h4, h5, h6 {
     60% { transform: scale(1); }
 }
 
+/* Floating Draggable Chat Button */
+.chat-floating-btn {
+    cursor: grab !important;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+.chat-floating-btn:active,
+.chat-floating-btn.is-dragging {
+    cursor: grabbing !important;
+}
+.chat-drag-grip {
+    opacity: 0.65;
+    transition: opacity 0.2s ease;
+}
+.chat-floating-btn:hover .chat-drag-grip {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   LAYOUT & HORIZONTAL SCROLLBAR FOR DATA TABLES
+   ========================================================================== */
+/* Ngăn flex child tràn màn hình làm mất thanh cuộn ngang */
+.row > .col-md-10,
+.row > .col-lg-10 {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+/* Đảm bảo table-responsive luôn cuộn mượt và hiện thanh kéo rõ nét */
+.table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #94a3b8 #f1f5f9;
+}
+
+/* Thanh cuộn ngang tùy biến: to hơn (9px), nổi bật, dễ bấm kéo */
+.table-responsive::-webkit-scrollbar {
+    height: 9px !important;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 6px;
+    margin: 0 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 6px;
+    border: 2px solid #f1f5f9;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Bảng xét duyệt đăng ký phòng */
+.table-dang-ky {
+    min-width: 1180px;
+}
+
 

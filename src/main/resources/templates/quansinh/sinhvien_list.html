@@ -39,48 +39,50 @@
 
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Mã SV</th>
-                                    <th>Họ tên</th>
-                                    <th>Trạng thái</th>
-                                    <th>Giới tính</th>
-                                    <th>Khoa</th>
-                                    <th>Năm học</th>
-                                    <th>SĐT</th>
-                                    <th>Email</th>
-                                    <th>Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="sv : ${sinhVienPage.content}">
-                                    <td th:text="${sv.maSV}"></td>
-                                    <td class="fw-bold" th:text="${sv.hoTen}"></td>
-                                    <td>
-                                        <span th:class="${trangThaiMap.get(sv.maSV) == 'Chờ xếp phòng' ? 'badge bg-secondary text-white' : 'badge bg-success text-white'}" 
-                                              th:text="${trangThaiMap.get(sv.maSV)}"></span>
-                                    </td>
-                                    <td th:text="${sv.gioiTinh}"></td>
-                                    <td th:text="${sv.khoa}"></td>
-                                    <td th:text="${sv.namHoc}"></td>
-                                    <td th:text="${sv.sdt}"></td>
-                                    <td th:text="${sv.email}"></td>
-                                    <td>
-                                        <div class="d-flex gap-1">
-                                            <a th:href="@{/quansinh/phong/phan-nhanh/{id}(id=${sv.maSV})}" class="btn btn-sm btn-outline-success" title="Xếp phòng"><i class="fas fa-bed"></i></a>
-                                            <a th:href="@{/quansinh/sinhvien/sua/{id}(id=${sv.maSV})}" class="btn btn-sm btn-outline-primary" title="Sửa"><i class="fas fa-edit"></i></a>
-                                            <form th:action="@{/quansinh/sinhvien/xoa/{id}(id=${sv.maSV})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sinh viên này không? Hệ thống sẽ xóa sạch dữ liệu liên quan và gửi email thông báo tới sinh viên.');">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="fas fa-trash"></i></button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr th:if="${#lists.isEmpty(sinhVienPage.content)}">
-                                    <td colspan="9" class="text-center text-muted py-3">Không tìm thấy sinh viên nào</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" style="min-width: 900px;">
+                                <thead>
+                                    <tr>
+                                        <th>Mã SV</th>
+                                        <th>Họ tên</th>
+                                        <th>Trạng thái</th>
+                                        <th>Giới tính</th>
+                                        <th>Khoa</th>
+                                        <th>Năm học</th>
+                                        <th>SĐT</th>
+                                        <th>Email</th>
+                                        <th class="text-center text-nowrap" style="min-width: 120px;">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="sv : ${sinhVienPage.content}">
+                                        <td th:text="${sv.maSV}"></td>
+                                        <td class="fw-bold" th:text="${sv.hoTen}"></td>
+                                        <td>
+                                            <span th:class="${trangThaiMap.get(sv.maSV) == 'Chờ xếp phòng' ? 'badge bg-secondary text-white' : 'badge bg-success text-white'}" 
+                                                  th:text="${trangThaiMap.get(sv.maSV)}"></span>
+                                        </td>
+                                        <td th:text="${sv.gioiTinh}"></td>
+                                        <td th:text="${sv.khoa}"></td>
+                                        <td th:text="${sv.namHoc}"></td>
+                                        <td th:text="${sv.sdt}"></td>
+                                        <td th:text="${sv.email}"></td>
+                                        <td class="text-nowrap">
+                                            <div class="d-flex gap-1 justify-content-center">
+                                                <a th:href="@{/quansinh/phong/phan-nhanh/{id}(id=${sv.maSV})}" class="btn btn-sm btn-outline-success" title="Xếp phòng"><i class="fas fa-bed"></i></a>
+                                                <a th:href="@{/quansinh/sinhvien/sua/{id}(id=${sv.maSV})}" class="btn btn-sm btn-outline-primary" title="Sửa"><i class="fas fa-edit"></i></a>
+                                                <form th:action="@{/quansinh/sinhvien/xoa/{id}(id=${sv.maSV})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sinh viên này không? Hệ thống sẽ xóa sạch dữ liệu liên quan và gửi email thông báo tới sinh viên.');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="fas fa-trash"></i></button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(sinhVienPage.content)}">
+                                        <td colspan="9" class="text-center text-muted py-3">Không tìm thấy sinh viên nào</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                         
                         <!-- Pagination Fragment -->
                         <div th:replace="~{fragments/pagination :: pagination(pageObj=${sinhVienPage}, url='/quansinh/sinhvien', queryParams=${keyword != null ? '&keyword=' + keyword : ''})}"></div>

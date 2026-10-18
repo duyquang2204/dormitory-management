@@ -3,15 +3,202 @@
 <body>
 <div th:fragment="chat_widget">
 
+    <!-- Script Kéo Thả Di Chuyển Nút Chat Toàn Cục (Draggable Floating Chat Button) -->
+    <script>
+    function initDraggableChatWidget(containerId, windowId, storageKey) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const btn = container.querySelector('button');
+        const win = document.getElementById(windowId);
+
+        let isDragging = false;
+        let hasMoved = false;
+        let startX = 0, startY = 0;
+        let initialLeft = 0, initialTop = 0;
+
+        // 1. Phục hồi vị trí đã lưu trong localStorage nếu có
+        try {
+            const savedPos = localStorage.getItem(storageKey);
+            if (savedPos) {
+                const pos = JSON.parse(savedPos);
+                const btnW = container.offsetWidth || 180;
+                const btnH = container.offsetHeight || 50;
+                const maxLeft = window.innerWidth - btnW - 12;
+                const maxTop = window.innerHeight - btnH - 12;
+                const clampedLeft = Math.max(12, Math.min(pos.left, maxLeft));
+                const clampedTop = Math.max(12, Math.min(pos.top, maxTop));
+
+                container.style.left = clampedLeft + 'px';
+                container.style.top = clampedTop + 'px';
+                container.style.right = 'auto';
+                container.style.bottom = 'auto';
+            }
+        } catch (e) {}
+
+        if (btn) {
+            btn.classList.add('chat-floating-btn');
+        }
+
+        function onPointerDown(e) {
+            if (e.type === 'mousedown' && e.button !== 0) return;
+
+            isDragging = true;
+            hasMoved = false;
+
+            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+            startX = clientX;
+            startY = clientY;
+
+            const rect = container.getBoundingClientRect();
+            initialLeft = rect.left;
+            initialTop = rect.top;
+
+            if (btn) {
+                btn.classList.add('is-dragging');
+                btn.style.transition = 'none';
+            }
+
+            document.addEventListener('mousemove', onPointerMove, { passive: false });
+            document.addEventListener('mouseup', onPointerUp);
+            document.addEventListener('touchmove', onPointerMove, { passive: false });
+            document.addEventListener('touchend', onPointerUp);
+        }
+
+        function onPointerMove(e) {
+            if (!isDragging) return;
+
+            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+            const deltaX = clientX - startX;
+            const deltaY = clientY - startY;
+
+            if (!hasMoved && (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4)) {
+                hasMoved = true;
+                if (btn) {
+                    btn.style.transform = 'scale(1.04)';
+                    btn.style.opacity = '0.92';
+                }
+            }
+
+            if (hasMoved) {
+                if (e.cancelable) e.preventDefault();
+
+                let newLeft = initialLeft + deltaX;
+                let newTop = initialTop + deltaY;
+
+                const maxLeft = window.innerWidth - container.offsetWidth - 8;
+                const maxTop = window.innerHeight - container.offsetHeight - 8;
+
+                newLeft = Math.max(8, Math.min(newLeft, maxLeft));
+                newTop = Math.max(8, Math.min(newTop, maxTop));
+
+                container.style.left = newLeft + 'px';
+                container.style.top = newTop + 'px';
+                container.style.right = 'auto';
+                container.style.bottom = 'auto';
+
+                if (win && !win.classList.contains('d-none')) {
+                    positionChatPopup(container, win);
+                }
+            }
+        }
+
+        function onPointerUp(e) {
+            if (!isDragging) return;
+            isDragging = false;
+
+            document.removeEventListener('mousemove', onPointerMove);
+            document.removeEventListener('mouseup', onPointerUp);
+            document.removeEventListener('touchmove', onPointerMove);
+            document.removeEventListener('touchend', onPointerUp);
+
+            if (btn) {
+                btn.classList.remove('is-dragging');
+                btn.style.transform = '';
+                btn.style.opacity = '';
+                btn.style.transition = 'box-shadow 0.3s ease';
+            }
+
+            if (hasMoved) {
+                const preventClick = function(ev) {
+                    ev.stopPropagation();
+                    ev.preventDefault();
+                    container.removeEventListener('click', preventClick, true);
+                };
+                container.addEventListener('click', preventClick, true);
+
+                try {
+                    const rect = container.getBoundingClientRect();
+                    localStorage.setItem(storageKey, JSON.stringify({ left: rect.left, top: rect.top }));
+                } catch (err) {}
+            }
+        }
+
+        container.addEventListener('mousedown', onPointerDown);
+        container.addEventListener('touchstart', onPointerDown, { passive: true });
+
+        window.addEventListener('resize', function() {
+            const rect = container.getBoundingClientRect();
+            const maxLeft = window.innerWidth - container.offsetWidth - 8;
+            const maxTop = window.innerHeight - container.offsetHeight - 8;
+            if (rect.left > maxLeft || rect.top > maxTop) {
+                const newLeft = Math.max(8, Math.min(rect.left, maxLeft));
+                const newTop = Math.max(8, Math.min(rect.top, maxTop));
+                container.style.left = newLeft + 'px';
+                container.style.top = newTop + 'px';
+                container.style.right = 'auto';
+                container.style.bottom = 'auto';
+                if (win && !win.classList.contains('d-none')) {
+                    positionChatPopup(container, win);
+                }
+            }
+        });
+    }
+
+    function positionChatPopup(btnContainer, winEl) {
+        if (!btnContainer || !winEl) return;
+        const rect = btnContainer.getBoundingClientRect();
+        const boxWidth = Math.min(380, window.innerWidth - 24);
+        const boxHeight = Math.min(500, window.innerHeight - 100);
+
+        let top;
+        if (rect.top >= boxHeight + 16) {
+            top = rect.top - boxHeight - 12;
+        } else if (window.innerHeight - rect.bottom >= boxHeight + 16) {
+            top = rect.bottom + 12;
+        } else {
+            top = Math.max(12, (window.innerHeight - boxHeight) / 2);
+        }
+
+        let left;
+        if (rect.left + boxWidth <= window.innerWidth - 12) {
+            left = rect.left;
+        } else {
+            left = rect.right - boxWidth;
+        }
+        left = Math.max(12, Math.min(left, window.innerWidth - boxWidth - 12));
+        top = Math.max(12, Math.min(top, window.innerHeight - boxHeight - 12));
+
+        winEl.style.left = left + 'px';
+        winEl.style.top = top + 'px';
+        winEl.style.right = 'auto';
+        winEl.style.bottom = 'auto';
+    }
+    </script>
+
     <!-- ========================================== -->
     <!-- 1. CHAT WIDGET DÀNH CHO SINH VIÊN          -->
     <!-- ========================================== -->
     <th:block sec:authorize="hasRole('SINH_VIEN')">
         <!-- Nút Chat nổi của Sinh viên -->
         <div id="studentChatFloatingBtn" class="position-fixed" style="bottom: 24px; right: 24px; z-index: 1045;">
-            <button type="button" class="btn btn-primary rounded-pill shadow-lg d-flex align-items-center justify-content-center position-relative px-3 py-2 text-white fw-semibold"
-                    style="height: 50px; font-size: 0.95rem; background: linear-gradient(135deg, #0d6efd, #0a58ca); border: none; box-shadow: 0 4px 15px rgba(13,110,253,0.35); transition: all 0.3s ease;"
-                    id="toggleChatBtn" onclick="toggleStudentChatBox()" title="Nhắn tin với Ban Quản Lý KTX">
+            <button type="button" class="btn btn-primary rounded-pill shadow-lg d-flex align-items-center justify-content-center position-relative px-3 py-2 text-white fw-semibold chat-floating-btn"
+                    style="height: 50px; font-size: 0.95rem; background: linear-gradient(135deg, #0d6efd, #0a58ca); border: none; box-shadow: 0 4px 15px rgba(13,110,253,0.35); transition: box-shadow 0.3s ease;"
+                    id="toggleChatBtn" onclick="toggleStudentChatBox()" title="Nhấn giữ để kéo di chuyển | Bấm để chat với Ban Quản Lý">
+                <i class="fas fa-grip-vertical text-white-50 me-2 chat-drag-grip" title="Kéo để di chuyển"></i>
                 <i class="fas fa-comments fs-5 me-2"></i>
                 <span class="d-none d-sm-inline">Chat với BQL</span>
                 <span id="studentChatBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none badge-chat-pulse" 
@@ -69,6 +256,11 @@
 
             document.addEventListener("DOMContentLoaded", function () {
                 if (!studentMaSV || studentMaSV === 'anonymousUser') return;
+
+                // 0. Bật tính năng kéo thả di chuyển nút chat tự do
+                if (typeof initDraggableChatWidget === 'function') {
+                    initDraggableChatWidget('studentChatFloatingBtn', 'studentChatWindow', 'student_chat_btn_pos');
+                }
 
                 // 1. Kiểm tra số tin nhắn chưa đọc khi tải trang để hiển thị badge đỏ
                 checkStudentUnreadMessages();
@@ -139,6 +331,11 @@
                 if (isChatOpen) {
                     chatBox.classList.remove('d-none');
                     chatBox.classList.add('d-flex');
+                    
+                    const floatingBtn = document.getElementById('studentChatFloatingBtn');
+                    if (floatingBtn && typeof positionChatPopup === 'function') {
+                        positionChatPopup(floatingBtn, chatBox);
+                    }
                     
                     // Ẩn badge đỏ & xóa hiệu ứng rung
                     updateStudentBadges(0);
@@ -281,9 +478,10 @@
     <th:block sec:authorize="hasAnyRole('QUAN_SINH', 'QUAN_TRI')">
         <!-- Nút Chat nổi của Quản sinh (ẩn nếu đang ở trang /quansinh/chat) -->
         <div id="managerChatFloatingBtn" class="position-fixed" style="bottom: 24px; right: 24px; z-index: 1045;">
-            <button type="button" class="btn btn-primary rounded-pill shadow-lg d-flex align-items-center justify-content-center position-relative px-3 py-2 text-white fw-semibold"
-                    style="height: 50px; font-size: 0.95rem; background: linear-gradient(135deg, #0d6efd, #0a58ca); border: none; box-shadow: 0 4px 15px rgba(13,110,253,0.35); transition: all 0.3s ease;"
-                    id="toggleManagerChatBtn" onclick="toggleManagerChatBox()" title="Hỗ trợ & Tin nhắn Sinh viên">
+            <button type="button" class="btn btn-primary rounded-pill shadow-lg d-flex align-items-center justify-content-center position-relative px-3 py-2 text-white fw-semibold chat-floating-btn"
+                    style="height: 50px; font-size: 0.95rem; background: linear-gradient(135deg, #0d6efd, #0a58ca); border: none; box-shadow: 0 4px 15px rgba(13,110,253,0.35); transition: box-shadow 0.3s ease;"
+                    id="toggleManagerChatBtn" onclick="toggleManagerChatBox()" title="Nhấn giữ để kéo di chuyển | Bấm để mở tin nhắn SV">
+                <i class="fas fa-grip-vertical text-white-50 me-2 chat-drag-grip" title="Kéo để di chuyển"></i>
                 <i class="fas fa-comments fs-5 me-2"></i>
                 <span class="d-none d-sm-inline">Tin nhắn SV</span>
                 <span id="managerChatBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none badge-chat-pulse" 
@@ -362,6 +560,11 @@
                     if (btn) btn.classList.add('d-none');
                 }
 
+                // 0. Bật tính năng kéo thả di chuyển nút chat cho Quản sinh
+                if (typeof initDraggableChatWidget === 'function') {
+                    initDraggableChatWidget('managerChatFloatingBtn', 'managerChatWindow', 'manager_chat_btn_pos');
+                }
+
                 // 1. Kiểm tra số tin nhắn chưa đọc khi tải trang để hiện badge đỏ
                 checkManagerUnreadMessages();
 
@@ -431,6 +634,11 @@
                 if (isManagerChatOpen) {
                     chatBox.classList.remove('d-none');
                     chatBox.classList.add('d-flex');
+
+                    const floatingBtn = document.getElementById('managerChatFloatingBtn');
+                    if (floatingBtn && typeof positionChatPopup === 'function') {
+                        positionChatPopup(floatingBtn, chatBox);
+                    }
 
                     // Mở màn danh sách hội thoại
                     showManagerConversationList();

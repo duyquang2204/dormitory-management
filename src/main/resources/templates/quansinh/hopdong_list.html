@@ -36,71 +36,75 @@
                     </div>
                 </div>
 
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Ngày Lập</th>
-                                    <th>Mã SV</th>
-                                    <th>Phòng</th>
-                                    <th>Thời hạn</th>
-                                    <th>Giá thuê / tháng</th>
-                                    <th>Trạng thái</th>
-                                    <th>Yêu cầu SV</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="hd : ${hopDongs}">
-                                    <td th:text="${hd.ngayLap}"></td>
-                                    <td th:text="${hd.phanPhong.sinhVien.maSV}" class="fw-bold"></td>
-                                    <td th:text="${hd.phanPhong.phong.soPhong}"></td>
-                                    <td>
-                                        <span th:text="${#temporals.format(hd.ngayBatDau, 'dd/MM/yyyy') + ' - ' + #temporals.format(hd.ngayKetThuc, 'dd/MM/yyyy')}"></span>
-                                        <br>
-                                        <span th:if="${hd.isSapHetHan()}" class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle"></i> Sắp hết</span>
-                                    </td>
-                                    <td th:text="${#numbers.formatDecimal(hd.giaTien, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng'" class="text-danger"></td>
-                                    <td>
-                                        <span th:class="${hd.trangThai == 'Đã hết hạn' or hd.trangThai == 'Đã thanh lý' ? 'badge bg-danger' : 'badge bg-success'}" 
-                                              th:text="${hd.trangThai}"></span>
-                                    </td>
-                                    <td>
-                                        <span th:if="${hd.yeuCauCuaSV != null}" class="badge bg-info text-dark" th:text="${hd.yeuCauCuaSV}"></span>
-                                        <span th:unless="${hd.yeuCauCuaSV != null}" class="text-muted small">-</span>
-                                    </td>
-                                    <td>
-                                        <!-- Actions -->
-                                        <div class="d-flex gap-1 align-items-center">
-                                            <a th:href="@{/quansinh/hop-dong/xuat-pdf/{id}(id=${hd.maHopDong})}" class="btn btn-sm btn-outline-danger" target="_blank" title="In / Tải hợp đồng PDF">
-                                                <i class="fas fa-file-pdf"></i>
-                                            </a>
-                                            <th:block th:if="${hd.trangThai != 'Đã thanh lý'}">
-                                                <!-- Nếu xin gia hạn -->
-                                                <form th:if="${hd.yeuCauCuaSV == 'Xin gia hạn'}" th:action="@{/quansinh/hop-dong/duyet-gia-han}" method="post">
-                                                    <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
-                                                    <input type="hidden" name="soThang" value="12">
-                                                    <button type="submit" class="btn btn-sm btn-success" title="Duyệt gia hạn 1 năm"><i class="fas fa-check"></i> Duyệt GH</button>
-                                                </form>
-                                                
-                                                <!-- Báo trả phòng hoặc Đã hết hạn -->
-                                                <form th:if="${hd.yeuCauCuaSV == 'Báo trả phòng' or hd.trangThai == 'Đã hết hạn'}" th:action="@{/quansinh/hop-dong/thanh-ly}" method="post">
-                                                    <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
-                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn xác nhận thanh lý hợp đồng và thu hồi giường này?');" title="Thanh lý hợp đồng"><i class="fas fa-times-circle"></i> Thanh lý</button>
-                                                </form>
-                                            </th:block>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr th:if="${#lists.isEmpty(hopDongs)}">
-                                    <td colspan="8" class="text-center text-muted py-3">Không có hợp đồng nào</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" style="min-width: 950px;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Ngày Lập</th>
+                                        <th>Mã SV</th>
+                                        <th>Phòng</th>
+                                        <th>Thời hạn</th>
+                                        <th>Giá thuê / tháng</th>
+                                        <th>Trạng thái</th>
+                                        <th>Yêu cầu SV</th>
+                                        <th class="pe-3">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="hd : ${hopDongs}">
+                                        <td class="ps-3" th:text="${hd.ngayLap}"></td>
+                                        <td th:text="${hd.phanPhong.sinhVien.maSV}" class="fw-bold"></td>
+                                        <td th:text="${hd.phanPhong.phong.soPhong}"></td>
+                                        <td>
+                                            <span th:text="${#temporals.format(hd.ngayBatDau, 'dd/MM/yyyy') + ' - ' + #temporals.format(hd.ngayKetThuc, 'dd/MM/yyyy')}"></span>
+                                            <br>
+                                            <span th:if="${hd.isSapHetHan()}" class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle"></i> Sắp hết</span>
+                                        </td>
+                                        <td th:text="${#numbers.formatDecimal(hd.giaTien, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng'" class="text-danger"></td>
+                                        <td>
+                                            <span th:class="${hd.trangThai == 'Đã hết hạn' or hd.trangThai == 'Đã thanh lý' ? 'badge bg-danger' : 'badge bg-success'}" 
+                                                  th:text="${hd.trangThai}"></span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${hd.yeuCauCuaSV != null}" class="badge bg-info text-dark" th:text="${hd.yeuCauCuaSV}"></span>
+                                            <span th:unless="${hd.yeuCauCuaSV != null}" class="text-muted small">-</span>
+                                        </td>
+                                        <td class="pe-3">
+                                            <!-- Actions -->
+                                            <div class="d-flex gap-1 align-items-center text-nowrap">
+                                                <a th:href="@{/quansinh/hop-dong/xuat-pdf/{id}(id=${hd.maHopDong})}" class="btn btn-sm btn-outline-danger" target="_blank" title="In / Tải hợp đồng PDF">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                </a>
+                                                <th:block th:if="${hd.trangThai != 'Đã thanh lý'}">
+                                                    <!-- Nếu xin gia hạn -->
+                                                    <form th:if="${hd.yeuCauCuaSV == 'Xin gia hạn'}" th:action="@{/quansinh/hop-dong/duyet-gia-han}" method="post">
+                                                        <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
+                                                        <input type="hidden" name="soThang" value="12">
+                                                        <button type="submit" class="btn btn-sm btn-success" title="Duyệt gia hạn 1 năm"><i class="fas fa-check"></i> Duyệt GH</button>
+                                                    </form>
+                                                    
+                                                    <!-- Báo trả phòng hoặc Đã hết hạn -->
+                                                    <form th:if="${hd.yeuCauCuaSV == 'Báo trả phòng' or hd.trangThai == 'Đã hết hạn'}" th:action="@{/quansinh/hop-dong/thanh-ly}" method="post">
+                                                        <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
+                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn xác nhận thanh lý hợp đồng và thu hồi giường này?');" title="Thanh lý hợp đồng"><i class="fas fa-times-circle"></i> Thanh lý</button>
+                                                    </form>
+                                                </th:block>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(hopDongs)}">
+                                        <td colspan="8" class="text-center text-muted py-3">Không có hợp đồng nào</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                         
                         <!-- PAGINATION -->
-                        <div th:replace="~{fragments/pagination :: pagination(pageObj=${hopDongPage}, url='/quansinh/hop-dong', queryParams=${queryParams})}"></div>
+                        <div class="p-3">
+                            <div th:replace="~{fragments/pagination :: pagination(pageObj=${hopDongPage}, url='/quansinh/hop-dong', queryParams=${queryParams})}"></div>
+                        </div>
                     </div>
                 </div>
             </div>
