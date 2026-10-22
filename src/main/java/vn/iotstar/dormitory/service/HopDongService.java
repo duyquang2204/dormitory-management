@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import vn.iotstar.dormitory.dto.HopDongDTO;
 import vn.iotstar.dormitory.entity.HopDong;
 import vn.iotstar.dormitory.entity.PhanPhong;
+import vn.iotstar.dormitory.entity.Phong;
 import vn.iotstar.dormitory.entity.SinhVien;
 import vn.iotstar.dormitory.repository.HopDongRepository;
 import vn.iotstar.dormitory.repository.NguoiDungRepository;
@@ -26,6 +27,9 @@ public class HopDongService {
     
     @Autowired
     private NguoiDungRepository nguoiDungRepository;
+
+    @Autowired
+    private HoaDonService hoaDonService;
 
     @jakarta.annotation.PostConstruct
     public void cleanupMultipleActiveContracts() {
@@ -194,6 +198,14 @@ public class HopDongService {
             nguoiDungRepository.findById(maNhanVien).ifPresent(hd::setNhanVienLap);
             
             hopDongRepository.save(hd);
+
+            // Sinh hóa đơn tiền phòng 1 năm tương ứng
+            if (pp.getPhong() != null && pp.getSinhVien() != null) {
+                double donGiaThang = (pp.getPhong().getLoaiPhong() != null && pp.getPhong().getLoaiPhong().getDonGia() != null) ? pp.getPhong().getLoaiPhong().getDonGia() : 0.0;
+                long monthsDiff = (dto.getNgayBatDau() != null && dto.getNgayKetThuc() != null) ? java.time.temporal.ChronoUnit.MONTHS.between(dto.getNgayBatDau(), dto.getNgayKetThuc()) : 12;
+                int soThang = (int) Math.max(1, monthsDiff);
+                hoaDonService.createTienPhongInvoice(pp.getSinhVien(), pp.getPhong(), dto.getNgayBatDau(), donGiaThang, soThang);
+            }
         }
     }
 
@@ -210,6 +222,7 @@ public class HopDongService {
         Optional<HopDong> hdOpt = hopDongRepository.findById(maHopDong);
         if (hdOpt.isPresent()) {
             HopDong hd = hdOpt.get();
+            LocalDate ngayBatDauGiaHan = hd.getNgayKetThuc() != null ? hd.getNgayKetThuc() : LocalDate.now();
             if (hd.getNgayKetThuc() != null) {
                 hd.setNgayKetThuc(hd.getNgayKetThuc().plusMonths(soThang));
             } else {
@@ -218,6 +231,13 @@ public class HopDongService {
             hd.setTrangThai("Còn hạn");
             hd.setYeuCauCuaSV(null); // Clear the request after approval
             hopDongRepository.save(hd);
+
+            // Sinh hóa đơn tiền phòng cho đợt gia hạn mới
+            if (hd.getPhanPhong() != null && hd.getPhanPhong().getPhong() != null && hd.getPhanPhong().getSinhVien() != null) {
+                Phong p = hd.getPhanPhong().getPhong();
+                double donGiaThang = (p.getLoaiPhong() != null && p.getLoaiPhong().getDonGia() != null) ? p.getLoaiPhong().getDonGia() : 0.0;
+                hoaDonService.createTienPhongInvoice(hd.getPhanPhong().getSinhVien(), p, ngayBatDauGiaHan, donGiaThang, soThang);
+            }
         }
     }
 

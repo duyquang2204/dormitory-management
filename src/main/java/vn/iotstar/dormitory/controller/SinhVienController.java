@@ -90,7 +90,10 @@ public class SinhVienController {
                     .orElse(contracts.isEmpty() ? null : contracts.get(0));
             model.addAttribute("activeContract", activeContract);
 
-            // Hóa đơn gần nhất
+            // Hóa đơn tiền phòng 1 năm
+            model.addAttribute("hoaDonTienPhong", hoaDonService.findTienPhongInvoiceBySinhVien(maSV).orElse(null));
+
+            // Hóa đơn điện nước gần nhất
             java.util.List<vn.iotstar.dormitory.entity.HoaDon> myInvoices = hoaDonRepository.findAllBySinhVien_MaSV(maSV).stream()
                     .sorted((a, b) -> {
                         int c = Integer.compare(b.getNam(), a.getNam());
@@ -98,7 +101,10 @@ public class SinhVienController {
                         return Integer.compare(b.getThang(), a.getThang());
                     })
                     .toList();
-            vn.iotstar.dormitory.entity.HoaDon latestInvoice = myInvoices.isEmpty() ? null : myInvoices.get(0);
+            vn.iotstar.dormitory.entity.HoaDon latestInvoice = myInvoices.stream()
+                    .filter(h -> "DIEN_NUOC".equalsIgnoreCase(h.getLoaiHoaDon()) || h.getLoaiHoaDon() == null)
+                    .findFirst()
+                    .orElse(null);
             model.addAttribute("latestInvoice", latestInvoice);
 
             long unpaidInvoices = hoaDonService.countUnpaidBySinhVien(maSV);
@@ -248,9 +254,11 @@ public class SinhVienController {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page - 1, size);
         
         if (!myRooms.isEmpty()) {
-            model.addAttribute("hoaDonPage", hoaDonService.findBySinhVien(maSV, pageable));
+            model.addAttribute("hoaDonTienPhong", hoaDonService.findTienPhongInvoiceBySinhVien(maSV).orElse(null));
+            model.addAttribute("hoaDonPage", hoaDonService.findBySinhVienAndLoai(maSV, "DIEN_NUOC", pageable));
             model.addAttribute("currentRoom", myRooms.get(0).getPhong());
         } else {
+            model.addAttribute("hoaDonTienPhong", null);
             model.addAttribute("hoaDonPage", org.springframework.data.domain.Page.empty());
         }
         

@@ -10,8 +10,8 @@ Hệ thống Quản lý Ký túc xá Thông minh được xây dựng trên nề
 3. [Tài Khoản Thử Nghiệm (Test Accounts)](#-tài-khoản-thử-nghiệm-test-accounts)
 4. [Thông Tin Thẻ Test Thanh Toán VNPAY Sandbox](#-thông-tin-thẻ-test-thanh-toán-vnpay-sandbox)
 5. [Toàn Bộ Chức Năng Phân Theo 5 Vai Trò](#-toàn-bộ-chức-năng-phân-theo-5-vai-trò)
-6. [Chi Tiết 3 Tính Năng Nâng Cao Mới Nhất](#-chi-tiết-3-tính-năng-nâng-cao-mới-nhất)
-7. [Định Mức Đơn Giá Điện Nước & Công Thức Tính Tiền](#-định-mức-đơn-giá-điện-nước--công-thức-tính-tiền)
+6. [Chi Tiết Các Tính Năng Nâng Cao Mới Nhất](#-chi-tiết-các-tính-năng-nâng-cao-mới-nhất)
+7. [Quy Chế Tài Chính: Tiền Phòng 1 Năm (Hạn 15 Ngày) & Điện Nước Hàng Tháng](#-quy-chế-tài-chính-tiền-phòng-1-năm-hạn-15-ngày--điện-nước-hàng-tháng)
 8. [Sơ Đồ Luồng Nghiệp Vụ Chính (Mermaid Diagrams)](#-sơ-đồ-luồng-nghiệp-vụ-chính)
 9. [Hướng Dẫn Cài Đặt & Khởi Chạy Dự Án](#-hướng-dẫn-cài-đặt--khởi-chạy-dự-án)
 10. [Cấu Trúc Thư Mục Dự Án](#-cấu-trúc-thư-mục-dự-án)
@@ -23,13 +23,15 @@ Hệ thống Quản lý Ký túc xá Thông minh được xây dựng trên nề
 
 - 🚀 **Số hóa quy trình tiếp nhận 100% trực tuyến:** Sinh viên ở bất kỳ trường ĐH nào cũng có thể nộp đơn online, tải ảnh thẻ sinh viên, CCCD và giấy tờ ưu tiên lên đám mây Cloudinary. Mã sinh viên được tự động sinh theo mẫu chuẩn (`SVxxxxxx`).
 - 🎓 **Hồ sơ sinh viên linh hoạt & Tự bổ sung Trường/Khoa:** Cho phép sinh viên chủ động cập nhật, bổ sung tên Trường Đại học và Khoa/Chuyên ngành trên trang cá nhân nếu Ban Quản Lý chưa điền, đồng bộ tức thời với cơ sở dữ liệu.
+- 🏢 **Quy chế thu Tiền phòng 1 năm & Chế tài nghiêm ngặt:** Thu trọn gói 1 năm tiền phòng ngay khi nhận phòng/ký hợp đồng; hạn chót thanh toán cố định trong vòng **15 ngày kể từ ngày vào ở**. Nếu quá hạn 15 ngày chưa thanh toán, hệ thống cung cấp quy trình kỷ luật tự động: chấm dứt hợp đồng, thu hồi chỗ ở và ghi nhận biên bản kỷ luật *"Đuổi khỏi KTX"*.
+- ⚡ **Tách biệt Hóa đơn & Đơn giá Điện Nước Động:** Tách riêng biệt Hóa đơn Tiền phòng (1 năm) và Hóa đơn Điện nước (hàng tháng, tuyệt đối không cộng tiền phòng). Cho phép Quản sinh tùy biến đơn giá điện (đ/kWh) và đơn giá nước (đ/m³) linh hoạt khi chốt số thay vì hardcode; sinh viên theo dõi minh bạch chỉ số, đơn giá và công thức chia đều theo đầu người.
 - 🔐 **Xác thực bảo mật đa tầng:** Mã hóa mật khẩu một chiều với **BCrypt**, cơ chế gửi mã OTP 6 số qua Email (SMTP Gmail) khi kích hoạt tài khoản sinh viên và đặt lại mật khẩu.
 - 🔔 **Thông báo đẩy tức thời (Real-time Push Notification):** Kiến trúc WebSocket STOMP qua SockJS, tự động nhảy số chuông và hiển thị popup Toast ngay khi có cập nhật mà không cần tải lại trang.
 - 💬 **Live Chat Trực Tuyến Đa Nền Tảng (Sinh viên & Quản sinh):** 
   - Widget chat nổi dạng viên thuốc (Pill Button) cố định ở góc dưới bên phải màn hình cho cả **Sinh viên ("Chat với BQL")** và **Quản sinh ("Tin nhắn SV")**.
   - **Huy hiệu ĐỎ thông báo tin nhắn mới:** Tự động hiện số đỏ kèm hiệu ứng nhấp nháy tỏa sáng (`badge-chat-pulse`) và rung nhẹ nút như các ứng dụng Messenger / Zalo khi có tin nhắn chưa đọc. Đồng bộ badge đỏ trên menu Sidebar.
   - Quản sinh có thể trả lời nhanh ngay trên popup nổi hoặc truy cập Trung tâm điều phối toàn màn hình (`/quansinh/chat`).
-- 📄 **Xuất file PDF Hợp đồng KTX & Hóa đơn Điện Nước:** Sử dụng OpenPDF tích hợp font TrueType Arial Unicode chuẩn tiếng Việt, bố cục văn bản hành chính quy chuẩn kèm chữ ký 2 bên.
+- 📄 **Xuất file PDF Hợp đồng KTX & Hóa đơn Điện Nước:** Sử dụng OpenPDF tích hợp font TrueType Arial Unicode chuẩn tiếng Việt, thiết kế 2 mẫu in riêng biệt: Mẫu in Tiền phòng 1 năm (kèm cam kết 15 ngày) và Mẫu in Điện nước hàng tháng (7 cột thông số rõ ràng).
 - 💳 **Thanh toán tự động qua VNPAY Sandbox:** Tích hợp chữ ký số `HMAC-SHA512`, thanh toán an toàn qua thẻ ATM/QR ngân hàng, tự động gạch nợ hóa đơn tức thì.
 
 ---
@@ -117,21 +119,20 @@ Khi thực hiện thanh toán hóa đơn bằng cổng **VNPAY**, sử dụng th
 ---
 
 ### 1. Sinh Viên Nội Trú (Student - `/sinhvien/**`)
-- **Dashboard Sinh Viên:** Thẻ thông tin phòng đang ở, số hóa đơn chưa thanh toán, lịch sử vi phạm, thông báo mới.
+- **Dashboard Sinh Viên:** Thẻ thông tin phòng đang ở, số hóa đơn chưa thanh toán, lịch sử vi phạm, thông báo mới. **Banner cảnh báo/nhắc nhở nộp tiền phòng 1 năm trong vòng 15 ngày** kèm widget hóa đơn điện nước tháng gần nhất rõ ràng, tách bạch.
 - **Hồ Sơ Cá Nhân (`/sinhvien/profile`):** 
   - Xem thông tin sinh viên, CCCD, giới tính, tình trạng phòng ở.
   - Cập nhật số điện thoại, email, quê quán, địa chỉ thường trú, thông tin phụ huynh liên hệ khẩn cấp.
   - **Bổ sung Trường Đại học & Khoa:** Cho phép sinh viên tự điền/bổ sung tên trường và khoa nếu Quản sinh chưa nhập khi lập hồ sơ.
 - **Thông Tin Phòng Ở & Hợp Đồng (`/sinhvien/phong`):**
-  - Xem thông tin phòng, danh sách bạn cùng phòng, thời hạn lưu trú; **tự động đồng bộ và hiển thị chính xác Khu/Phòng mới nhất** theo hợp đồng hiện hành (kể cả khi vừa chuyển phòng/đổi khu).
-  - **Tải file PDF Hợp đồng lưu trú KTX** có giá trị pháp lý về máy.
+  - Xem thông tin phòng, danh sách bạn cùng phòng, thời hạn lưu trú chuẩn 1 năm (12 tháng); **tự động đồng bộ và hiển thị chính xác Khu/Phòng mới nhất** theo hợp đồng hiện hành.
+  - **Tải file PDF Hợp đồng lưu trú KTX:** Hợp đồng có giá trị pháp lý, thể hiện rõ điều khoản nộp tiền phòng 1 năm trong vòng 15 ngày và chế tài buộc rời KTX nếu vi phạm.
   - Gửi yêu cầu *Xin chuyển phòng/đổi khu*, *Xin gia hạn hợp đồng* hoặc *Báo trả phòng* khi sắp hết hạn.
 - **Báo Cáo Sự Cố Hỏng Hóc (`/sinhvien/sua-chua`):** Báo hỏng cơ sở vật chất kèm ảnh chụp thực tế (tải lên Cloudinary).
-- **Hóa Đơn Điện Nước & Dịch Vụ (`/sinhvien/hoa-don`):**
-  - Bảng kê chi tiết tiền phòng, chỉ số điện cũ/mới, chỉ số nước cũ/mới chia đều cho các thành viên trong phòng.
-  - **Xuất file PDF Hóa đơn điện nước & phòng** phục vụ lưu trữ hoặc gửi gia đình.
-  - Nút **"Thanh toán VNPAY"** trực tuyến: thanh toán tức thì qua ngân hàng.
-- **Kỷ Luật - Vi Phạm (`/sinhvien/vi-pham`):** Theo dõi lịch sử biên bản vi phạm kỷ luật và hình thức xử lý của ban quản lý.
+- **Hóa Đơn & Lệ Phí Ký Túc Xá (`/sinhvien/hoa-don`):**
+  - **Mục 1 - Tiền phòng trọn gói 1 năm:** Thẻ card thông tin nổi bật với số tiền cả năm, hạn chót thanh toán (15 ngày từ ngày vào ở), cảnh báo hủy phòng nếu quá hạn, nút thanh toán trực tuyến qua VNPAY và nút xuất PDF hóa đơn tiền phòng.
+  - **Mục 2 - Hóa đơn điện nước hàng tháng:** Bảng kê chi tiết chỉ số công tơ cũ/mới, số tiêu thụ (kWh/m³), đơn giá điện/nước động của tháng đó, số tiền chia theo đầu người (tuyệt đối không cộng tiền phòng), xuất PDF hóa đơn điện nước và thanh toán VNPAY.
+- **Kỷ Luật - Vi Phạm (`/sinhvien/vi-pham`):** Theo dõi lịch sử biên bản vi phạm kỷ luật và hình thức xử lý của ban quản lý (bao gồm các hình thức cảnh cáo, bồi thường, đuổi khỏi KTX).
 - **Floating Live Chat Widget & Menu Sidebar:** 
   - Nút nổi **"Chat với BQL"** ở góc dưới bên phải màn hình mọi trang, kèm mục **"Hỗ trợ & Chat BQL"** trên thanh menu bên trái.
   - **Badge ĐỎ đếm tin nhắn mới:** Tự động hiện số đỏ nhấp nháy khi có tin phản hồi từ BQL; click vào là mở ngay popup trò chuyện.
@@ -144,22 +145,23 @@ Khi thực hiện thanh toán hóa đơn bằng cổng **VNPAY**, sử dụng th
 - **Xét Duyệt Hồ Sơ Đăng Ký Phòng:**
   - Bộ lọc hồ sơ theo Trạng thái, Khu, Loại phòng, Diện ưu tiên.
   - Xem ảnh thẻ SV, ảnh CCCD, giấy chứng minh ưu tiên phóng to qua modal.
-  - **Phê duyệt đơn:** Tự động xếp vào phòng phù hợp (kiểm tra giới tính Nam/Nữ & số chỗ còn trống), sinh tài khoản và hợp đồng lưu trú, **tự động gửi Email chúc mừng trúng tuyển kèm thông tin phòng & tài khoản cho sinh viên**.
+  - **Phê duyệt đơn:** Tự động xếp vào phòng phù hợp (kiểm tra giới tính Nam/Nữ & số chỗ còn trống), sinh tài khoản, lập hợp đồng 1 năm và **tự động sinh hóa đơn tiền phòng 1 năm (hạn 15 ngày)**, gửi Email chúc mừng trúng tuyển kèm thông tin phòng & tài khoản cho sinh viên.
   - **Từ chối đơn:** Nhập lý do từ chối cụ thể, **tự động gửi Email thông báo lý do tới sinh viên**.
 - **Quản Lý Phòng & Sĩ Số (144 Phòng Khu A, B, C):** Theo dõi chính xác 144 phòng KTX (4 tầng x 12 phòng/tầng), trạng thái Trống, Đang ở, Đầy phòng.
 - **Quản Lý Sinh Viên & Chuyển Phòng:** 
   - Thêm mới, cập nhật hồ sơ, chỉnh sửa Trường Đại học & Khoa, khóa/mở tài khoản sinh viên.
   - **Điều chuyển phòng/khu:** Xử lý nguyện vọng chuyển phòng, tự động cập nhật hợp đồng lưu trú và đồng bộ trạng thái chỗ trống của các phòng liên quan.
-- **Quản Lý Hợp Đồng Lưu Trú:** Lập hợp đồng mới, xem danh sách hợp đồng, duyệt gia hạn, thanh lý hợp đồng khi sinh viên rời KTX. **Hỗ trợ xuất PDF từng hợp đồng**.
+- **Quản Lý Hợp Đồng Lưu Trú:** Lập hợp đồng 1 năm, xem danh sách hợp đồng, duyệt gia hạn, thanh lý hợp đồng khi sinh viên rời KTX. **Hỗ trợ xuất PDF từng hợp đồng**.
 - **Quản Lý Sửa Chữa Thiết Bị:** Nhận báo cáo hỏng từ sinh viên, phân công cho thợ sửa chữa, theo dõi tiến độ và kiểm tra ảnh nghiệm thu hoàn thành.
-- **Quản Lý Hóa Đơn Điện Nước:**
-  - Lập hóa đơn đơn lẻ.
-  - **Ghi chỉ số hàng loạt:** Nhập chỉ số điện nước đồng loạt cho tất cả các phòng trong một Khu trên một bảng nhập duy nhất.
-  - **Xuất PDF hóa đơn** cho từng phòng/sinh viên.
-  - Xác nhận thanh toán tiền mặt.
+- **Quản Lý Hóa Đơn Tách Biệt & Đơn Giá Động:**
+  - **Bộ lọc thông minh theo Tabs:** `Tất cả hóa đơn` | `Tiền phòng (1 năm)` | `Điện nước (Tháng)` | `Quá hạn nộp`.
+  - **Chốt điện nước đơn lẻ & hàng loạt:** Cho phép Quản sinh nhập trực tiếp **Đơn giá Điện (đ/kWh)** và **Đơn giá Nước (đ/m³)** linh hoạt theo từng kỳ chốt mà không bị hardcode.
+  - **Chế tài xử lý quá hạn:** Nút hành động **[Buộc rời KTX]** với các hóa đơn tiền phòng 1 năm quá hạn 15 ngày, tự động chấm dứt hợp đồng, hủy phân phòng, giải phóng chỗ trống và ghi biên bản kỷ luật "Đuổi khỏi KTX".
+  - **Xuất PDF hóa đơn** chuẩn hóa theo từng loại hóa đơn (Tiền phòng riêng, Điện nước riêng).
+  - Xác nhận thanh toán tiền mặt trực tiếp.
 - **Quản Lý Kỷ Luật - Vi Phạm:** Lập biên bản vi phạm, áp dụng các mức xử lý (Cảnh cáo, Trừ điểm rèn luyện, Bồi thường, Đuổi khỏi KTX).
 - **Hệ Thống Live Chat Đa Nhiệm (Popup Nổi & Trang Đầy Đủ):**
-  - **Nút nổi "Tin nhắn SV":** Cố định ở góc dưới bên phải màn hình Quản sinh; khi có sinh viên nhắn đến, badge đỏ lập tức nhảy số và nhấp nháy báo hiệu.
+  - **Nút nổi "Tin nhắn SV":** Cố định trên tất cả các trang nghiệp vụ của Quản sinh, báo đỏ khi có sinh viên gửi tin nhắn.
   - **Popup chat nhanh:** Xem danh sách hội thoại, tìm kiếm sinh viên và trả lời tức thì mà không cần rời khỏi trang đang làm việc.
   - **Trung tâm toàn màn hình (`/quansinh/chat`):** Giao diện chia 2 cột chuyên nghiệp để xử lý chuyên sâu nhiều hội thoại cùng lúc.
 
@@ -191,8 +193,9 @@ Khi thực hiện thanh toán hóa đơn bằng cổng **VNPAY**, sử dụng th
 
 ### 2. 📄 Xuất File PDF Hợp Đồng & Hóa Đơn (PDF Export)
 - **Công nghệ:** Thư viện mã nguồn mở `OpenPDF 2.0.3` kết hợp font hệ thống Arial Unicode.
-- **Hợp đồng lưu trú KTX:** Định dạng văn bản pháp quy Việt Nam chuẩn xác: Quốc hiệu, thông tin Bên A, Bên B, đối tượng và thời hạn thuê, giá tiền, trách nhiệm và ô ký tên đóng dấu 2 bên.
-- **Hóa đơn điện nước & phòng:** Đầy đủ thông tin sinh viên, phòng, kỳ thu, bảng kê chi tiết chỉ số điện cũ/mới, chỉ số nước cũ/mới, đơn giá, số tiền chia theo đầu người trong phòng và tổng tiền thanh toán.
+- **Hợp đồng lưu trú KTX:** Định dạng văn bản pháp quy Việt Nam chuẩn xác: Quốc hiệu, thông tin Bên A, Bên B, đối tượng và thời hạn thuê 1 năm, giá tiền trọn gói, cam kết thời hạn thanh toán 15 ngày, chế tài xử lý buộc rời KTX nếu quá hạn, và ô ký tên đóng dấu 2 bên.
+- **Hóa đơn Tiền phòng 1 năm (Mẫu riêng):** Đầy đủ thông tin sinh viên, phòng, thời hạn thuê 12 tháng, hạn chót thanh toán 15 ngày kể từ ngày vào ở kèm ghi chú cảnh báo chế tài hủy phòng.
+- **Hóa đơn Điện nước hàng tháng (Mẫu riêng):** Bảng kê chi tiết 7 cột gồm chỉ số điện/nước cũ & mới, mức tiêu thụ, đơn giá động áp dụng cho kỳ, thành tiền phòng, số tiền chia theo đầu người trong phòng và tổng tiền thanh toán (không có tiền phòng).
 - **Bảo mật:** Kiểm tra phân quyền chặt chẽ; sinh viên chỉ được phép tải hợp đồng và hóa đơn thuộc quyền sở hữu của chính mình.
 
 ### 3. 💬 Live Chat Trực Tuyến & Thông Báo Đỏ (Realtime 2-Way Live Chat)
@@ -209,19 +212,31 @@ Khi thực hiện thanh toán hóa đơn bằng cổng **VNPAY**, sử dụng th
 
 ---
 
-## ⚡ ĐỊNH MỨC ĐƠN GIÁ ĐIỆN NƯỚC & CÔNG THỨC TÍNH TIỀN
+## ⚡ QUY CHẾ TÀI CHÍNH: TIỀN PHÒNG 1 NĂM (HẠN 15 NGÀY) & ĐIỆN NƯỚC HÀNG THÁNG
 
-Hệ thống áp dụng đơn giá dịch vụ công khai và minh bạch:
-- ⚡ **Đơn giá Điện sinh hoạt:** `3.500 đ / kWh`
-- 💧 **Đơn giá Nước sinh hoạt:** `15.000 đ / m³`
+Hệ thống áp dụng cơ chế tài chính chặt chẽ, tách bạch và minh bạch:
 
-### Công thức tính tự động chia đều cho sinh viên trong phòng:
+### 1. 🏢 Tiền Phòng Lưu Trú (Thu Trọn Gói 1 Năm - Hạn 15 Ngày)
+- Sinh viên có nghĩa vụ thanh toán toàn bộ chi phí tiền phòng trọn gói 1 năm (12 tháng) ngay sau khi nhận phòng để đảm bảo tính ổn định và trách nhiệm lưu trú:
+$$\text{Tổng tiền phòng 1 năm} = \text{Đơn giá phòng/tháng} \times 12\text{ tháng}$$
+- ⏱️ **Thời hạn thanh toán:** Tối đa **15 ngày** kể từ ngày bắt đầu vào KTX ghi trên Hợp đồng (`ngayBatDau + 15 ngày`).
+- ⚠️ **Chế tài xử lý nghiêm khắc:** Nếu quá hạn 15 ngày mà sinh viên chưa hoàn tất thanh toán tiền phòng, Ban Quản Lý KTX sẽ thực thi quy trình kỷ luật tự động: **chấm dứt hợp đồng lưu trú, thu hồi phòng/giường và ghi nhận biên bản kỷ luật "Đuổi khỏi KTX"**.
 
-$$\text{Tiền điện của SV} = \frac{(\text{Chỉ số Điện mới} - \text{Chỉ số Điện cũ}) \times 3.500\text{ đ}}{\text{Số lượng SV đang lưu trú trong phòng}}$$
+---
 
-$$\text{Tiền nước của SV} = \frac{(\text{Chỉ số Nước mới} - \text{Chỉ số Nước cũ}) \times 15.000\text{ đ}}{\text{Số lượng SV đang lưu trú trong phòng}}$$
+### 2. 💡 Tiền Điện Nước Sinh Hoạt (Thu Định Kỳ Hàng Tháng)
+- **Đơn giá động:** Quản sinh có thể tùy biến linh hoạt đơn giá điện (đ/kWh) và đơn giá nước (đ/m³) khi chốt số công tơ định kỳ theo từng tháng (mặc định gợi ý: `3.500 đ/kWh` và `15.000 đ/m³`).
+- **Tuyệt đối không cộng tiền phòng:** Hóa đơn tháng chỉ thu chi phí sử dụng điện nước thực tế, không cộng thêm tiền phòng.
 
-$$\text{Tổng thanh toán} = \text{Tiền điện của SV} + \text{Tiền nước của SV} + \text{Tiền phòng/tháng}$$
+#### Công thức tính tự động chia đều cho sinh viên trong phòng:
+
+$$\text{Tiền điện của SV} = \frac{(\text{Chỉ số Điện mới} - \text{Chỉ số Điện cũ}) \times \text{Đơn giá Điện (đ/kWh)}}{\text{Số lượng SV đang lưu trú trong phòng}}$$
+
+$$\text{Tiền nước của SV} = \frac{(\text{Chỉ số Nước mới} - \text{Chỉ số Nước cũ}) \times \text{Đơn giá Nước (đ/m³)}}{\text{Số lượng SV đang lưu trú trong phòng}}$$
+
+$$\text{Tổng thanh toán hóa đơn tháng} = \text{Tiền điện của SV} + \text{Tiền nước của SV}$$
+
+- 📅 **Hạn nộp định kỳ:** Ngày **25** hàng tháng.
 
 ---
 
@@ -243,7 +258,7 @@ sequenceDiagram
     SYS->>QS: WebSocket Push: Có hồ sơ mới chờ duyệt!
     QS->>SYS: Xem chi tiết hồ sơ & minh chứng ảnh
     QS->>SYS: Bấm Duyệt hồ sơ & Phân vào phòng còn chỗ
-    SYS->>SYS: Tự sinh mã SV, tài khoản & Hợp đồng lưu trú
+    SYS->>SYS: Tự sinh mã SV, tài khoản, Hợp đồng 1 năm & Hóa đơn tiền phòng (Hạn 15 ngày)
     SYS->>MAIL: Gửi email trúng tuyển kèm thông tin phòng & tài khoản
 ```
 
@@ -266,7 +281,7 @@ sequenceDiagram
     SV->>SV: Bong bóng chat xuất hiện tức thì trong widget
 ```
 
-### 3. Luồng Ghi Điện Nước, Xuất PDF & Thanh Toán VNPAY
+### 3. Luồng Quản Lý Tiền Phòng 1 Năm (Hạn 15 Ngày) & Điện Nước Hàng Tháng
 ```mermaid
 sequenceDiagram
     autonumber
@@ -275,15 +290,29 @@ sequenceDiagram
     participant SYS as Hệ Thống KTX
     participant VNP as Cổng VNPAY Sandbox
     
-    QS->>SYS: Nhập chỉ số điện nước hàng loạt theo Khu
-    SYS->>SYS: Tự động chia đều theo sĩ số phòng & sinh HoaDon
-    SYS->>SV: WebSocket Push: Có hóa đơn tiền phòng/điện nước mới!
-    SV->>SYS: Bấm "Xuất PDF" để tải hóa đơn định dạng chuẩn
-    SV->>SYS: Bấm "Thanh toán VNPAY"
-    SYS->>VNP: Tạo URL thanh toán bảo mật với mã hash HMAC-SHA512
-    SV->>VNP: Nhập thẻ test NCB & xác thực OTP
-    VNP->>SYS: Trả về kết quả giao dịch thành công (vnp_ResponseCode = 00)
-    SYS->>SYS: Cập nhật hóa đơn thành "Đã thanh toán"
+    rect rgb(240, 248, 255)
+    note over QS,VNP: LUỒNG 1: TIỀN PHÒNG 1 NĂM (HẠN 15 NGÀY) & CHẾ TÀI BUỘC RỜI KTX
+    SYS->>SV: Tự động khởi tạo Hóa đơn tiền phòng 1 năm khi ký HĐ (Hạn: ngày vào ở + 15 ngày)
+    alt Sinh viên thanh toán trong vòng 15 ngày
+        SV->>SYS: Bấm "Thanh toán VNPAY"
+        SYS->>VNP: Tạo URL thanh toán bảo mật với mã hash HMAC-SHA512
+        SV->>VNP: Nhập thẻ test NCB & xác thực OTP
+        VNP->>SYS: Trả về kết quả giao dịch thành công (vnp_ResponseCode = 00)
+        SYS->>SYS: Cập nhật hóa đơn thành "Đã thanh toán trọn gói 1 năm"
+    else Quá hạn 15 ngày chưa thanh toán
+        SYS->>QS: Hiển thị cảnh báo QUÁ HẠN NỘP TIỀN PHÒNG trên danh sách quản lý
+        QS->>SYS: Bấm nút hành động [Buộc rời KTX]
+        SYS->>SYS: Chấm dứt hợp đồng, kết thúc phân phòng & ghi biên bản kỷ luật "Đuổi khỏi KTX"
+    end
+    end
+    
+    rect rgb(255, 250, 240)
+    note over QS,VNP: LUỒNG 2: ĐIỆN NƯỚC HÀNG THÁNG (ĐƠN GIÁ ĐỘNG, KHÔNG CỘNG TIỀN PHÒNG)
+    QS->>SYS: Nhập đơn giá điện, nước & chốt chỉ số công tơ tháng (Đơn lẻ hoặc hàng loạt theo Khu)
+    SYS->>SYS: Tự động chia đều điện nước theo sĩ số phòng (tienPhong = 0.0 đ)
+    SYS->>SV: WebSocket Push: Có hóa đơn điện nước tháng mới (Hạn ngày 25 hàng tháng)
+    SV->>SYS: Xem chi tiết đơn giá, công tơ, xuất PDF hoặc thanh toán trực tuyến qua VNPAY
+    end
 ```
 
 ---
@@ -399,12 +428,12 @@ Toàn bộ các luồng nghiệp vụ từ Guest, Xác thực OTP, Sinh viên, Q
    - `Sinh viên 1`: Xem thông tin hồ sơ cá nhân (`/sinhvien/profile`)
    - `Sinh viên 2`: Cập nhật thông tin cá nhân kèm tự bổ sung Trường Đại học & Khoa
    - `Sinh viên 3`: Báo cáo sự cố hư hỏng cơ sở vật chất phòng
-   - `Sinh viên 4`: Xem danh sách hóa đơn điện nước và trạng thái thanh toán
+   - `Sinh viên 4`: Xem danh sách hóa đơn tiền phòng 1 năm & điện nước hàng tháng, kiểm tra hạn nộp và trạng thái thanh toán
 5. **Quản Trị Viên Flow (1 test):**
    - `Admin 1`: Đăng nhập, truy cập Dashboard Giám đốc/Admin và xem biểu đồ doanh thu
 6. **3 Tính Năng Nâng Cao - PDF Export & Live Chat (6 tests):**
-   - `Ý tưởng 2 - PDF`: Xuất hợp đồng lưu trú KTX sang định dạng PDF (OpenPDF chuẩn tiếng Việt)
-   - `Ý tưởng 2 - PDF`: Xuất hóa đơn điện nước & phòng sang định dạng PDF
+   - `Ý tưởng 2 - PDF`: Xuất hợp đồng lưu trú KTX sang định dạng PDF (OpenPDF chuẩn tiếng Việt, Điều khoản 1 năm & 15 ngày)
+   - `Ý tưởng 2 - PDF`: Xuất hóa đơn tiền phòng 1 năm và hóa đơn điện nước sang định dạng PDF chuẩn hóa
    - `Ý tưởng 3 - Live Chat`: Sinh viên gửi tin nhắn, lấy lịch sử và quản sinh phản hồi
    - `Ý tưởng 3 - Live Chat`: Quản sinh truy cập Trung tâm Live Chat toàn màn hình (`/quansinh/chat`)
    - `Ý tưởng 3 - Live Chat`: Đường dẫn tắt `/sinhvien/chat` chuyển hướng mở popup chat trên Dashboard

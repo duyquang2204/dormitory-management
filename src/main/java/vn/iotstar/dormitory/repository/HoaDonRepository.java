@@ -17,6 +17,18 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, String> {
     long countBySinhVien_MaSVAndTrangThai(String maSV, String trangThai);
     long countByTrangThaiContaining(String trangThai);
 
+    Page<HoaDon> findByLoaiHoaDon(String loaiHoaDon, Pageable pageable);
+    Page<HoaDon> findByPhong_Khu_MaKhuAndLoaiHoaDon(String maKhu, String loaiHoaDon, Pageable pageable);
+    Page<HoaDon> findBySinhVien_MaSVAndLoaiHoaDon(String maSV, String loaiHoaDon, Pageable pageable);
+    java.util.List<HoaDon> findBySinhVien_MaSVAndLoaiHoaDon(String maSV, String loaiHoaDon);
+    java.util.Optional<HoaDon> findFirstBySinhVien_MaSVAndLoaiHoaDonOrderByNgayTaoDesc(String maSV, String loaiHoaDon);
+    
+    @org.springframework.data.jpa.repository.Query("SELECT h FROM HoaDon h WHERE h.trangThai != 'Đã thanh toán' AND h.hanThanhToan < :currentDate")
+    Page<HoaDon> findOverdueInvoices(@org.springframework.data.repository.query.Param("currentDate") java.time.LocalDate currentDate, Pageable pageable);
+
+    @org.springframework.data.jpa.repository.Query("SELECT h FROM HoaDon h WHERE h.phong.khu.maKhu = :maKhu AND h.trangThai != 'Đã thanh toán' AND h.hanThanhToan < :currentDate")
+    Page<HoaDon> findOverdueInvoicesByKhu(@org.springframework.data.repository.query.Param("maKhu") String maKhu, @org.springframework.data.repository.query.Param("currentDate") java.time.LocalDate currentDate, Pageable pageable);
+
     @org.springframework.data.jpa.repository.Query("SELECT h.thang, SUM(h.tongTien) FROM HoaDon h WHERE h.trangThai = 'Đã thanh toán' AND h.nam = :nam GROUP BY h.thang ORDER BY h.thang")
     java.util.List<Object[]> getRevenueByMonthAndYear(@org.springframework.data.repository.query.Param("nam") int nam);
     
@@ -26,6 +38,6 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, String> {
     @org.springframework.data.jpa.repository.Query("SELECT DISTINCT h.nam FROM HoaDon h WHERE h.trangThai = 'Đã thanh toán' ORDER BY h.nam DESC")
     java.util.List<Integer> findDistinctYears();
     
-    @org.springframework.data.jpa.repository.Query("SELECT h FROM HoaDon h WHERE h.phong.maPhong = :maPhong AND (h.nam < :nam OR (h.nam = :nam AND h.thang < :thang)) ORDER BY h.nam DESC, h.thang DESC")
+    @org.springframework.data.jpa.repository.Query("SELECT h FROM HoaDon h WHERE h.phong.maPhong = :maPhong AND (h.loaiHoaDon = 'DIEN_NUOC' OR h.loaiHoaDon IS NULL) AND h.chiSoDienMoi IS NOT NULL AND (h.nam < :nam OR (h.nam = :nam AND h.thang < :thang)) ORDER BY h.nam DESC, h.thang DESC")
     java.util.List<HoaDon> findPreviousInvoices(@org.springframework.data.repository.query.Param("maPhong") String maPhong, @org.springframework.data.repository.query.Param("thang") int thang, @org.springframework.data.repository.query.Param("nam") int nam, org.springframework.data.domain.Pageable pageable);
 }

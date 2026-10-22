@@ -52,6 +52,9 @@ public class DangKyKTXService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private HoaDonService hoaDonService;
+
     public List<DangKyKTX> findAll() {
         return dangKyKTXRepository.findAll();
     }
@@ -141,9 +144,43 @@ public class DangKyKTXService {
             loaiPhongRepository.findById(dto.getMaLoaiPhong()).ifPresent(dk::setLoaiPhong);
         }
 
-        // Kiểm tra xem sinh viên này đã có tài khoản sẵn trong hệ thống chưa
-        Optional<SinhVien> svOpt = sinhVienRepository.findByEmail(dto.getEmail());
-        svOpt.ifPresent(dk::setSinhVien);
+        // 1. Kiểm tra trùng CCCD với sinh viên đã có trong hệ thống
+        if (dto.getCccd() != null && !dto.getCccd().trim().isEmpty()) {
+            String cleanCccd = dto.getCccd().trim();
+            Optional<SinhVien> existingCccd = sinhVienRepository.findAll().stream()
+                    .filter(s -> s.getCccd() != null && cleanCccd.equalsIgnoreCase(s.getCccd().trim()))
+                    .findFirst();
+            if (existingCccd.isPresent()) {
+                throw new RuntimeException("Số CCCD [" + cleanCccd + "] đã tồn tại trên hệ thống KTX (thuộc về sinh viên " 
+                        + existingCccd.get().getHoTen() + "). Vui lòng kiểm tra lại hoặc liên hệ Ban quản lý.");
+            }
+        }
+
+        // 2. Kiểm tra trùng Email với sinh viên đã có trong hệ thống
+        if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
+            String cleanEmail = dto.getEmail().trim();
+            Optional<SinhVien> existingEmail = sinhVienRepository.findByEmail(cleanEmail);
+            if (existingEmail.isPresent()) {
+                throw new RuntimeException("Email [" + cleanEmail + "] đã được đăng ký tài khoản sinh viên trên hệ thống KTX. Vui lòng đăng nhập để gửi đơn hoặc sử dụng email khác.");
+            }
+        }
+
+        // 3. Kiểm tra xem đã có hồ sơ nào đang chờ duyệt với cùng CCCD hoặc Email chưa
+        List<DangKyKTX> pendingList = dangKyKTXRepository.findAll().stream()
+                .filter(d -> "Chờ duyệt".equalsIgnoreCase(d.getTrangThai()))
+                .toList();
+        if (dto.getCccd() != null && !dto.getCccd().trim().isEmpty()) {
+            String cleanCccd = dto.getCccd().trim();
+            if (pendingList.stream().anyMatch(d -> d.getCccd() != null && cleanCccd.equalsIgnoreCase(d.getCccd().trim()))) {
+                throw new RuntimeException("Số CCCD [" + cleanCccd + "] hiện đã có hồ sơ đăng ký đang chờ xét duyệt. Vui lòng không nộp trùng lặp.");
+            }
+        }
+        if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
+            String cleanEmail = dto.getEmail().trim();
+            if (pendingList.stream().anyMatch(d -> d.getEmail() != null && cleanEmail.equalsIgnoreCase(d.getEmail().trim()))) {
+                throw new RuntimeException("Email [" + cleanEmail + "] hiện đã có hồ sơ đăng ký đang chờ xét duyệt. Vui lòng không nộp trùng lặp.");
+            }
+        }
 
         DangKyKTX saved = dangKyKTXRepository.save(dk);
 
@@ -234,40 +271,58 @@ public class DangKyKTXService {
         boolean isNewStudent = false;
 
         if (sv == null) {
-            // Thử tìm theo email hoặc cccd
-            Optional<SinhVien> existingOpt = Optional.empty();
-            if (dk.getEmail() != null && !dk.getEmail().trim().isEmpty()) {
-                existingOpt = sinhVienRepository.findByEmail(dk.getEmail().trim());
-            }
-            if (existingOpt.isEmpty() && dk.getCccd() != null && !dk.getCccd().trim().isEmpty()) {
-                existingOpt = sinhVienRepository.findAll().stream()
-                        .filter(s -> dk.getCccd().trim().equalsIgnoreCase(s.getCccd()))
+            // Kiểm tra xem số CCCD đã bị trùng với sinh viên khác trong hệ thống chưa
+            if (dk.getCccd() != null && !dk.getCccd().trim().isEmpty()) {
+                String cleanCccd = dk.getCccd().trim();
+                Optional<SinhVien> cccdConflict = sinhVienRepository.findAll().stream()
+                        .filter(s -> s.getCccd() != null && cleanCccd.equalsIgnoreCase(s.getCccd().trim()))
                         .findFirst();
+                if (cccdConflict.isPresent()) {
+                    throw new RuntimeException("Không thể duyệt đơn: Số CCCD [" + cleanCccd + "] đã thuộc về sinh viên " 
+                            + cccdConflict.get().getHoTen() + " (Mã SV: " + cccdConflict.get().getMaSV() + ").");
+                }
             }
 
-            if (existingOpt.isPresent()) {
-                sv = existingOpt.get();
-            } else {
-                isNewStudent = true;
-                sv = new SinhVien();
-                sv.setMaSV(sinhVienService.generateNextMaSV());
-                sv.setHoTen(dk.getHoTen());
-                sv.setEmail(dk.getEmail());
-                sv.setSdt(dk.getSdt());
-                sv.setCccd(dk.getCccd());
-                sv.setGioiTinh(dk.getGioiTinh());
-                sv.setNgaySinh(dk.getNgaySinh());
-                sv.setQueQuan(dk.getQueQuan());
-                sv.setTruongDaiHoc(dk.getTruongDaiHoc());
-                sv.setKhoa(dk.getKhoa());
-                sv.setNamHoc(dk.getNamHoc());
-                sv.setDienUuTien(dk.getDienUuTien());
-                sv.setAnhTheSinhVien(dk.getAnhTheSinhVien());
-                sv.setMatKhau(passwordEncoder.encode(plainPassword));
-                sv.setTrangThai("Hoạt động");
-                sv = sinhVienRepository.save(sv);
+            // Kiểm tra xem Email đã bị trùng với sinh viên khác trong hệ thống chưa
+            if (dk.getEmail() != null && !dk.getEmail().trim().isEmpty()) {
+                String cleanEmail = dk.getEmail().trim();
+                Optional<SinhVien> emailConflict = sinhVienRepository.findByEmail(cleanEmail);
+                if (emailConflict.isPresent()) {
+                    throw new RuntimeException("Không thể duyệt đơn: Email [" + cleanEmail + "] đã được đăng ký cho sinh viên " 
+                            + emailConflict.get().getHoTen() + " (Mã SV: " + emailConflict.get().getMaSV() + ").");
+                }
             }
+
+            // Khởi tạo tài khoản Sinh viên MỚI với Mã SV tăng tuần tự không trùng lặp
+            isNewStudent = true;
+            sv = new SinhVien();
+            sv.setMaSV(sinhVienService.generateNextMaSV());
+            sv.setHoTen(dk.getHoTen());
+            sv.setEmail(dk.getEmail());
+            sv.setSdt(dk.getSdt());
+            sv.setCccd(dk.getCccd());
+            sv.setGioiTinh(dk.getGioiTinh());
+            sv.setNgaySinh(dk.getNgaySinh());
+            sv.setQueQuan(dk.getQueQuan());
+            sv.setTruongDaiHoc(dk.getTruongDaiHoc());
+            sv.setKhoa(dk.getKhoa());
+            // Năm vào KTX: lấy năm của ngày bắt đầu vào ở (hoặc năm hiện tại)
+            int namVaoKTX = (ngayBatDau != null) ? ngayBatDau.getYear() : LocalDate.now().getYear();
+            sv.setNamHoc(namVaoKTX);
+            sv.setDienUuTien(dk.getDienUuTien());
+            sv.setAnhTheSinhVien(dk.getAnhTheSinhVien());
+            sv.setMatKhau(passwordEncoder.encode(plainPassword));
+            sv.setTrangThai("Hoạt động");
+            sv = sinhVienRepository.save(sv);
             dk.setSinhVien(sv);
+        } else {
+            // Đối với sinh viên cũ được duyệt đơn gia hạn / chuyển phòng:
+            // Giữ nguyên năm đầu tiên vào KTX, chỉ gán nếu hồ sơ cũ chưa có
+            if (sv.getNamHoc() == null) {
+                int namVaoKTX = (ngayBatDau != null) ? ngayBatDau.getYear() : LocalDate.now().getYear();
+                sv.setNamHoc(namVaoKTX);
+                sinhVienRepository.save(sv);
+            }
         }
 
         // 4. Xử lý các phân phòng và hợp đồng cũ của sinh viên nếu có
@@ -318,15 +373,23 @@ public class DangKyKTXService {
         phanPhongRepository.save(pp);
 
         // 6. Tạo Hợp đồng lưu trú
+        double donGiaThang = (p.getLoaiPhong() != null && p.getLoaiPhong().getDonGia() != null) ? p.getLoaiPhong().getDonGia() : 0.0;
+        long monthsDiff = (ngayBatDau != null && ngayKetThuc != null) ? java.time.temporal.ChronoUnit.MONTHS.between(ngayBatDau, ngayKetThuc) : 12;
+        int soThang = (int) Math.max(1, monthsDiff);
+        double tongGiaTien = donGiaThang * soThang;
+
         HopDong hd = new HopDong();
         hd.setMaHopDong("HD" + (System.currentTimeMillis() % 10000000));
         hd.setPhanPhong(pp);
         hd.setNgayLap(LocalDate.now());
         hd.setNgayBatDau(ngayBatDau);
         hd.setNgayKetThuc(ngayKetThuc);
-        hd.setGiaTien((p.getLoaiPhong() != null && p.getLoaiPhong().getDonGia() != null) ? p.getLoaiPhong().getDonGia() : 0.0);
+        hd.setGiaTien(tongGiaTien);
         hd.setTrangThai("Còn hạn");
         hopDongRepository.save(hd);
+
+        // 6.1 TỰ ĐỘNG SINH HÓA ĐƠN TIỀN PHÒNG 1 NĂM (Hạn nộp trong vòng 15 ngày)
+        hoaDonService.createTienPhongInvoice(sv, p, ngayBatDau, donGiaThang, soThang);
 
         // 6. Cập nhật trạng thái đơn đăng ký & phòng
         dk.setTrangThai("Đã duyệt");

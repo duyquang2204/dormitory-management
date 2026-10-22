@@ -38,6 +38,9 @@ public class PhanPhongService {
     @Autowired
     private vn.iotstar.dormitory.repository.HopDongRepository hopDongRepository;
 
+    @Autowired
+    private HoaDonService hoaDonService;
+
     public List<PhanPhong> findAll() {
         return phanPhongRepository.findAll();
     }
@@ -315,6 +318,25 @@ public class PhanPhongService {
             pp.setTrangThai("Đang ở");
             
             phanPhongRepository.save(pp);
+
+            // Tạo Hợp đồng lưu trú 01 năm
+            double donGiaThang = (p.getLoaiPhong() != null && p.getLoaiPhong().getDonGia() != null) ? p.getLoaiPhong().getDonGia() : 0.0;
+            long monthsDiff = (ngayBatDau != null && ngayKetThuc != null) ? java.time.temporal.ChronoUnit.MONTHS.between(ngayBatDau, ngayKetThuc) : 12;
+            int soThang = (int) Math.max(1, monthsDiff);
+            double tongGiaTien = donGiaThang * soThang;
+
+            vn.iotstar.dormitory.entity.HopDong hd = new vn.iotstar.dormitory.entity.HopDong();
+            hd.setMaHopDong("HD" + (System.currentTimeMillis() % 10000000));
+            hd.setPhanPhong(pp);
+            hd.setNgayLap(LocalDate.now());
+            hd.setNgayBatDau(ngayBatDau);
+            hd.setNgayKetThuc(ngayKetThuc);
+            hd.setGiaTien(tongGiaTien);
+            hd.setTrangThai("Còn hạn");
+            hopDongRepository.save(hd);
+
+            // Sinh Hóa đơn tiền phòng 01 năm (Hạn 15 ngày)
+            hoaDonService.createTienPhongInvoice(sv, p, ngayBatDau, donGiaThang, soThang);
             
             // Kiểm tra xem sau khi thêm, phòng đã đầy chưa
             if (soNguoiHienTai + 1 >= soNguoiToiDa) {

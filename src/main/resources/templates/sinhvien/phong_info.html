@@ -124,8 +124,8 @@
                                             <span class="fw-semibold text-dark" th:text="${#temporals.format(hd.ngayLap, 'dd/MM/yyyy')}"></span>
                                         </div>
                                         <div class="col-sm-6">
-                                            <span class="text-muted">Giá thuê phòng:</span> 
-                                            <span class="fw-bold text-danger" th:text="${#numbers.formatDecimal(hd.giaTien, 0, 'COMMA', 0, 'POINT')} + ' VNĐ / tháng'"></span>
+                                            <span class="text-muted">Giá thuê hợp đồng:</span> 
+                                            <span class="fw-bold text-danger" th:text="${#numbers.formatDecimal(hd.giaTien, 0, 'COMMA', 0, 'POINT')} + ' VNĐ / năm'"></span>
                                         </div>
                                         <div class="col-12">
                                             <span class="text-muted">Thời hạn HĐ:</span> 

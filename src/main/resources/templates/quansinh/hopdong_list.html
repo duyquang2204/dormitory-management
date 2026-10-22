@@ -46,7 +46,7 @@
                                         <th>Mã SV</th>
                                         <th>Phòng</th>
                                         <th>Thời hạn</th>
-                                        <th>Giá thuê / tháng</th>
+                                        <th>Giá thuê / năm</th>
                                         <th>Trạng thái</th>
                                         <th>Yêu cầu SV</th>
                                         <th class="pe-3">Thao tác</th>
@@ -62,7 +62,7 @@
                                             <br>
                                             <span th:if="${hd.isSapHetHan()}" class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle"></i> Sắp hết</span>
                                         </td>
-                                        <td th:text="${#numbers.formatDecimal(hd.giaTien, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng'" class="text-danger"></td>
+                                        <td th:text="${#numbers.formatDecimal(hd.giaTien, 0, 'COMMA', 0, 'POINT')} + ' đ/năm'" class="text-danger fw-semibold"></td>
                                         <td>
                                             <span th:class="${hd.trangThai == 'Đã hết hạn' or hd.trangThai == 'Đã thanh lý' ? 'badge bg-danger' : 'badge bg-success'}" 
                                                   th:text="${hd.trangThai}"></span>

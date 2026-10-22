@@ -148,9 +148,12 @@ public class PdfExportService {
         document.add(pDieu2);
 
         String giaTienStr = hd.getGiaTien() != null ? CURRENCY_FORMATTER.format(hd.getGiaTien()) + " VNĐ" : "Theo quy định";
-        Paragraph pNoiDung2 = new Paragraph("- Giá thuê lưu trú: " + giaTienStr + " / tháng.\n"
-                + "- Chi phí điện, nước: Tính theo chỉ số thực tế tiêu thụ hàng tháng của phòng và chia đều cho các sinh viên nội trú.\n"
-                + "- Thời hạn nộp: Hóa đơn dịch vụ hàng tháng được phát hành trên hệ thống và Bên B có trách nhiệm thanh toán qua cổng VNPAY hoặc chuyển khoản trước ngày 25 hàng tháng.", normalFont);
+        String hanNopStr = hd.getNgayBatDau() != null ? hd.getNgayBatDau().plusDays(15).format(DATE_FORMATTER) : "trong vòng 15 ngày";
+
+        Paragraph pNoiDung2 = new Paragraph("- Tổng giá trị hợp đồng thuê chỗ ở trọn gói 01 năm: " + giaTienStr + ".\n"
+                + "- Thời hạn thanh toán tiền phòng: Bên B có nghĩa vụ thanh toán đủ 100% tiền thuê phòng 01 năm trong thời hạn tối đa 15 (mười lăm) ngày kể từ ngày bắt đầu vào ở (Hạn chót: " + hanNopStr + ").\n"
+                + "- Quy định chế tài nghiêm ngặt: Trường hợp quá thời hạn 15 ngày kể từ ngày nhận phòng mà Bên B không hoàn thành nghĩa vụ nộp tiền phòng 01 năm, Bên A có toàn quyền đơn phương chấm dứt hợp đồng, buộc Bên B rời khỏi Ký túc xá và thu hồi chỗ ở để phân bổ cho sinh viên khác.\n"
+                + "- Chi phí điện, nước sinh hoạt: Tính theo chỉ số thực tế tiêu thụ hàng tháng của phòng theo đơn giá hiện hành do KTX ban hành và chia đều cho các sinh viên nội trú. Thời hạn thanh toán dịch vụ hàng tháng trước ngày 25 hàng tháng.", normalFont);
         pNoiDung2.setSpacingAfter(8);
         document.add(pNoiDung2);
 
@@ -221,12 +224,18 @@ public class PdfExportService {
         pAddr.setSpacingAfter(15);
         document.add(pAddr);
 
+        boolean isTienPhong = "TIEN_PHONG".equalsIgnoreCase(hd.getLoaiHoaDon());
+
         // 2. Tiêu đề Hóa Đơn
-        Paragraph pTitle = new Paragraph("HÓA ĐƠN TIỀN PHÒNG & DỊCH VỤ ĐIỆN NƯỚC", titleFont);
+        String titleText = isTienPhong ? "HÓA ĐƠN THU TIỀN PHÒNG NỘI TRÚ (01 NĂM)" : "HÓA ĐƠN DỊCH VỤ ĐIỆN NƯỚC HÀNG THÁNG";
+        Paragraph pTitle = new Paragraph(titleText, titleFont);
         pTitle.setAlignment(Element.ALIGN_CENTER);
         document.add(pTitle);
 
-        Paragraph pKy = new Paragraph("Kỳ thanh toán: Tháng " + hd.getThang() + " / Năm " + hd.getNam(), getFont(11, Font.BOLD, new Color(220, 53, 69)));
+        String kyText = isTienPhong 
+                ? "Thời hạn lưu trú: 01 Năm học (" + hd.getNam() + " - " + (hd.getNam() + 1) + ")"
+                : "Kỳ thanh toán: Tháng " + hd.getThang() + " / Năm " + hd.getNam();
+        Paragraph pKy = new Paragraph(kyText, getFont(11, Font.BOLD, new Color(220, 53, 69)));
         pKy.setAlignment(Element.ALIGN_CENTER);
         document.add(pKy);
 
@@ -246,87 +255,126 @@ public class PdfExportService {
         String phongStr = (hd.getPhong() != null ? "Phòng " + hd.getPhong().getSoPhong() : "N/A")
                 + (hd.getPhong() != null && hd.getPhong().getKhu() != null ? " (Khu " + hd.getPhong().getKhu().getTenKhu() + ")" : "");
         String ngayTaoStr = hd.getNgayTao() != null ? hd.getNgayTao().format(DATE_FORMATTER) : LocalDate.now().format(DATE_FORMATTER);
+        String hanThanhToanStr = hd.getHanThanhToan() != null ? hd.getHanThanhToan().format(DATE_FORMATTER) : ("25/" + hd.getThang() + "/" + hd.getNam());
 
         addInfoCell(tableInfo, "Sinh viên:", hoTenSV + " (" + maSV + ")", boldFont, normalFont);
         addInfoCell(tableInfo, "Phòng lưu trú:", phongStr, boldFont, normalFont);
         addInfoCell(tableInfo, "Ngày phát hành:", ngayTaoStr, boldFont, normalFont);
-        addInfoCell(tableInfo, "Hạn thanh toán:", "25/" + hd.getThang() + "/" + hd.getNam(), boldFont, normalFont);
+        addInfoCell(tableInfo, "Hạn thanh toán:", hanThanhToanStr, boldFont, normalFont);
         addInfoCell(tableInfo, "Trạng thái:", hd.getTrangThai(), boldFont, normalFont);
         addInfoCell(tableInfo, "Phương thức:", hd.getPhuongThucThanhToan() != null ? hd.getPhuongThucThanhToan() : "Cổng VNPAY / Chuyển khoản", boldFont, normalFont);
 
         document.add(tableInfo);
 
         // 4. Bảng kê chi phí
-        PdfPTable tableChiTiet = new PdfPTable(6);
-        tableChiTiet.setWidthPercentage(100);
-        tableChiTiet.setWidths(new float[]{8f, 32f, 15f, 15f, 15f, 15f});
-        tableChiTiet.setSpacingAfter(15);
-
-        // Header cells
         Color headerBg = new Color(20, 50, 95);
-        addHeaderCell(tableChiTiet, "STT", thFont, headerBg);
-        addHeaderCell(tableChiTiet, "Dịch vụ", thFont, headerBg);
-        addHeaderCell(tableChiTiet, "Chỉ số cũ", thFont, headerBg);
-        addHeaderCell(tableChiTiet, "Chỉ số mới", thFont, headerBg);
-        addHeaderCell(tableChiTiet, "Tiêu thụ", thFont, headerBg);
-        addHeaderCell(tableChiTiet, "Thành tiền", thFont, headerBg);
 
-        // Dòng 1: Tiền phòng
-        double tienPhong = hd.getTienPhong() != null ? hd.getTienPhong() : 0.0;
-        addDataCell(tableChiTiet, "1", normalFont, Element.ALIGN_CENTER);
-        addDataCell(tableChiTiet, "Tiền thuê chỗ ở KTX", normalFont, Element.ALIGN_LEFT);
-        addDataCell(tableChiTiet, "-", normalFont, Element.ALIGN_CENTER);
-        addDataCell(tableChiTiet, "-", normalFont, Element.ALIGN_CENTER);
-        addDataCell(tableChiTiet, "1 tháng", normalFont, Element.ALIGN_CENTER);
-        addDataCell(tableChiTiet, CURRENCY_FORMATTER.format(tienPhong) + " đ", boldFont, Element.ALIGN_RIGHT);
+        if (isTienPhong) {
+            // Bảng cho Hóa đơn tiền phòng 1 năm
+            PdfPTable tableChiTiet = new PdfPTable(5);
+            tableChiTiet.setWidthPercentage(100);
+            tableChiTiet.setWidths(new float[]{10f, 40f, 15f, 15f, 20f});
+            tableChiTiet.setSpacingAfter(15);
 
-        // Dòng 2: Tiền điện
-        double chiSoDienCu = hd.getChiSoDienCu() != null ? hd.getChiSoDienCu() : 0.0;
-        double chiSoDienMoi = hd.getChiSoDienMoi() != null ? hd.getChiSoDienMoi() : 0.0;
-        double soDien = Math.max(0, chiSoDienMoi - chiSoDienCu);
-        double tienDien = hd.getTienDien() != null ? hd.getTienDien() : 0.0;
+            addHeaderCell(tableChiTiet, "STT", thFont, headerBg);
+            addHeaderCell(tableChiTiet, "Khoản thu", thFont, headerBg);
+            addHeaderCell(tableChiTiet, "Thời hạn", thFont, headerBg);
+            addHeaderCell(tableChiTiet, "Đơn giá/tháng", thFont, headerBg);
+            addHeaderCell(tableChiTiet, "Thành tiền", thFont, headerBg);
 
-        addDataCell(tableChiTiet, "2", normalFont, Element.ALIGN_CENTER);
-        addDataCell(tableChiTiet, "Tiền điện (3.500 đ/kWh)", normalFont, Element.ALIGN_LEFT);
-        addDataCell(tableChiTiet, String.valueOf(chiSoDienCu), normalFont, Element.ALIGN_CENTER);
-        addDataCell(tableChiTiet, String.valueOf(chiSoDienMoi), normalFont, Element.ALIGN_CENTER);
-        addDataCell(tableChiTiet, soDien + " kWh", normalFont, Element.ALIGN_CENTER);
-        addDataCell(tableChiTiet, CURRENCY_FORMATTER.format(tienDien) + " đ", boldFont, Element.ALIGN_RIGHT);
+            double tongTienPhong = hd.getTongTien() != null ? hd.getTongTien() : (hd.getTienPhong() != null ? hd.getTienPhong() : 0.0);
+            double donGiaThang = tongTienPhong / 12.0;
 
-        // Dòng 3: Tiền nước
-        double chiSoNuocCu = hd.getChiSoNuocCu() != null ? hd.getChiSoNuocCu() : 0.0;
-        double chiSoNuocMoi = hd.getChiSoNuocMoi() != null ? hd.getChiSoNuocMoi() : 0.0;
-        double soNuoc = Math.max(0, chiSoNuocMoi - chiSoNuocCu);
-        double tienNuoc = hd.getTienNuoc() != null ? hd.getTienNuoc() : 0.0;
+            addDataCell(tableChiTiet, "1", normalFont, Element.ALIGN_CENTER);
+            addDataCell(tableChiTiet, "Tiền thuê chỗ ở KTX trọn gói 01 năm", normalFont, Element.ALIGN_LEFT);
+            addDataCell(tableChiTiet, "12 tháng", normalFont, Element.ALIGN_CENTER);
+            addDataCell(tableChiTiet, CURRENCY_FORMATTER.format(donGiaThang) + " đ", normalFont, Element.ALIGN_RIGHT);
+            addDataCell(tableChiTiet, CURRENCY_FORMATTER.format(tongTienPhong) + " đ", boldFont, Element.ALIGN_RIGHT);
 
-        addDataCell(tableChiTiet, "3", normalFont, Element.ALIGN_CENTER);
-        addDataCell(tableChiTiet, "Tiền nước (15.000 đ/m³)", normalFont, Element.ALIGN_LEFT);
-        addDataCell(tableChiTiet, String.valueOf(chiSoNuocCu), normalFont, Element.ALIGN_CENTER);
-        addDataCell(tableChiTiet, String.valueOf(chiSoNuocMoi), normalFont, Element.ALIGN_CENTER);
-        addDataCell(tableChiTiet, soNuoc + " m³", normalFont, Element.ALIGN_CENTER);
-        addDataCell(tableChiTiet, CURRENCY_FORMATTER.format(tienNuoc) + " đ", boldFont, Element.ALIGN_RIGHT);
+            PdfPCell cellTotalLabel = new PdfPCell(new Phrase("TỔNG TIỀN PHÒNG PHẢI NỘP:", getFont(10, Font.BOLD, new Color(20, 50, 95))));
+            cellTotalLabel.setColspan(4);
+            cellTotalLabel.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cellTotalLabel.setPadding(8);
+            cellTotalLabel.setBackgroundColor(new Color(245, 245, 245));
+            tableChiTiet.addCell(cellTotalLabel);
 
-        // Dòng Tổng cộng
-        double tongTien = hd.getTongTien() != null ? hd.getTongTien() : (tienPhong + tienDien + tienNuoc);
-        PdfPCell cellTotalLabel = new PdfPCell(new Phrase("TỔNG CỘNG THANH TOÁN:", getFont(10, Font.BOLD, new Color(20, 50, 95))));
-        cellTotalLabel.setColspan(5);
-        cellTotalLabel.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        cellTotalLabel.setPadding(8);
-        cellTotalLabel.setBackgroundColor(new Color(245, 245, 245));
-        tableChiTiet.addCell(cellTotalLabel);
+            PdfPCell cellTotalValue = new PdfPCell(new Phrase(CURRENCY_FORMATTER.format(tongTienPhong) + " VNĐ", getFont(11, Font.BOLD, new Color(220, 53, 69))));
+            cellTotalValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cellTotalValue.setPadding(8);
+            cellTotalValue.setBackgroundColor(new Color(245, 245, 245));
+            tableChiTiet.addCell(cellTotalValue);
 
-        PdfPCell cellTotalValue = new PdfPCell(new Phrase(CURRENCY_FORMATTER.format(tongTien) + " VNĐ", getFont(11, Font.BOLD, new Color(220, 53, 69))));
-        cellTotalValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        cellTotalValue.setPadding(8);
-        cellTotalValue.setBackgroundColor(new Color(245, 245, 245));
-        tableChiTiet.addCell(cellTotalValue);
+            document.add(tableChiTiet);
 
-        document.add(tableChiTiet);
+            Paragraph pNote = new Paragraph("LƯU Ý QUAN TRỌNG: Sinh viên có nghĩa vụ hoàn tất thanh toán tiền phòng 01 năm trong vòng 15 ngày kể từ ngày vào ở (Hạn chót: " + hanThanhToanStr + "). Sau thời hạn này nếu không nộp tiền, Ký túc xá sẽ chấm dứt hợp đồng và buộc sinh viên rời khỏi KTX theo quy định.", italicFont);
+            pNote.setSpacingAfter(25);
+            document.add(pNote);
+        } else {
+            // Bảng cho Hóa đơn điện nước hàng tháng (KHÔNG CÓ TIỀN PHÒNG)
+            PdfPTable tableChiTiet = new PdfPTable(7);
+            tableChiTiet.setWidthPercentage(100);
+            tableChiTiet.setWidths(new float[]{8f, 24f, 13f, 13f, 14f, 14f, 14f});
+            tableChiTiet.setSpacingAfter(15);
 
-        // 5. Ghi chú và hướng dẫn nộp tiền
-        Paragraph pNote = new Paragraph("Ghi chú: Tiền điện và tiền nước được tính theo chỉ số thực tế của phòng và chia đều cho các sinh viên trong phòng.\nSinh viên vui lòng thanh toán đúng thời hạn trước ngày 25 hàng tháng để tránh gián đoạn dịch vụ.", italicFont);
-        pNote.setSpacingAfter(25);
-        document.add(pNote);
+            addHeaderCell(tableChiTiet, "STT", thFont, headerBg);
+            addHeaderCell(tableChiTiet, "Dịch vụ", thFont, headerBg);
+            addHeaderCell(tableChiTiet, "Chỉ số cũ", thFont, headerBg);
+            addHeaderCell(tableChiTiet, "Chỉ số mới", thFont, headerBg);
+            addHeaderCell(tableChiTiet, "Tiêu thụ", thFont, headerBg);
+            addHeaderCell(tableChiTiet, "Đơn giá", thFont, headerBg);
+            addHeaderCell(tableChiTiet, "Thành tiền", thFont, headerBg);
+
+            // Dòng 1: Tiền điện
+            double chiSoDienCu = hd.getChiSoDienCu() != null ? hd.getChiSoDienCu() : 0.0;
+            double chiSoDienMoi = hd.getChiSoDienMoi() != null ? hd.getChiSoDienMoi() : 0.0;
+            double soDien = Math.max(0, chiSoDienMoi - chiSoDienCu);
+            double donGiaDien = hd.getDonGiaDien() != null ? hd.getDonGiaDien() : 3500.0;
+            double tienDien = hd.getTienDien() != null ? hd.getTienDien() : 0.0;
+
+            addDataCell(tableChiTiet, "1", normalFont, Element.ALIGN_CENTER);
+            addDataCell(tableChiTiet, "Điện sinh hoạt", normalFont, Element.ALIGN_LEFT);
+            addDataCell(tableChiTiet, String.valueOf(chiSoDienCu), normalFont, Element.ALIGN_CENTER);
+            addDataCell(tableChiTiet, String.valueOf(chiSoDienMoi), normalFont, Element.ALIGN_CENTER);
+            addDataCell(tableChiTiet, soDien + " kWh", normalFont, Element.ALIGN_CENTER);
+            addDataCell(tableChiTiet, CURRENCY_FORMATTER.format(donGiaDien) + " đ", normalFont, Element.ALIGN_RIGHT);
+            addDataCell(tableChiTiet, CURRENCY_FORMATTER.format(tienDien) + " đ", boldFont, Element.ALIGN_RIGHT);
+
+            // Dòng 2: Tiền nước
+            double chiSoNuocCu = hd.getChiSoNuocCu() != null ? hd.getChiSoNuocCu() : 0.0;
+            double chiSoNuocMoi = hd.getChiSoNuocMoi() != null ? hd.getChiSoNuocMoi() : 0.0;
+            double soNuoc = Math.max(0, chiSoNuocMoi - chiSoNuocCu);
+            double donGiaNuoc = hd.getDonGiaNuoc() != null ? hd.getDonGiaNuoc() : 15000.0;
+            double tienNuoc = hd.getTienNuoc() != null ? hd.getTienNuoc() : 0.0;
+
+            addDataCell(tableChiTiet, "2", normalFont, Element.ALIGN_CENTER);
+            addDataCell(tableChiTiet, "Nước sinh hoạt", normalFont, Element.ALIGN_LEFT);
+            addDataCell(tableChiTiet, String.valueOf(chiSoNuocCu), normalFont, Element.ALIGN_CENTER);
+            addDataCell(tableChiTiet, String.valueOf(chiSoNuocMoi), normalFont, Element.ALIGN_CENTER);
+            addDataCell(tableChiTiet, soNuoc + " m³", normalFont, Element.ALIGN_CENTER);
+            addDataCell(tableChiTiet, CURRENCY_FORMATTER.format(donGiaNuoc) + " đ", normalFont, Element.ALIGN_RIGHT);
+            addDataCell(tableChiTiet, CURRENCY_FORMATTER.format(tienNuoc) + " đ", boldFont, Element.ALIGN_RIGHT);
+
+            // Dòng Tổng cộng
+            double tongTien = hd.getTongTien() != null ? hd.getTongTien() : (tienDien + tienNuoc);
+            PdfPCell cellTotalLabel = new PdfPCell(new Phrase("TỔNG THANH TOÁN (ĐIỆN + NƯỚC):", getFont(10, Font.BOLD, new Color(20, 50, 95))));
+            cellTotalLabel.setColspan(6);
+            cellTotalLabel.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cellTotalLabel.setPadding(8);
+            cellTotalLabel.setBackgroundColor(new Color(245, 245, 245));
+            tableChiTiet.addCell(cellTotalLabel);
+
+            PdfPCell cellTotalValue = new PdfPCell(new Phrase(CURRENCY_FORMATTER.format(tongTien) + " VNĐ", getFont(11, Font.BOLD, new Color(220, 53, 69))));
+            cellTotalValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cellTotalValue.setPadding(8);
+            cellTotalValue.setBackgroundColor(new Color(245, 245, 245));
+            tableChiTiet.addCell(cellTotalValue);
+
+            document.add(tableChiTiet);
+
+            Paragraph pNote = new Paragraph("Ghi chú: Tiền điện và tiền nước được tính theo chỉ số thực tế của phòng và chia đều cho các sinh viên trong phòng.\nSinh viên vui lòng thanh toán đúng thời hạn trước ngày 25 hàng tháng để tránh gián đoạn dịch vụ.", italicFont);
+            pNote.setSpacingAfter(25);
+            document.add(pNote);
+        }
 
         // 6. Chữ ký
         PdfPTable tableKy = new PdfPTable(2);

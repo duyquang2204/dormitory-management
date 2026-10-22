@@ -23,7 +23,7 @@
                                 <div class="d-flex flex-wrap align-items-center gap-3 text-muted small mt-2">
                                     <span><i class="fas fa-id-card text-primary me-1"></i> MSSV: <strong class="text-dark" th:text="${sinhVien != null ? sinhVien.maSV : '---'}">SV001</strong></span>
                                     <span><i class="fas fa-graduation-cap text-info me-1"></i> Khoa: <span th:text="${sinhVien != null && sinhVien.khoa != null ? sinhVien.khoa : 'Công nghệ thông tin'}">CNTT</span></span>
-                                    <span><i class="fas fa-calendar-alt text-warning me-1"></i> Năm học: <span th:text="${sinhVien != null && sinhVien.namHoc != null ? 'Năm ' + sinhVien.namHoc : 'Năm 1'}">Năm 2</span></span>
+                                    <span><i class="fas fa-calendar-alt text-warning me-1"></i> Năm vào KTX: <strong class="text-dark" th:text="${sinhVien != null && sinhVien.namHoc != null ? sinhVien.namHoc : '2026'}">2026</strong></span>
                                     <span><i class="fas fa-map-marker-alt text-danger me-1"></i> Quê quán: <span th:text="${sinhVien != null && sinhVien.queQuan != null ? sinhVien.queQuan : '---'}">Hồ Chí Minh</span></span>
                                 </div>
                             </div>
@@ -49,6 +49,45 @@
                 <!-- KỊCH BẢN 1: SINH VIÊN ĐÃ ĐƯỢC PHÂN PHÒNG (CURRENT ROOM != NULL) -->
                 <!-- ========================================================================= -->
                 <div th:if="${currentRoom != null}">
+                    <!-- CẢNH BÁO QUÁ HẠN 15 NGÀY NỘP TIỀN PHÒNG -->
+                    <div th:if="${hoaDonTienPhong != null and hoaDonTienPhong.isQuaHan() and hoaDonTienPhong.trangThai != 'Đã thanh toán'}" 
+                         class="alert alert-danger shadow-sm border-2 border-danger mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="border-radius: 14px;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                                <i class="fas fa-exclamation-triangle fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1 text-danger">CẢNH BÁO: HÓA ĐƠN TIỀN PHÒNG 1 NĂM ĐÃ QUÁ HẠN 15 NGÀY!</h6>
+                                <p class="mb-0 small text-dark">
+                                    Hạn thanh toán là <strong th:text="${#temporals.format(hoaDonTienPhong.hanThanhToan, 'dd/MM/yyyy')}">15/09/2026</strong>. Theo quy chế KTX, bạn đang trong diện <strong>bị chấm dứt hợp đồng và buộc rời KTX</strong> do chưa hoàn tất tiền phòng.
+                                </p>
+                            </div>
+                        </div>
+                        <a th:href="@{/sinhvien/vnpay/thanh-toan(maHoaDon=${hoaDonTienPhong.maHoaDon})}" class="btn btn-danger fw-bold px-4 py-2 shadow-sm">
+                            <i class="fas fa-credit-card me-2"></i>Thanh toán VNPAY Khẩn cấp
+                        </a>
+                    </div>
+
+                    <!-- NHẮC NHỞ THANH TOÁN TIỀN PHÒNG 1 NĂM (TRONG HẠN 15 NGÀY) -->
+                    <div th:if="${hoaDonTienPhong != null and !hoaDonTienPhong.isQuaHan() and hoaDonTienPhong.trangThai != 'Đã thanh toán'}" 
+                         class="alert alert-warning shadow-sm border border-warning mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="border-radius: 14px;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                                <i class="fas fa-bell fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1 text-dark">Nhắc nhở: Thanh toán tiền phòng trọn gói 1 năm (Hạn 15 ngày từ khi vào KTX)</h6>
+                                <p class="mb-0 small text-dark">
+                                    Số tiền: <strong class="text-danger" th:text="${#numbers.formatDecimal(hoaDonTienPhong.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'">12,000,000 đ</strong>. 
+                                    Hạn chót thanh toán: <strong class="text-danger" th:text="${#temporals.format(hoaDonTienPhong.hanThanhToan, 'dd/MM/yyyy')}">15/09/2026</strong>. Vui lòng thanh toán đúng hạn để tránh bị kỷ luật hủy phòng.
+                                </p>
+                            </div>
+                        </div>
+                        <a th:href="@{/sinhvien/vnpay/thanh-toan(maHoaDon=${hoaDonTienPhong.maHoaDon})}" class="btn btn-primary fw-bold px-4 py-2 shadow-sm" style="background-color: #005a9e; border-color: #005a9e;">
+                            <i class="fas fa-credit-card me-2"></i>Thanh toán VNPAY Ngay
+                        </a>
+                    </div>
+
                     <!-- 4 THẺ CHỈ SỐ NHANH -->
                     <div class="row g-3 mb-4">
                         <!-- Thẻ 1: Phòng hiện tại -->
@@ -254,33 +293,31 @@
                                             </div>
                                         </div>
 
-                                        <!-- Chi tiết điện nước & phòng -->
-                                        <div class="row g-2 text-center">
-                                            <div class="col-4">
-                                                <div class="p-2 bg-light rounded-3">
-                                                    <span class="text-muted small d-block"><i class="fas fa-bolt text-warning me-1"></i> Tiền Điện</span>
-                                                    <strong class="text-dark small" th:text="${latestInvoice.tienDien != null ? #numbers.formatDecimal(latestInvoice.tienDien, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">50,000 đ</strong>
-                                                    <div class="text-muted" style="font-size: 0.72rem;">
-                                                        Tiêu thụ: <span th:text="${(latestInvoice.chiSoDienMoi != null and latestInvoice.chiSoDienCu != null) ? (latestInvoice.chiSoDienMoi - latestInvoice.chiSoDienCu) : 0}">20</span> kWh
+                                        <!-- Chi tiết điện nước (không tính tiền phòng) -->
+                                        <div class="row g-3 text-center">
+                                            <div class="col-6">
+                                                <div class="p-3 bg-light rounded-3 border">
+                                                    <span class="text-muted small d-block mb-1"><i class="fas fa-bolt text-warning me-1"></i> Tiền Điện (Phần của bạn)</span>
+                                                    <h5 class="fw-bold text-dark mb-1" th:text="${latestInvoice.tienDien != null ? #numbers.formatDecimal(latestInvoice.tienDien, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">50,000 đ</h5>
+                                                    <div class="text-muted small">
+                                                        Phòng dùng: <strong th:text="${(latestInvoice.chiSoDienMoi != null and latestInvoice.chiSoDienCu != null) ? (latestInvoice.chiSoDienMoi - latestInvoice.chiSoDienCu) : 0}">20</strong> kWh
+                                                        • Đơn giá: <span th:text="${#numbers.formatDecimal(latestInvoice.donGiaDien ?: 3500, 0, 'COMMA', 0, 'POINT')}"></span> đ/kWh
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-4">
-                                                <div class="p-2 bg-light rounded-3">
-                                                    <span class="text-muted small d-block"><i class="fas fa-tint text-info me-1"></i> Tiền Nước</span>
-                                                    <strong class="text-dark small" th:text="${latestInvoice.tienNuoc != null ? #numbers.formatDecimal(latestInvoice.tienNuoc, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">30,000 đ</strong>
-                                                    <div class="text-muted" style="font-size: 0.72rem;">
-                                                        Tiêu thụ: <span th:text="${(latestInvoice.chiSoNuocMoi != null and latestInvoice.chiSoNuocCu != null) ? (latestInvoice.chiSoNuocMoi - latestInvoice.chiSoNuocCu) : 0}">3</span> m³
+                                            <div class="col-6">
+                                                <div class="p-3 bg-light rounded-3 border">
+                                                    <span class="text-muted small d-block mb-1"><i class="fas fa-tint text-info me-1"></i> Tiền Nước (Phần của bạn)</span>
+                                                    <h5 class="fw-bold text-dark mb-1" th:text="${latestInvoice.tienNuoc != null ? #numbers.formatDecimal(latestInvoice.tienNuoc, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">30,000 đ</h5>
+                                                    <div class="text-muted small">
+                                                        Phòng dùng: <strong th:text="${(latestInvoice.chiSoNuocMoi != null and latestInvoice.chiSoNuocCu != null) ? (latestInvoice.chiSoNuocMoi - latestInvoice.chiSoNuocCu) : 0}">3</strong> m³
+                                                        • Đơn giá: <span th:text="${#numbers.formatDecimal(latestInvoice.donGiaNuoc ?: 15000, 0, 'COMMA', 0, 'POINT')}"></span> đ/m³
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-4">
-                                                <div class="p-2 bg-light rounded-3">
-                                                    <span class="text-muted small d-block"><i class="fas fa-home text-primary me-1"></i> Tiền Phòng</span>
-                                                    <strong class="text-dark small" th:text="${latestInvoice.tienPhong != null ? #numbers.formatDecimal(latestInvoice.tienPhong, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">0 đ</strong>
-                                                    <div class="text-muted" style="font-size: 0.72rem;">Tiền phòng theo tháng</div>
-                                                </div>
-                                            </div>
+                                        </div>
+                                        <div class="text-muted small fst-italic mt-2">
+                                            <i class="fas fa-info-circle me-1"></i>Hóa đơn tháng chỉ thu chi phí điện nước sinh hoạt, không tính tiền phòng (tiền phòng 1 năm thu theo hợp đồng).
                                         </div>
 
                                         <div class="mt-3 text-end" th:if="${latestInvoice.trangThai == 'Chưa thanh toán'}">

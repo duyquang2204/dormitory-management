@@ -17,6 +17,9 @@ public class PhongDTO {
     
     private String trangThai;
 
+    private Double chiSoDienHienTai = 0.0;
+    private Double chiSoNuocHienTai = 0.0;
+
     // Getters and Setters
     public String getMaPhong() { return maPhong; }
     public void setMaPhong(String maPhong) { this.maPhong = maPhong; }
@@ -32,4 +35,10 @@ public class PhongDTO {
 
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
+
+    public Double getChiSoDienHienTai() { return chiSoDienHienTai != null ? chiSoDienHienTai : 0.0; }
+    public void setChiSoDienHienTai(Double chiSoDienHienTai) { this.chiSoDienHienTai = chiSoDienHienTai; }
+
+    public Double getChiSoNuocHienTai() { return chiSoNuocHienTai != null ? chiSoNuocHienTai : 0.0; }
+    public void setChiSoNuocHienTai(Double chiSoNuocHienTai) { this.chiSoNuocHienTai = chiSoNuocHienTai; }
 }

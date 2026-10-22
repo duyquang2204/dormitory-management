@@ -33,7 +33,7 @@ public class HoaDon {
     private Double tienPhong;
     private Double tongTien;
 
-    // Trạng thái: "Chưa thanh toán", "Chờ duyệt", "Đã thanh toán"
+    // Trạng thái: "Chưa thanh toán", "Chờ duyệt", "Đã thanh toán", "Quá hạn", ...
     private String trangThai;
 
     private String minhChungThanhToan; // Hình ảnh biên lai
@@ -41,6 +41,16 @@ public class HoaDon {
     private String phuongThucThanhToan; // "Tiền mặt" hoặc "Chuyển khoản"
 
     private LocalDate ngayTao;
+
+    // Phân loại: "TIEN_PHONG" (1 năm) hoặc "DIEN_NUOC" (hàng tháng)
+    private String loaiHoaDon = "DIEN_NUOC";
+
+    private LocalDate hanThanhToan;
+
+    private Double donGiaDien;
+    private Double donGiaNuoc;
+
+    private String ghiChu;
 
     public HoaDon() {
     }
@@ -179,5 +189,53 @@ public class HoaDon {
 
     public void setTienNuoc(Double tienNuoc) {
         this.tienNuoc = tienNuoc;
+    }
+
+    public String getLoaiHoaDon() {
+        return loaiHoaDon;
+    }
+
+    public void setLoaiHoaDon(String loaiHoaDon) {
+        this.loaiHoaDon = loaiHoaDon;
+    }
+
+    public LocalDate getHanThanhToan() {
+        return hanThanhToan;
+    }
+
+    public void setHanThanhToan(LocalDate hanThanhToan) {
+        this.hanThanhToan = hanThanhToan;
+    }
+
+    public Double getDonGiaDien() {
+        return donGiaDien;
+    }
+
+    public void setDonGiaDien(Double donGiaDien) {
+        this.donGiaDien = donGiaDien;
+    }
+
+    public Double getDonGiaNuoc() {
+        return donGiaNuoc;
+    }
+
+    public void setDonGiaNuoc(Double donGiaNuoc) {
+        this.donGiaNuoc = donGiaNuoc;
+    }
+
+    public String getGhiChu() {
+        return ghiChu;
+    }
+
+    public void setGhiChu(String ghiChu) {
+        this.ghiChu = ghiChu;
+    }
+
+    @Transient
+    public boolean isQuaHan() {
+        if (!"Đã thanh toán".equalsIgnoreCase(this.trangThai) && this.hanThanhToan != null) {
+            return LocalDate.now().isAfter(this.hanThanhToan);
+        }
+        return false;
     }
 }

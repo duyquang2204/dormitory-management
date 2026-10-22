@@ -22,15 +22,10 @@
                 <!-- Đơn giá định mức áp dụng -->
                 <div class="alert alert-light border shadow-sm mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3" style="border-radius: 12px;">
                     <div class="d-flex align-items-center flex-wrap gap-3">
-                        <span class="fw-bold text-dark"><i class="fas fa-calculator text-primary me-2"></i>Đơn giá tự động tính:</span>
-                        <span class="badge bg-warning bg-opacity-25 text-dark border border-warning px-3 py-2">
-                            <i class="fas fa-bolt text-warning me-1"></i> Điện: <strong>3.500 đ</strong> / kWh
-                        </span>
-                        <span class="badge bg-info bg-opacity-25 text-dark border border-info px-3 py-2">
-                            <i class="fas fa-water text-primary me-1"></i> Nước: <strong>15.000 đ</strong> / m³
-                        </span>
+                        <span class="fw-bold text-dark"><i class="fas fa-info-circle text-primary me-2"></i>Quy chế thu phí điện nước:</span>
+                        <span class="text-muted">Hóa đơn điện nước hàng tháng chỉ tính <strong>Tiền Điện & Tiền Nước</strong> (chia đều cho các sinh viên trong phòng). Không tính tiền phòng.</span>
                     </div>
-                    <small class="text-muted fst-italic">Hệ thống tính: (Tiêu thụ điện × 3.500 + Tiêu thụ nước × 15.000) / Số sinh viên + Tiền phòng</small>
+                    <small class="text-muted fst-italic">Quản sinh có thể tùy chỉnh đơn giá điện và nước áp dụng cho đợt chốt này</small>
                 </div>
 
                 <!-- Form chọn Khu và Thời gian -->
@@ -78,6 +73,29 @@
                             <input type="hidden" th:field="*{maKhu}">
                             <input type="hidden" th:field="*{thang}">
                             <input type="hidden" th:field="*{nam}">
+                            
+                            <!-- Đơn giá áp dụng cho đợt chốt này -->
+                            <div class="p-3 bg-light border-bottom">
+                                <div class="row g-3 align-items-center">
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0 fw-bold text-dark"><i class="fas fa-sliders-h text-primary me-2"></i>Thiết lập đơn giá cho đợt chốt này:</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white fw-bold"><i class="fas fa-bolt text-warning me-1"></i>Điện:</span>
+                                            <input type="number" step="100" class="form-control" th:field="*{donGiaDien}" placeholder="3500" required>
+                                            <span class="input-group-text bg-white">đ/kWh</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white fw-bold"><i class="fas fa-tint text-info me-1"></i>Nước:</span>
+                                            <input type="number" step="500" class="form-control" th:field="*{donGiaNuoc}" placeholder="15000" required>
+                                            <span class="input-group-text bg-white">đ/m³</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle mb-0">

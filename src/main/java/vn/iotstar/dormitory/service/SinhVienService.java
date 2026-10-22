@@ -75,6 +75,9 @@ public class SinhVienService {
     @Autowired
     private OtpXacThucRepository otpXacThucRepository;
 
+    @Autowired
+    private vn.iotstar.dormitory.repository.PhongRepository phongRepository;
+
     public List<SinhVien> findAll() {
         return sinhVienRepository.findAll();
     }
@@ -169,8 +172,25 @@ public class SinhVienService {
             phanPhongRepository.delete(pp);
         }
 
-        // 2.3 Hóa đơn
+        // 2.3 Bảo toàn chỉ số điện nước cho phòng trước khi xóa hóa đơn
         List<vn.iotstar.dormitory.entity.HoaDon> hoaDons = hoaDonRepository.findAllBySinhVien_MaSV(id);
+        for (vn.iotstar.dormitory.entity.HoaDon hd : hoaDons) {
+            if (hd.getPhong() != null) {
+                vn.iotstar.dormitory.entity.Phong p = hd.getPhong();
+                boolean updated = false;
+                if (hd.getChiSoDienMoi() != null && (p.getChiSoDienHienTai() == null || hd.getChiSoDienMoi() > p.getChiSoDienHienTai())) {
+                    p.setChiSoDienHienTai(hd.getChiSoDienMoi());
+                    updated = true;
+                }
+                if (hd.getChiSoNuocMoi() != null && (p.getChiSoNuocHienTai() == null || hd.getChiSoNuocMoi() > p.getChiSoNuocHienTai())) {
+                    p.setChiSoNuocHienTai(hd.getChiSoNuocMoi());
+                    updated = true;
+                }
+                if (updated) {
+                    phongRepository.save(p);
+                }
+            }
+        }
         hoaDonRepository.deleteAll(hoaDons);
 
         // 2.4 Vi phạm
@@ -206,11 +226,23 @@ public class SinhVienService {
     }
 
     public synchronized String generateNextMaSV() {
-        long count = sinhVienRepository.count();
-        String generatedId = String.format("SV%04d", count + 1);
+        int maxId = 0;
+        List<SinhVien> all = sinhVienRepository.findAll();
+        for (SinhVien sv : all) {
+            if (sv.getMaSV() != null && sv.getMaSV().matches("(?i)SV\\d+")) {
+                try {
+                    int num = Integer.parseInt(sv.getMaSV().replaceAll("[^0-9]", ""));
+                    if (num > maxId) {
+                        maxId = num;
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        int nextId = maxId + 1;
+        String generatedId = String.format("SV%04d", nextId);
         while (sinhVienRepository.existsById(generatedId)) {
-            count++;
-            generatedId = String.format("SV%04d", count + 1);
+            nextId++;
+            generatedId = String.format("SV%04d", nextId);
         }
         return generatedId;
     }
@@ -316,6 +348,23 @@ public class SinhVienService {
         if (sv.getMaSV() == null) {
             isNew = true;
         }
+
+        // Kiểm tra trùng Email với sinh viên khác
+        if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
+            Optional<SinhVien> emailSv = sinhVienRepository.findByEmail(dto.getEmail().trim());
+            if (emailSv.isPresent() && !emailSv.get().getMaSV().equalsIgnoreCase(dto.getMaSV())) {
+                throw new RuntimeException("Email [" + dto.getEmail() + "] đã thuộc về sinh viên " + emailSv.get().getHoTen() + " (" + emailSv.get().getMaSV() + ").");
+            }
+        }
+        // Kiểm tra trùng CCCD với sinh viên khác
+        if (dto.getCccd() != null && !dto.getCccd().trim().isEmpty()) {
+            Optional<SinhVien> cccdSv = sinhVienRepository.findAll().stream()
+                    .filter(s -> s.getCccd() != null && s.getCccd().equalsIgnoreCase(dto.getCccd().trim()) && !s.getMaSV().equalsIgnoreCase(dto.getMaSV()))
+                    .findFirst();
+            if (cccdSv.isPresent()) {
+                throw new RuntimeException("Số CCCD [" + dto.getCccd() + "] đã thuộc về sinh viên " + cccdSv.get().getHoTen() + " (" + cccdSv.get().getMaSV() + ").");
+            }
+        }
         
         sv.setMaSV(dto.getMaSV());
         sv.setHoTen(dto.getHoTen());
@@ -327,7 +376,11 @@ public class SinhVienService {
         sv.setEmail(dto.getEmail());
         sv.setKhoa(dto.getKhoa());
         sv.setTruongDaiHoc(dto.getTruongDaiHoc());
-        sv.setNamHoc(dto.getNamHoc());
+        if (dto.getNamHoc() != null) {
+            sv.setNamHoc(dto.getNamHoc());
+        } else if (sv.getNamHoc() == null) {
+            sv.setNamHoc(java.time.LocalDate.now().getYear());
+        }
         sv.setDienUuTien(dto.getDienUuTien());
         sv.setTrangThai("Hoạt động");
         

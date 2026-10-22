@@ -45,8 +45,8 @@
                             </div>
 
                             <div class="mb-4">
-                                <label class="form-label">Tiền thuê phòng/tháng (VNĐ) <span class="text-danger">*</span></label>
-                                <input type="number" step="1000" class="form-control" th:field="*{giaTien}" placeholder="Ví dụ: 3000000" required>
+                                <label class="form-label">Tiền thuê phòng / năm (VNĐ) <span class="text-danger">*</span></label>
+                                <input type="number" step="1000" class="form-control" th:field="*{giaTien}" placeholder="Ví dụ: 9600000" required>
                                 <div class="text-danger small mt-1" th:if="${#fields.hasErrors('giaTien')}" th:errors="*{giaTien}"></div>
                             </div>
 

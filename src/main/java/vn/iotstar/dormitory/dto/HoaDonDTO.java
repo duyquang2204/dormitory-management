@@ -30,6 +30,13 @@ public class HoaDonDTO {
     
     private String trangThai;
 
+    private Double donGiaDien;
+    private Double donGiaNuoc;
+    private String loaiHoaDon;
+    private java.time.LocalDate hanThanhToan;
+    private Double tienPhong;
+    private String ghiChu;
+
     public HoaDonDTO() {}
 
     public String getMaHoaDon() {
@@ -102,5 +109,53 @@ public class HoaDonDTO {
 
     public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
+    }
+
+    public Double getDonGiaDien() {
+        return donGiaDien;
+    }
+
+    public void setDonGiaDien(Double donGiaDien) {
+        this.donGiaDien = donGiaDien;
+    }
+
+    public Double getDonGiaNuoc() {
+        return donGiaNuoc;
+    }
+
+    public void setDonGiaNuoc(Double donGiaNuoc) {
+        this.donGiaNuoc = donGiaNuoc;
+    }
+
+    public String getLoaiHoaDon() {
+        return loaiHoaDon;
+    }
+
+    public void setLoaiHoaDon(String loaiHoaDon) {
+        this.loaiHoaDon = loaiHoaDon;
+    }
+
+    public java.time.LocalDate getHanThanhToan() {
+        return hanThanhToan;
+    }
+
+    public void setHanThanhToan(java.time.LocalDate hanThanhToan) {
+        this.hanThanhToan = hanThanhToan;
+    }
+
+    public Double getTienPhong() {
+        return tienPhong;
+    }
+
+    public void setTienPhong(Double tienPhong) {
+        this.tienPhong = tienPhong;
+    }
+
+    public String getGhiChu() {
+        return ghiChu;
+    }
+
+    public void setGhiChu(String ghiChu) {
+        this.ghiChu = ghiChu;
     }
 }

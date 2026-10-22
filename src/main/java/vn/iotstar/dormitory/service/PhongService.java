@@ -199,6 +199,13 @@ public class PhongService {
             p.setTrangThai(dto.getTrangThai());
         }
         
+        if (dto.getChiSoDienHienTai() != null) {
+            p.setChiSoDienHienTai(dto.getChiSoDienHienTai());
+        }
+        if (dto.getChiSoNuocHienTai() != null) {
+            p.setChiSoNuocHienTai(dto.getChiSoNuocHienTai());
+        }
+        
         phongRepository.save(p);
     }
 }

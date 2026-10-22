@@ -25,6 +25,9 @@ public class Phong {
 
     private String gioiTinh;
 
+    private Double chiSoDienHienTai = 0.0;
+    private Double chiSoNuocHienTai = 0.0;
+
     @Transient
     private long soNguoiHienTai = 0;
 
@@ -123,5 +126,21 @@ public class Phong {
 
     public void setGioiTinh(String gioiTinh) {
         this.gioiTinh = gioiTinh;
+    }
+
+    public Double getChiSoDienHienTai() {
+        return chiSoDienHienTai != null ? chiSoDienHienTai : 0.0;
+    }
+
+    public void setChiSoDienHienTai(Double chiSoDienHienTai) {
+        this.chiSoDienHienTai = chiSoDienHienTai;
+    }
+
+    public Double getChiSoNuocHienTai() {
+        return chiSoNuocHienTai != null ? chiSoNuocHienTai : 0.0;
+    }
+
+    public void setChiSoNuocHienTai(Double chiSoNuocHienTai) {
+        this.chiSoNuocHienTai = chiSoNuocHienTai;
     }
 }

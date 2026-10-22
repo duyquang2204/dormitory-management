@@ -105,7 +105,14 @@
                             </thead>
                             <tbody>
                                 <tr th:each="p : ${phongPage.content}">
-                                    <td th:text="${p.soPhong}" class="fw-bold"></td>
+                                    <td class="text-nowrap">
+                                        <div class="fw-bold text-dark" th:text="${p.soPhong}"></div>
+                                        <div class="small text-muted" style="font-size: 0.78rem;" title="Chỉ số điện nước chốt hiện tại của phòng">
+                                            <i class="fas fa-bolt text-warning"></i> <span th:text="${#numbers.formatDecimal(p.chiSoDienHienTai ?: 0, 0, 'COMMA', 1, 'POINT')}"></span> kWh
+                                            <span class="mx-1">•</span>
+                                            <i class="fas fa-tint text-info"></i> <span th:text="${#numbers.formatDecimal(p.chiSoNuocHienTai ?: 0, 0, 'COMMA', 1, 'POINT')}"></span> m³
+                                        </div>
+                                    </td>
                                     <td>
                                         <span th:text="${p.khu != null ? p.khu.tenKhu : ''}"></span>
                                         <span class="text-muted small"> (Tầng <span th:text="${p.tang}">1</span>)</span>

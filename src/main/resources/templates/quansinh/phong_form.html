@@ -55,7 +55,7 @@
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('maLoaiPhong')}" th:errors="*{maLoaiPhong}"></div>
                             </div>
 
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label class="form-label">Trạng thái</label>
                                 <select class="form-select" th:field="*{trangThai}">
                                     <option value="Trống">Trống</option>
@@ -63,6 +63,19 @@
                                     <option value="Đã đầy">Đã đầy</option>
                                     <option value="Bảo trì">Bảo trì</option>
                                 </select>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label"><i class="fas fa-bolt text-warning me-1"></i>Chỉ số điện hiện tại (kWh)</label>
+                                    <input type="number" step="0.01" class="form-control" th:field="*{chiSoDienHienTai}" placeholder="0.0">
+                                    <div class="form-text small text-muted">Lưu cố định cho phòng kể cả khi phòng trống.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label"><i class="fas fa-tint text-info me-1"></i>Chỉ số nước hiện tại (m³)</label>
+                                    <input type="number" step="0.01" class="form-control" th:field="*{chiSoNuocHienTai}" placeholder="0.0">
+                                    <div class="form-text small text-muted">Lưu cố định cho phòng kể cả khi phòng trống.</div>
+                                </div>
                             </div>
 
                             <div class="d-flex justify-content-end">

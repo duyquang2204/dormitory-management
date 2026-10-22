@@ -79,15 +79,11 @@ public class QuanSinhController {
     
     @GetMapping("/sinhvien/them")
     public String themSinhVien(Model model) {
-        long count = sinhVienService.findAll().size();
-        String generatedId = String.format("SV%04d", count + 1);
-        while (sinhVienService.findById(generatedId).isPresent()) {
-            count++;
-            generatedId = String.format("SV%04d", count + 1);
-        }
+        String generatedId = sinhVienService.generateNextMaSV();
         
         SinhVienDTO dto = new SinhVienDTO();
         dto.setMaSV(generatedId);
+        dto.setNamHoc(java.time.LocalDate.now().getYear());
         
         model.addAttribute("sinhVienDTO", dto);
         model.addAttribute("isEdit", false);
@@ -102,12 +98,36 @@ public class QuanSinhController {
         if (!isEdit && sinhVienService.findById(dto.getMaSV()).isPresent()) {
             result.rejectValue("maSV", "error.sinhVienDTO", "Mã sinh viên đã tồn tại trong hệ thống!");
         }
+
+        // Kiểm tra trùng Email
+        if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
+            Optional<SinhVien> emailSv = sinhVienService.findByEmail(dto.getEmail().trim());
+            if (emailSv.isPresent() && (!isEdit || !emailSv.get().getMaSV().equalsIgnoreCase(dto.getMaSV()))) {
+                result.rejectValue("email", "error.sinhVienDTO", "Email này đã được sử dụng bởi sinh viên " + emailSv.get().getHoTen() + " (" + emailSv.get().getMaSV() + ")!");
+            }
+        }
+
+        // Kiểm tra trùng CCCD
+        if (dto.getCccd() != null && !dto.getCccd().trim().isEmpty()) {
+            Optional<SinhVien> cccdSv = sinhVienService.findAll().stream()
+                    .filter(s -> s.getCccd() != null && s.getCccd().equalsIgnoreCase(dto.getCccd().trim()) && (!isEdit || !s.getMaSV().equalsIgnoreCase(dto.getMaSV())))
+                    .findFirst();
+            if (cccdSv.isPresent()) {
+                result.rejectValue("cccd", "error.sinhVienDTO", "Số CCCD này đã thuộc về sinh viên " + cccdSv.get().getHoTen() + " (" + cccdSv.get().getMaSV() + ")!");
+            }
+        }
         
         if (result.hasErrors()) {
             model.addAttribute("isEdit", isEdit);
             return "quansinh/sinhvien_form";
         }
-        sinhVienService.save(dto);
+        try {
+            sinhVienService.save(dto);
+        } catch (Exception e) {
+            model.addAttribute("isEdit", isEdit);
+            model.addAttribute("error", e.getMessage());
+            return "quansinh/sinhvien_form";
+        }
         return "redirect:/quansinh/sinhvien?success";
     }
     
@@ -222,6 +242,8 @@ public class QuanSinhController {
             if (p.getKhu() != null) dto.setMaKhu(p.getKhu().getMaKhu());
             if (p.getLoaiPhong() != null) dto.setMaLoaiPhong(p.getLoaiPhong().getMaLoaiPhong());
             dto.setTrangThai(p.getTrangThai());
+            dto.setChiSoDienHienTai(p.getChiSoDienHienTai());
+            dto.setChiSoNuocHienTai(p.getChiSoNuocHienTai());
             
             model.addAttribute("phongDTO", dto);
             model.addAttribute("khus", phongService.findAllKhu());
@@ -357,7 +379,7 @@ public class QuanSinhController {
 
             model.addAttribute("phongs", displayPhongs);
             model.addAttribute("homNay", java.time.LocalDate.now());
-            model.addAttribute("ngayKetThucMacDinh", java.time.LocalDate.now().plusMonths(6));
+            model.addAttribute("ngayKetThucMacDinh", java.time.LocalDate.now().plusYears(1));
             return "quansinh/phanphong_form";
         }
         return "redirect:/quansinh/dang-ky";
@@ -403,6 +425,8 @@ public class QuanSinhController {
                     return conCho && matchGioiTinh;
                 })
                 .toList());
+        model.addAttribute("homNay", java.time.LocalDate.now());
+        model.addAttribute("ngayKetThucMacDinh", java.time.LocalDate.now().plusYears(1));
         return "quansinh/phanphong_nhanh_form";
     }
 
@@ -579,6 +603,7 @@ public class QuanSinhController {
     @GetMapping("/hoa-don")
     public String listHoaDon(
             @RequestParam(name = "maKhu", required = false) String maKhu,
+            @RequestParam(name = "loaiHoaDon", defaultValue = "ALL") String loaiHoaDon,
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
             Model model) {
@@ -586,21 +611,39 @@ public class QuanSinhController {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page - 1, size);
         org.springframework.data.domain.Page<vn.iotstar.dormitory.entity.HoaDon> hoaDonPage;
         
-        if (maKhu != null && !maKhu.isEmpty()) {
-            hoaDonPage = hoaDonService.findByKhu(maKhu, pageable);
+        if ("QUA_HAN".equalsIgnoreCase(loaiHoaDon)) {
+            if (maKhu != null && !maKhu.isEmpty()) {
+                hoaDonPage = hoaDonService.findOverdueByKhu(maKhu, pageable);
+            } else {
+                hoaDonPage = hoaDonService.findOverdue(pageable);
+            }
+        } else if ("TIEN_PHONG".equalsIgnoreCase(loaiHoaDon) || "DIEN_NUOC".equalsIgnoreCase(loaiHoaDon)) {
+            if (maKhu != null && !maKhu.isEmpty()) {
+                hoaDonPage = hoaDonService.findByKhuAndLoaiHoaDon(maKhu, loaiHoaDon, pageable);
+            } else {
+                hoaDonPage = hoaDonService.findByLoaiHoaDon(loaiHoaDon, pageable);
+            }
         } else {
-            hoaDonPage = hoaDonService.findAll(pageable);
+            if (maKhu != null && !maKhu.isEmpty()) {
+                hoaDonPage = hoaDonService.findByKhu(maKhu, pageable);
+            } else {
+                hoaDonPage = hoaDonService.findAll(pageable);
+            }
         }
         
         model.addAttribute("hoaDonPage", hoaDonPage);
         model.addAttribute("maKhu", maKhu);
+        model.addAttribute("loaiHoaDon", loaiHoaDon);
         model.addAttribute("khus", phongService.findAllKhu());
         return "quansinh/hoadon_list";
     }
 
     @GetMapping("/hoa-don/them")
     public String themHoaDon(Model model) {
-        model.addAttribute("hoaDonDTO", new vn.iotstar.dormitory.dto.HoaDonDTO());
+        vn.iotstar.dormitory.dto.HoaDonDTO dto = new vn.iotstar.dormitory.dto.HoaDonDTO();
+        dto.setDonGiaDien(3500.0);
+        dto.setDonGiaNuoc(15000.0);
+        model.addAttribute("hoaDonDTO", dto);
         model.addAttribute("phongs", phongService.findAll());
         return "quansinh/hoadon_form";
     }
@@ -627,12 +670,26 @@ public class QuanSinhController {
         return "redirect:/quansinh/hoa-don?paid";
     }
 
+    @PostMapping("/hoa-don/xu-ly-qua-han")
+    public String xuLyHoaDonQuaHan(@RequestParam("maHoaDon") String maHoaDon, 
+                                   org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            hoaDonService.xuLyQuaHanBuocRoiKTX(maHoaDon);
+            redirectAttributes.addFlashAttribute("success", "Đã xử lý kỷ luật buộc rời KTX và chấm dứt hợp đồng do nợ tiền phòng quá 15 ngày thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/quansinh/hoa-don";
+    }
+
     @GetMapping("/hoa-don/ghi-so-hang-loat")
     public String ghiSoHangLoatForm(@RequestParam(name = "maKhu", required = false) String maKhu,
                                     @RequestParam(name = "thang", required = false) Integer thang,
                                     @RequestParam(name = "nam", required = false) Integer nam,
                                     Model model) {
         vn.iotstar.dormitory.dto.HoaDonMassInputDTO dto = new vn.iotstar.dormitory.dto.HoaDonMassInputDTO();
+        dto.setDonGiaDien(3500.0);
+        dto.setDonGiaNuoc(15000.0);
         java.util.List<vn.iotstar.dormitory.dto.HoaDonRoomInputDTO> roomDtos = new java.util.ArrayList<>();
         
         if (maKhu != null && thang != null && nam != null) {

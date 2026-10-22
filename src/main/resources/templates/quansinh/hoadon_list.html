@@ -17,16 +17,56 @@
                     </div>
                 </div>
                 
-                <div th:if="${param.success}" class="alert alert-success">
-                    Lưu thông tin hóa đơn thành công!
+                <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+                    <i class="fas fa-check-circle me-1"></i> Lưu thông tin hóa đơn thành công!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-                <div th:if="${param.paid}" class="alert alert-info">
-                    Đã cập nhật trạng thái thanh toán thành công!
+                <div th:if="${param.paid}" class="alert alert-info alert-dismissible fade show">
+                    <i class="fas fa-check-circle me-1"></i> Đã cập nhật trạng thái thanh toán thành công!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                    <i class="fas fa-check-circle me-1"></i> <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-triangle me-1"></i> <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
 
+                <!-- Tabs lọc loại hóa đơn -->
+                <ul class="nav nav-pills mb-3 gap-2">
+                    <li class="nav-item">
+                        <a th:class="${loaiHoaDon == 'ALL' or loaiHoaDon == null ? 'nav-link active fw-bold' : 'nav-link bg-white border text-dark'}" 
+                           th:href="@{/quansinh/hoa-don(maKhu=${maKhu}, loaiHoaDon='ALL')}">
+                           <i class="fas fa-list me-1"></i> Tất cả hóa đơn
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:class="${loaiHoaDon == 'TIEN_PHONG' ? 'nav-link active fw-bold bg-primary text-white' : 'nav-link bg-white border text-dark'}" 
+                           th:href="@{/quansinh/hoa-don(maKhu=${maKhu}, loaiHoaDon='TIEN_PHONG')}">
+                           <i class="fas fa-home me-1"></i> Tiền phòng 1 năm (Hạn 15 ngày)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:class="${loaiHoaDon == 'DIEN_NUOC' ? 'nav-link active fw-bold bg-info text-dark' : 'nav-link bg-white border text-dark'}" 
+                           th:href="@{/quansinh/hoa-don(maKhu=${maKhu}, loaiHoaDon='DIEN_NUOC')}">
+                           <i class="fas fa-bolt me-1"></i> Điện nước (Hàng tháng)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:class="${loaiHoaDon == 'QUA_HAN' ? 'nav-link active fw-bold bg-danger text-white' : 'nav-link bg-white border text-danger'}" 
+                           th:href="@{/quansinh/hoa-don(maKhu=${maKhu}, loaiHoaDon='QUA_HAN')}">
+                           <i class="fas fa-exclamation-triangle me-1"></i> Quá hạn nộp (Cần xử lý)
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Filter Khu -->
                 <div class="card shadow-sm mb-3">
                     <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
                         <form th:action="@{/quansinh/hoa-don}" method="get" class="row g-3 align-items-center m-0">
+                            <input type="hidden" name="loaiHoaDon" th:value="${loaiHoaDon}">
                             <div class="col-auto">
                                 <label for="maKhu" class="col-form-label fw-bold">Chọn Khu:</label>
                             </div>
@@ -40,14 +80,9 @@
                                 </select>
                             </div>
                         </form>
-                        <div class="d-flex align-items-center flex-wrap gap-2">
-                            <span class="text-muted small fw-bold"><i class="fas fa-tag me-1 text-primary"></i>Đơn giá áp dụng:</span>
-                            <span class="badge bg-warning bg-opacity-25 text-dark border border-warning px-3 py-2">
-                                <i class="fas fa-bolt text-warning me-1"></i>Điện: <strong>3.500 đ</strong> / kWh
-                            </span>
-                            <span class="badge bg-info bg-opacity-25 text-dark border border-info px-3 py-2">
-                                <i class="fas fa-water text-primary me-1"></i>Nước: <strong>15.000 đ</strong> / m³
-                            </span>
+                        <div class="d-flex align-items-center flex-wrap gap-2 text-muted small">
+                            <i class="fas fa-shield-alt text-warning me-1"></i>
+                            <span>Sinh viên quá hạn 15 ngày nộp tiền phòng sẽ bị xử lý chấm dứt hợp đồng và buộc rời KTX.</span>
                         </div>
                     </div>
                 </div>
@@ -55,59 +90,105 @@
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered text-center align-middle" style="min-width: 950px;">
+                            <table class="table table-hover table-bordered text-center align-middle" style="min-width: 1050px;">
                             <thead class="table-light">
                                 <tr>
+                                    <th>Loại Hóa Đơn</th>
                                     <th>Sinh viên</th>
-                                    <th>Khu - Phòng</th>
-                                    <th>Tháng/Năm</th>
-                                    <th>Số điện (kWh)</th>
-                                    <th>Số nước (m³)</th>
+                                    <th>Phòng</th>
+                                    <th>Kỳ thu / Diễn giải</th>
+                                    <th>Hạn thanh toán</th>
                                     <th>Tổng tiền</th>
                                     <th>Trạng thái</th>
-                                    <th>Hành động</th>
+                                    <th style="min-width: 160px;">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr th:each="hd : ${hoaDonPage.content}">
-                                    <td class="fw-bold" th:text="${hd.sinhVien != null ? hd.sinhVien.hoTen : 'Trống'}"></td>
-                                    <td class="fw-bold text-primary" th:text="${hd.phong.soPhong}"></td>
-                                    <td th:text="${hd.thang + '/' + hd.nam}"></td>
                                     <td>
-                                        <span class="text-danger fw-bold" th:text="${hd.chiSoDienMoi - hd.chiSoDienCu}"></span>
+                                        <span th:if="${hd.loaiHoaDon == 'TIEN_PHONG'}" class="badge bg-primary px-2 py-1">
+                                            <i class="fas fa-home me-1"></i>Tiền phòng 1 năm
+                                        </span>
+                                        <span th:if="${hd.loaiHoaDon != 'TIEN_PHONG'}" class="badge bg-info text-dark px-2 py-1">
+                                            <i class="fas fa-bolt me-1"></i>Điện nước
+                                        </span>
+                                        <div class="small text-muted mt-1" th:text="${hd.maHoaDon}"></div>
                                     </td>
                                     <td>
-                                        <span class="text-info fw-bold" th:text="${hd.chiSoNuocMoi - hd.chiSoNuocCu}"></span>
+                                        <strong th:text="${hd.sinhVien != null ? hd.sinhVien.hoTen : 'Chưa gán'}"></strong>
+                                        <div class="small text-muted" th:if="${hd.sinhVien != null}" th:text="'MSSV: ' + ${hd.sinhVien.maSV}"></div>
                                     </td>
-                                    <td th:text="${#numbers.formatDecimal(hd.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'" class="fw-bold text-success"></td>
+                                    <td class="fw-bold text-primary" th:text="${hd.phong != null ? hd.phong.soPhong : '---'}"></td>
+                                    <td class="text-start">
+                                        <div th:if="${hd.loaiHoaDon == 'TIEN_PHONG'}">
+                                            <span class="fw-semibold text-dark">Tiền phòng trọn gói 12 tháng</span>
+                                            <div class="small text-muted" th:text="${hd.ghiChu}"></div>
+                                        </div>
+                                        <div th:if="${hd.loaiHoaDon != 'TIEN_PHONG'}">
+                                            <span class="fw-semibold text-dark" th:text="'Tháng ' + ${hd.thang} + '/' + ${hd.nam}"></span>
+                                            <div class="small text-muted">
+                                                Điện: <strong th:text="${hd.chiSoDienMoi - hd.chiSoDienCu}"></strong> kWh (<span th:text="${#numbers.formatDecimal(hd.donGiaDien ?: 3500, 0, 'COMMA', 0, 'POINT')}"></span> đ/kWh)
+                                            </div>
+                                            <div class="small text-muted">
+                                                Nước: <strong th:text="${hd.chiSoNuocMoi - hd.chiSoNuocCu}"></strong> m³ (<span th:text="${#numbers.formatDecimal(hd.donGiaNuoc ?: 15000, 0, 'COMMA', 0, 'POINT')}"></span> đ/m³)
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold" th:text="${hd.hanThanhToan != null ? #temporals.format(hd.hanThanhToan, 'dd/MM/yyyy') : ('25/' + hd.thang + '/' + hd.nam)}"></span>
+                                        <div th:if="${hd.isQuaHan() and hd.trangThai != 'Đã thanh toán'}">
+                                            <span class="badge bg-danger mt-1"><i class="fas fa-exclamation-triangle me-1"></i>ĐÃ QUÁ HẠN</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${#numbers.formatDecimal(hd.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'" class="fw-bold text-success fs-6"></td>
                                     <td>
                                         <span th:class="${hd.trangThai == 'Đã thanh toán' ? 'badge bg-success' : (hd.trangThai == 'Chưa thanh toán' ? 'badge bg-warning text-dark' : 'badge bg-info')}" 
                                               th:text="${hd.trangThai}"></span>
+                                        <div th:if="${hd.phuongThucThanhToan != null}" class="small text-muted mt-1" th:text="${hd.phuongThucThanhToan}"></div>
                                     </td>
                                     <td>
                                         <div class="d-flex flex-column gap-1 align-items-center">
+                                            <!-- Nút buộc rời KTX nếu quá hạn tiền phòng 1 năm -->
+                                            <form th:if="${hd.loaiHoaDon == 'TIEN_PHONG' and hd.isQuaHan() and hd.trangThai != 'Đã thanh toán'}" 
+                                                  th:action="@{/quansinh/hoa-don/xu-ly-qua-han}" method="post" 
+                                                  onsubmit="return confirm('CẢNH BÁO KỶ LUẬT: Sinh viên này đã QUÁ HẠN 15 NGÀY nộp tiền phòng 1 năm.\n\nHệ thống sẽ:\n1. Hủy bỏ và chấm dứt Hợp đồng lưu trú\n2. Kết thúc Phân phòng và cập nhật sĩ số phòng trống\n3. Ghi nhận biên bản kỷ luật: BUỘC RỜI KTX\n\nBạn có chắc chắn muốn thi hành?');" 
+                                                  class="w-100">
+                                                <input type="hidden" name="maHoaDon" th:value="${hd.maHoaDon}">
+                                                <button type="submit" class="btn btn-sm btn-danger w-100 fw-bold shadow-sm">
+                                                    <i class="fas fa-user-slash me-1"></i>Buộc rời KTX
+                                                </button>
+                                            </form>
+
+                                            <!-- Thu tiền mặt -->
+                                            <a th:if="${hd.trangThai != 'Đã thanh toán'}" 
+                                               th:href="@{/quansinh/hoa-don/thanh-toan/{id}(id=${hd.maHoaDon})}" 
+                                               class="btn btn-sm btn-outline-success w-100" 
+                                               onclick="return confirm('Xác nhận sinh viên đã nộp đủ tiền mặt trực tiếp?');">
+                                                <i class="fas fa-money-bill-wave me-1"></i>Thu tiền mặt
+                                            </a>
+
+                                            <!-- Xuất PDF -->
                                             <a th:href="@{/quansinh/hoa-don/xuat-pdf/{id}(id=${hd.maHoaDon})}" class="btn btn-sm btn-outline-danger w-100" target="_blank" title="In / Tải hóa đơn PDF">
                                                 <i class="fas fa-file-pdf me-1"></i>Xuất PDF
                                             </a>
+
                                             <div th:if="${hd.minhChungThanhToan != null}" class="w-100">
                                                 <a th:href="${hd.minhChungThanhToan}" target="_blank" class="btn btn-sm btn-outline-info w-100" title="Xem biên lai">
                                                     <i class="fas fa-image me-1"></i>Biên lai
                                                 </a>
                                             </div>
-                                            <span th:if="${hd.trangThai == 'Đã thanh toán'}" class="text-success small fw-bold"><i class="fas fa-check-circle me-1"></i>Đã thu VNPAY</span>
-                                            <span th:if="${hd.trangThai == 'Chưa thanh toán'}" class="text-muted small"><i class="fas fa-clock text-warning me-1"></i>Chờ nộp</span>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(hoaDonPage.content)}">
-                                    <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu hóa đơn</td>
+                                    <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu hóa đơn nào phù hợp bộ lọc</td>
                                 </tr>
                             </tbody>
                         </table>
                         </div>
                         
                         <!-- Pagination Fragment -->
-                        <div th:replace="~{fragments/pagination :: pagination(pageObj=${hoaDonPage}, url='/quansinh/hoa-don', queryParams=${maKhu != null ? '&maKhu=' + maKhu : ''})}"></div>
+                        <div th:replace="~{fragments/pagination :: pagination(pageObj=${hoaDonPage}, url='/quansinh/hoa-don', queryParams=${(maKhu != null ? '&maKhu=' + maKhu : '') + (loaiHoaDon != null ? '&loaiHoaDon=' + loaiHoaDon : '')})}"></div>
                         
                     </div>
                 </div>
