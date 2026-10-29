@@ -76,25 +76,65 @@
                     </div>
                 </div>
 
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <div class="card shadow-sm border-0" style="border-radius: 12px;">
-                            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-chart-bar me-2 text-primary"></i>Biểu đồ Doanh thu Tổng hợp (Phòng, Điện, Nước) năm <span th:text="${currentYear}"></span></h6>
-                                <div>
-                                    <form th:action="@{/admin/dashboard}" method="get" class="d-inline-block me-2">
-                                        <select name="year" class="form-select form-select-sm d-inline-block" style="width: 140px;" onchange="this.form.submit()">
-                                            <option th:each="y : ${availableYears}" 
-                                                    th:value="${y}" 
-                                                    th:text="'Năm ' + ${y}"
-                                                    th:selected="${y == currentYear}"></option>
-                                        </select>
-                                    </form>
-                                </div>
+                <!-- 1. BIỂU ĐỒ Ở TRÊN: DOANH THU ĐIỆN & NƯỚC -->
+                <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
+                    <div class="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-success bg-opacity-10 text-success p-2 rounded-2">
+                                <i class="fas fa-bolt text-warning me-1"></i><i class="fas fa-tint text-info"></i>
+                            </span>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">
+                                    Biểu đồ Doanh thu Điện & Nước năm <span th:text="${currentYear}"></span>
+                                </h6>
+                                <small class="text-muted">Thu định kỳ hàng tháng theo chỉ số công tơ</small>
                             </div>
-                            <div class="card-body p-4">
-                                <canvas id="revenueChart" height="80"></canvas>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle fs-6 px-3 py-2">
+                                Tổng: <strong th:text="${#numbers.formatDecimal(totalDienNuocYear, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                            </span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted small fw-semibold text-nowrap"><i class="fas fa-calendar-alt me-1"></i>Năm:</span>
+                                <form th:action="@{/admin/dashboard}" method="get" class="d-inline-block m-0">
+                                    <select name="year" class="form-select form-select-sm fw-bold border-secondary-subtle shadow-xs" style="width: 130px;" onchange="this.form.submit()">
+                                        <option th:each="y : ${availableYears}" 
+                                                th:value="${y}" 
+                                                th:text="'Năm ' + ${y}"
+                                                th:selected="${y == currentYear}"></option>
+                                    </select>
+                                </form>
                             </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-3 p-md-4">
+                        <div style="height: 250px; position: relative;">
+                            <canvas id="dienNuocChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. BIỂU ĐỒ Ở DƯỚI: DOANH THU TIỀN PHÒNG -->
+                <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
+                    <div class="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary bg-opacity-10 text-primary p-2 rounded-2">
+                                <i class="fas fa-hotel"></i>
+                            </span>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">
+                                    Biểu đồ Doanh thu Tiền Phòng năm <span th:text="${currentYear}"></span>
+                                </h6>
+                                <small class="text-muted">Thu trọn gói 1 năm theo hợp đồng lưu trú</small>
+                            </div>
+                        </div>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle fs-6 px-3 py-2">
+                            Tổng: <strong th:text="${#numbers.formatDecimal(totalTienPhongYear, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                        </span>
+                    </div>
+                    <div class="card-body p-3 p-md-4">
+                        <div style="height: 250px; position: relative;">
+                            <canvas id="tienPhongChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -145,29 +185,47 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script th:inline="javascript">
         /*<![CDATA[*/
-        var revenueData = /*[[${revenueData}]]*/ [0,0,0,0,0,0,0,0,0,0,0,0];
+        var tienPhongData = /*[[${tienPhongData}]]*/ [0,0,0,0,0,0,0,0,0,0,0,0];
+        var dienNuocData = /*[[${dienNuocData}]]*/ [0,0,0,0,0,0,0,0,0,0,0,0];
         
-        var ctx = document.getElementById('revenueChart').getContext('2d');
-        var gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(0, 90, 158, 0.5)');   
-        gradient.addColorStop(1, 'rgba(0, 90, 158, 0.05)');
+        var labels = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
         
-        var myChart = new Chart(ctx, {
+        // Hàm định dạng trục Y thông minh: tự động co giãn theo cấp số (k, Tr, Tỷ)
+        function formatVNDAxis(value) {
+            if (value >= 1e9) {
+                return (value / 1e9).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + ' Tỷ';
+            } else if (value >= 1e6) {
+                return (value / 1e6).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + ' Tr';
+            } else if (value >= 1e3) {
+                return (value / 1e3).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + ' k';
+            }
+            return value;
+        }
+
+        // 1. Biểu đồ Điện & Nước (Ở TRÊN - Màu xanh lá)
+        var ctxDienNuoc = document.getElementById('dienNuocChart').getContext('2d');
+        var gradDienNuoc = ctxDienNuoc.createLinearGradient(0, 0, 0, 250);
+        gradDienNuoc.addColorStop(0, 'rgba(25, 135, 84, 0.75)');   
+        gradDienNuoc.addColorStop(1, 'rgba(25, 135, 84, 0.05)');
+        
+        new Chart(ctxDienNuoc, {
             type: 'bar',
             data: {
-                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+                labels: labels,
                 datasets: [{
-                    label: 'Doanh thu (VNĐ)',
-                    data: revenueData,
-                    backgroundColor: gradient,
-                    borderColor: '#005a9e',
+                    label: 'Tiền điện nước (VNĐ)',
+                    data: dienNuocData,
+                    backgroundColor: gradDienNuoc,
+                    borderColor: '#198754',
                     borderWidth: 2,
-                    borderRadius: 5,
-                    barPercentage: 0.6
+                    borderRadius: 6,
+                    maxBarThickness: 45,
+                    barPercentage: 0.5
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -184,11 +242,71 @@
                     }
                 },
                 scales: {
+                    x: {
+                        grid: { display: false }
+                    },
                     y: {
                         beginAtZero: true,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
                         ticks: {
-                            callback: function(value, index, values) {
-                                return new Intl.NumberFormat('vi-VN', { notation: "compact", compactDisplay: "short" }).format(value);
+                            callback: function(value) {
+                                return formatVNDAxis(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Biểu đồ Tiền Phòng (Ở DƯỚI - Màu xanh dương)
+        var ctxTienPhong = document.getElementById('tienPhongChart').getContext('2d');
+        var gradTienPhong = ctxTienPhong.createLinearGradient(0, 0, 0, 250);
+        gradTienPhong.addColorStop(0, 'rgba(13, 110, 253, 0.75)');   
+        gradTienPhong.addColorStop(1, 'rgba(13, 110, 253, 0.05)');
+        
+        new Chart(ctxTienPhong, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Tiền phòng (VNĐ)',
+                    data: tienPhongData,
+                    backgroundColor: gradTienPhong,
+                    borderColor: '#0d6efd',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    maxBarThickness: 45,
+                    barPercentage: 0.5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: {
+                            callback: function(value) {
+                                return formatVNDAxis(value);
                             }
                         }
                     }

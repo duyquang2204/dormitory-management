@@ -25,13 +25,17 @@ Hệ thống Quản lý Ký túc xá Thông minh được xây dựng trên nề
 - 🎓 **Hồ sơ sinh viên linh hoạt & Tự bổ sung Trường/Khoa:** Cho phép sinh viên chủ động cập nhật, bổ sung tên Trường Đại học và Khoa/Chuyên ngành trên trang cá nhân nếu Ban Quản Lý chưa điền, đồng bộ tức thời với cơ sở dữ liệu.
 - 🏢 **Quy chế thu Tiền phòng 1 năm & Chế tài nghiêm ngặt:** Thu trọn gói 1 năm tiền phòng ngay khi nhận phòng/ký hợp đồng; hạn chót thanh toán cố định trong vòng **15 ngày kể từ ngày vào ở**. Nếu quá hạn 15 ngày chưa thanh toán, hệ thống cung cấp quy trình kỷ luật tự động: chấm dứt hợp đồng, thu hồi chỗ ở và ghi nhận biên bản kỷ luật *"Đuổi khỏi KTX"*.
 - ⚡ **Tách biệt Hóa đơn & Đơn giá Điện Nước Động:** Tách riêng biệt Hóa đơn Tiền phòng (1 năm) và Hóa đơn Điện nước (hàng tháng, tuyệt đối không cộng tiền phòng). Cho phép Quản sinh tùy biến đơn giá điện (đ/kWh) và đơn giá nước (đ/m³) linh hoạt khi chốt số thay vì hardcode; sinh viên theo dõi minh bạch chỉ số, đơn giá và công thức chia đều theo đầu người.
+- 💡 **Lưu trữ & Bảo toàn Chỉ số Điện Nước theo Phòng (Room Meter Persistence):** Bổ sung 2 trường `chiSoDienHienTai` (kWh) và `chiSoNuocHienTai` (m³) cố định vào thực thể `Phong`. Tự động chốt số khi phát hành hóa đơn và bảo toàn nguyên vẹn số công tơ kể cả khi toàn bộ sinh viên trong phòng trả phòng hoặc bị xóa hồ sơ. Khi sinh viên mới chuyển vào, hệ thống tự động kế thừa chỉ số công tơ thực tế của phòng, ngăn ngừa triệt để lỗi nhảy số về 0 làm đội tiền điện nước.
+- 🆔 **Cơ chế sinh Mã sinh viên thông minh & Đồng bộ Niên khóa:** Thuật toán `generateNextMaSV` tự động dò tìm số thứ tự lớn nhất trong hệ thống để cấp mã tuần tự không trùng lặp (nối tiếp `SV0001`, `SV0002` $\rightarrow$ `SV0003`...). Đồng thời bảo toàn thông tin "Năm đầu tiên vào KTX", giữ vững tính đồng bộ lịch sử khi gia hạn hồ sơ qua các năm học.
+- 📜 **Đồng bộ Giá hợp đồng Trọn gói theo Năm (`/ năm`):** Hiển thị thống nhất giá trị hợp đồng trọn gói 1 năm (ví dụ: `9,600,000 đ/năm`) xuyên suốt danh sách quản sinh, form hợp đồng và hồ sơ sinh viên, phân định rạch ròi với chi phí điện nước hàng tháng.
+- 📊 **Dashboard Phân Tích Doanh Thu Tách Biệt Độc Lập:** Phân rã trực quan thành 2 biểu đồ Chart.js xếp dọc thẩm mỹ trên Dashboard Admin: **Biểu đồ Doanh thu Điện & Nước ở trên** (xanh lá, thu định kỳ hàng tháng) và **Biểu đồ Doanh thu Tiền phòng ở dưới** (xanh dương, thu trọn gói 1 năm). Trục tọa độ và tỷ lệ tự động co giãn riêng biệt, giải quyết triệt để vấn đề cột điện nước bị lấn át làm phẳng lì do chênh lệch độ lớn so với tiền phòng.
 - 🔐 **Xác thực bảo mật đa tầng:** Mã hóa mật khẩu một chiều với **BCrypt**, cơ chế gửi mã OTP 6 số qua Email (SMTP Gmail) khi kích hoạt tài khoản sinh viên và đặt lại mật khẩu.
 - 🔔 **Thông báo đẩy tức thời (Real-time Push Notification):** Kiến trúc WebSocket STOMP qua SockJS, tự động nhảy số chuông và hiển thị popup Toast ngay khi có cập nhật mà không cần tải lại trang.
 - 💬 **Live Chat Trực Tuyến Đa Nền Tảng (Sinh viên & Quản sinh):** 
   - Widget chat nổi dạng viên thuốc (Pill Button) cố định ở góc dưới bên phải màn hình cho cả **Sinh viên ("Chat với BQL")** và **Quản sinh ("Tin nhắn SV")**.
   - **Huy hiệu ĐỎ thông báo tin nhắn mới:** Tự động hiện số đỏ kèm hiệu ứng nhấp nháy tỏa sáng (`badge-chat-pulse`) và rung nhẹ nút như các ứng dụng Messenger / Zalo khi có tin nhắn chưa đọc. Đồng bộ badge đỏ trên menu Sidebar.
   - Quản sinh có thể trả lời nhanh ngay trên popup nổi hoặc truy cập Trung tâm điều phối toàn màn hình (`/quansinh/chat`).
-- 📄 **Xuất file PDF Hợp đồng KTX & Hóa đơn Điện Nước:** Sử dụng OpenPDF tích hợp font TrueType Arial Unicode chuẩn tiếng Việt, thiết kế 2 mẫu in riêng biệt: Mẫu in Tiền phòng 1 năm (kèm cam kết 15 ngày) và Mẫu in Điện nước hàng tháng (7 cột thông số rõ ràng).
+- 📄 **Xuất file PDF Hợp đồng KTX & Hóa đơn Điện Nước:** Sử dụng OpenPDF tích hợp font TrueType Arial Unicode chuẩn tiếng Việt, thiết kế 2 mẫu in riêng biệt: Mẫu in Tiền phòng 1 năm (kèm cam kết 15 ngày, giá trọn gói 1 năm) và Mẫu in Điện nước hàng tháng (7 cột thông số rõ ràng).
 - 💳 **Thanh toán tự động qua VNPAY Sandbox:** Tích hợp chữ ký số `HMAC-SHA512`, thanh toán an toàn qua thẻ ATM/QR ngân hàng, tự động gạch nợ hóa đơn tức thì.
 
 ---
@@ -147,15 +151,20 @@ Khi thực hiện thanh toán hóa đơn bằng cổng **VNPAY**, sử dụng th
   - Xem ảnh thẻ SV, ảnh CCCD, giấy chứng minh ưu tiên phóng to qua modal.
   - **Phê duyệt đơn:** Tự động xếp vào phòng phù hợp (kiểm tra giới tính Nam/Nữ & số chỗ còn trống), sinh tài khoản, lập hợp đồng 1 năm và **tự động sinh hóa đơn tiền phòng 1 năm (hạn 15 ngày)**, gửi Email chúc mừng trúng tuyển kèm thông tin phòng & tài khoản cho sinh viên.
   - **Từ chối đơn:** Nhập lý do từ chối cụ thể, **tự động gửi Email thông báo lý do tới sinh viên**.
-- **Quản Lý Phòng & Sĩ Số (144 Phòng Khu A, B, C):** Theo dõi chính xác 144 phòng KTX (4 tầng x 12 phòng/tầng), trạng thái Trống, Đang ở, Đầy phòng.
+- **Quản Lý Phòng & Sĩ Số (144 Phòng Khu A, B, C):**
+  - Theo dõi chính xác 144 phòng KTX (4 tầng x 12 phòng/tầng), trạng thái Trống, Đang ở, Đầy phòng.
+  - **Hiển thị trực quan chỉ số công tơ điện nước:** Xem ngay chỉ số điện (kWh) và nước (m³) hiện tại của từng phòng ngay trên danh sách phòng.
+  - Cho phép Quản sinh xem và điều chỉnh trực tiếp chỉ số công tơ ban đầu hoặc khi phòng thay mới đồng hồ trong form cập nhật phòng.
 - **Quản Lý Sinh Viên & Chuyển Phòng:** 
   - Thêm mới, cập nhật hồ sơ, chỉnh sửa Trường Đại học & Khoa, khóa/mở tài khoản sinh viên.
+  - Cơ chế cấp mã SV tự động tuần tự (`generateNextMaSV`), đồng bộ "Năm đầu tiên vào KTX".
   - **Điều chuyển phòng/khu:** Xử lý nguyện vọng chuyển phòng, tự động cập nhật hợp đồng lưu trú và đồng bộ trạng thái chỗ trống của các phòng liên quan.
-- **Quản Lý Hợp Đồng Lưu Trú:** Lập hợp đồng 1 năm, xem danh sách hợp đồng, duyệt gia hạn, thanh lý hợp đồng khi sinh viên rời KTX. **Hỗ trợ xuất PDF từng hợp đồng**.
+- **Quản Lý Hợp Đồng Lưu Trú:** Lập hợp đồng 1 năm, xem danh sách hợp đồng (hiển thị giá thuê chuẩn xác theo năm: `... đ/năm`), duyệt gia hạn, thanh lý hợp đồng khi sinh viên rời KTX. **Hỗ trợ xuất PDF từng hợp đồng**.
 - **Quản Lý Sửa Chữa Thiết Bị:** Nhận báo cáo hỏng từ sinh viên, phân công cho thợ sửa chữa, theo dõi tiến độ và kiểm tra ảnh nghiệm thu hoàn thành.
 - **Quản Lý Hóa Đơn Tách Biệt & Đơn Giá Động:**
   - **Bộ lọc thông minh theo Tabs:** `Tất cả hóa đơn` | `Tiền phòng (1 năm)` | `Điện nước (Tháng)` | `Quá hạn nộp`.
   - **Chốt điện nước đơn lẻ & hàng loạt:** Cho phép Quản sinh nhập trực tiếp **Đơn giá Điện (đ/kWh)** và **Đơn giá Nước (đ/m³)** linh hoạt theo từng kỳ chốt mà không bị hardcode.
+  - **Tự động lưu và bảo toàn chỉ số phòng:** Mỗi lần chốt hóa đơn, số mới được lưu ngay vào thực thể `Phong`. Tự động fallback lấy số công tơ từ `Phong` khi phòng có sinh viên mới chuyển vào.
   - **Chế tài xử lý quá hạn:** Nút hành động **[Buộc rời KTX]** với các hóa đơn tiền phòng 1 năm quá hạn 15 ngày, tự động chấm dứt hợp đồng, hủy phân phòng, giải phóng chỗ trống và ghi biên bản kỷ luật "Đuổi khỏi KTX".
   - **Xuất PDF hóa đơn** chuẩn hóa theo từng loại hóa đơn (Tiền phòng riêng, Điện nước riêng).
   - Xác nhận thanh toán tiền mặt trực tiếp.
@@ -175,14 +184,17 @@ Khi thực hiện thanh toán hóa đơn bằng cổng **VNPAY**, sử dụng th
 ---
 
 ### 4. Quản Trị Viên Hệ Thống (Admin - `/admin/**`)
-- **Dashboard Doanh Thu & Thống Kê:** Biểu đồ doanh thu 12 tháng bằng Chart.js, thống kê tổng sinh viên, tổng nhân sự, tổng hóa đơn.
+- **Dashboard Phân Tích Doanh Thu Tách Biệt (Chart.js):** 
+  - **Biểu đồ 1 (Ở trên) - Doanh thu Điện & Nước (Xanh lá):** Thống kê 12 tháng khoản thu định kỳ theo chỉ số công tơ với trục tỷ lệ độc lập (không bị lấn át bởi tiền phòng), hiển thị tổng doanh thu điện nước trong năm.
+  - **Biểu đồ 2 (Ở dưới) - Doanh thu Tiền phòng (Xanh dương):** Thống kê theo 12 tháng khoản thu trọn gói 1 năm theo hợp đồng lưu trú, hiển thị tổng doanh thu tiền phòng trong năm.
+  - **Bộ lọc theo Năm:** Cho phép chọn lọc theo từng năm (`?year=...`), đồng bộ dữ liệu cho cả 2 biểu đồ tức thì.
 - **Giám Sát Trạng Thái Hệ Thống:** Thẻ giám sát tương phản cao (chữ trắng sắc nét trên nền Dark mode), theo dõi trực quan kết nối Database, Mail Server, Auto-Scheduler chạy định kỳ hàng ngày.
 - **Quản Lý Tài Khoản Cán Bộ:** Thêm tài khoản quản sinh/nhân viên mới, chỉnh sửa thông tin, phân quyền và khóa/mở khóa tài khoản.
 - **Quản Lý Danh Mục:** Tòa nhà (Khu A, B, C), Loại phòng, Đơn giá định mức.
 
 ---
 
-## 🚀 CHI TIẾT 3 TÍNH NĂNG NÂNG CAO MỚI NHẤT
+## 🚀 CHI TIẾT CÁC TÍNH NĂNG NÂNG CAO MỚI NHẤT
 
 ### 1. 🔔 Thông Báo Đẩy Tức Thời (Real-time Push Notification)
 - **Giao thức:** WebSocket với chuẩn STOMP qua SockJS fallback trên endpoint `/ws-dormitory`.
@@ -209,6 +221,15 @@ Khi thực hiện thanh toán hóa đơn bằng cổng **VNPAY**, sử dụng th
   - **Popup Mini-Chat:** Xem danh sách hội thoại, tìm kiếm sinh viên, trả lời tức thì tại chỗ mà không cần rời trang.
   - **Trung tâm toàn màn hình (`/quansinh/chat`):** Giao diện 2 cột chuyên sâu: tìm kiếm hội thoại, xem lịch sử tin nhắn, phản hồi nhanh chóng.
 - **Cơ chế đánh dấu đã đọc:** Khi người dùng mở hộp chat hoặc chọn sinh viên, hệ thống tự động gọi API `/api/chat/read` để gạch nợ tin nhắn và tắt badge đỏ tức thời.
+
+### 4. ⚡ Quản Lý & Bảo Toàn Chỉ Số Điện Nước Theo Phòng (Room Meter Persistence)
+- **Kiến trúc dữ liệu:** Bổ sung 2 thuộc tính `chiSoDienHienTai` (kWh) và `chiSoNuocHienTai` (m³) trực tiếp vào thực thể `Phong`.
+- **Cơ chế hoạt động:**
+  - **Tự động lưu số chốt mới:** Mỗi khi Quản sinh chốt chỉ số điện nước (đơn lẻ hoặc hàng loạt), hệ thống tự động ghi đè số mới nhất vào hồ sơ phòng tương ứng.
+  - **Bảo toàn khi phòng trống:** Khi toàn bộ sinh viên trong phòng trả phòng hoặc bị xóa hồ sơ (`SinhVienService.delete`), hệ thống tự động chốt và lưu giữ lại chỉ số công tơ điện nước mới nhất vào thực thể `Phong` trước khi xóa các hóa đơn liên quan.
+  - **Cơ chế kế thừa (Fallback):** Khi sinh viên mới chuyển vào phòng, hệ thống tự động lấy chỉ số cũ từ `phong.getChiSoDienHienTai()` / `phong.getChiSoNuocHienTai()` thay vì để về 0, đảm bảo tính đúng và minh bạch số điện nước tiêu thụ thực tế.
+  - **Khởi động hệ thống (`@PostConstruct syncRoomMeterReadings`):** Tự động đồng bộ số công tơ từ các hóa đơn đã có sang cho toàn bộ 144 phòng trong lần khởi chạy đầu tiên.
+  - **Quản lý trực tiếp:** Quản sinh có thể xem số công tơ hiện tại ngay trên danh sách phòng và cập nhật/hiệu chỉnh chỉ số khi phòng thay mới đồng hồ đo.
 
 ---
 
@@ -237,6 +258,13 @@ $$\text{Tiền nước của SV} = \frac{(\text{Chỉ số Nước mới} - \tex
 $$\text{Tổng thanh toán hóa đơn tháng} = \text{Tiền điện của SV} + \text{Tiền nước của SV}$$
 
 - 📅 **Hạn nộp định kỳ:** Ngày **25** hàng tháng.
+
+---
+
+### 3. ⚙️ Cơ Chế Bảo Toàn Số Công Tơ Điện Nước Khi Phòng Biến Động Sinh Viên
+- **Khi phòng đang có sinh viên:** Chỉ số mới nhất của mỗi kỳ được ghi nhận đồng thời vào hóa đơn của từng sinh viên và bảng `Phong` (`Phong.chiSoDienHienTai`, `Phong.chiSoNuocHienTai`).
+- **Khi tất cả sinh viên trả phòng / xóa hồ sơ:** Hệ thống tự động trích xuất và bảo toàn số điện nước mới nhất vào thực thể `Phong` trước khi làm rỗng phòng.
+- **Khi sinh viên mới nhận phòng:** Chỉ số cũ của kỳ đầu tiên sẽ được lấy trực tiếp từ số công tơ đã lưu của phòng thay vì số 0, giúp bảo đảm tiền điện nước luôn phản ánh đúng thực tế sử dụng.
 
 ---
 

@@ -273,6 +273,14 @@ public class HoaDonService {
     public java.util.List<Object[]> getRevenueByMonthAndYear(int nam) {
         return hoaDonRepository.getRevenueByMonthAndYear(nam);
     }
+
+    public java.util.List<Object[]> getTienPhongRevenueByMonthAndYear(int nam) {
+        return hoaDonRepository.getTienPhongRevenueByMonthAndYear(nam);
+    }
+
+    public java.util.List<Object[]> getDienNuocRevenueByMonthAndYear(int nam) {
+        return hoaDonRepository.getDienNuocRevenueByMonthAndYear(nam);
+    }
     
     public java.util.List<Integer> getDistinctYears() {
         return hoaDonRepository.findDistinctYears();

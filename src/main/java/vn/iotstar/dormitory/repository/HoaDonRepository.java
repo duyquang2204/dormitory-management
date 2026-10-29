@@ -31,6 +31,12 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, String> {
 
     @org.springframework.data.jpa.repository.Query("SELECT h.thang, SUM(h.tongTien) FROM HoaDon h WHERE h.trangThai = 'Đã thanh toán' AND h.nam = :nam GROUP BY h.thang ORDER BY h.thang")
     java.util.List<Object[]> getRevenueByMonthAndYear(@org.springframework.data.repository.query.Param("nam") int nam);
+
+    @org.springframework.data.jpa.repository.Query("SELECT h.thang, SUM(h.tongTien) FROM HoaDon h WHERE h.trangThai = 'Đã thanh toán' AND h.nam = :nam AND h.loaiHoaDon = 'TIEN_PHONG' GROUP BY h.thang ORDER BY h.thang")
+    java.util.List<Object[]> getTienPhongRevenueByMonthAndYear(@org.springframework.data.repository.query.Param("nam") int nam);
+
+    @org.springframework.data.jpa.repository.Query("SELECT h.thang, SUM(h.tongTien) FROM HoaDon h WHERE h.trangThai = 'Đã thanh toán' AND h.nam = :nam AND (h.loaiHoaDon = 'DIEN_NUOC' OR h.loaiHoaDon IS NULL) GROUP BY h.thang ORDER BY h.thang")
+    java.util.List<Object[]> getDienNuocRevenueByMonthAndYear(@org.springframework.data.repository.query.Param("nam") int nam);
     
     java.util.List<HoaDon> findByPhong_MaPhongAndThangAndNam(String maPhong, int thang, int nam);
     java.util.Optional<HoaDon> findByPhong_MaPhongAndSinhVien_MaSVAndThangAndNam(String maPhong, String maSV, int thang, int nam);

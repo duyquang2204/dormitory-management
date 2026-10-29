@@ -48,14 +48,39 @@ public class AdminController {
         
         java.util.List<Object[]> revenueRaw = hoaDonService.getRevenueByMonthAndYear(currentYear);
         java.util.List<Double> revenueList = new java.util.ArrayList<>(java.util.Collections.nCopies(12, 0.0));
-        
         for (Object[] obj : revenueRaw) {
             int month = ((Number) obj[0]).intValue();
             double amount = ((Number) obj[1]).doubleValue();
             revenueList.set(month - 1, amount);
         }
+
+        // Doanh thu riêng từ TIỀN PHÒNG
+        java.util.List<Object[]> tienPhongRaw = hoaDonService.getTienPhongRevenueByMonthAndYear(currentYear);
+        java.util.List<Double> tienPhongList = new java.util.ArrayList<>(java.util.Collections.nCopies(12, 0.0));
+        double totalTienPhongYear = 0.0;
+        for (Object[] obj : tienPhongRaw) {
+            int month = ((Number) obj[0]).intValue();
+            double amount = ((Number) obj[1]).doubleValue();
+            tienPhongList.set(month - 1, amount);
+            totalTienPhongYear += amount;
+        }
+
+        // Doanh thu riêng từ ĐIỆN & NƯỚC
+        java.util.List<Object[]> dienNuocRaw = hoaDonService.getDienNuocRevenueByMonthAndYear(currentYear);
+        java.util.List<Double> dienNuocList = new java.util.ArrayList<>(java.util.Collections.nCopies(12, 0.0));
+        double totalDienNuocYear = 0.0;
+        for (Object[] obj : dienNuocRaw) {
+            int month = ((Number) obj[0]).intValue();
+            double amount = ((Number) obj[1]).doubleValue();
+            dienNuocList.set(month - 1, amount);
+            totalDienNuocYear += amount;
+        }
         
         model.addAttribute("revenueData", revenueList);
+        model.addAttribute("tienPhongData", tienPhongList);
+        model.addAttribute("dienNuocData", dienNuocList);
+        model.addAttribute("totalTienPhongYear", totalTienPhongYear);
+        model.addAttribute("totalDienNuocYear", totalDienNuocYear);
         model.addAttribute("currentYear", currentYear);
         model.addAttribute("availableYears", distinctYears);
         
