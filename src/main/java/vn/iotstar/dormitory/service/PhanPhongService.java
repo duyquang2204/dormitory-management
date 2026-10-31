@@ -106,26 +106,30 @@ public class PhanPhongService {
         }
 
         // 1.2. Nếu sinh viên có hợp đồng nhưng chưa có cái nào ghi "Còn hạn":
-        // Tự động kích hoạt hợp đồng mới nhất (ưu tiên hợp đồng mới đổi sang)
+        // Tự động kích hoạt hợp đồng mới nhất (chỉ khi chưa bị thanh lý hoặc chưa hết hạn)
         if (!svContracts.isEmpty()) {
             HopDong latestContract = svContracts.get(0);
-            PhanPhong contractPp = latestContract.getPhanPhong();
-            if (contractPp != null) {
-                latestContract.setTrangThai("Còn hạn");
-                hopDongRepository.save(latestContract);
+            if (!"Đã thanh lý".equalsIgnoreCase(latestContract.getTrangThai()) 
+                    && !"Đã hết hạn".equalsIgnoreCase(latestContract.getTrangThai())
+                    && (latestContract.getNgayKetThuc() == null || !latestContract.getNgayKetThuc().isBefore(LocalDate.now()))) {
+                PhanPhong contractPp = latestContract.getPhanPhong();
+                if (contractPp != null) {
+                    latestContract.setTrangThai("Còn hạn");
+                    hopDongRepository.save(latestContract);
 
-                contractPp.setTrangThai("Đang ở");
-                phanPhongRepository.save(contractPp);
+                    contractPp.setTrangThai("Đang ở");
+                    phanPhongRepository.save(contractPp);
 
-                // Tự động kết thúc các phân phòng cũ khác
-                List<PhanPhong> allPps = phanPhongRepository.findBySinhVien_MaSV(cleanMaSV);
-                for (PhanPhong otherPp : allPps) {
-                    if (!otherPp.getMaPhanPhong().equals(contractPp.getMaPhanPhong()) && "Đang ở".equals(otherPp.getTrangThai())) {
-                        otherPp.setTrangThai("Đã kết thúc");
-                        phanPhongRepository.save(otherPp);
+                    // Tự động kết thúc các phân phòng cũ khác
+                    List<PhanPhong> allPps = phanPhongRepository.findBySinhVien_MaSV(cleanMaSV);
+                    for (PhanPhong otherPp : allPps) {
+                        if (!otherPp.getMaPhanPhong().equals(contractPp.getMaPhanPhong()) && "Đang ở".equals(otherPp.getTrangThai())) {
+                            otherPp.setTrangThai("Đã kết thúc");
+                            phanPhongRepository.save(otherPp);
+                        }
                     }
+                    return Optional.of(contractPp);
                 }
-                return Optional.of(contractPp);
             }
         }
 
@@ -156,15 +160,9 @@ public class PhanPhongService {
                 }
                 return Optional.of(current);
             }
-
-            // Nếu không có phân phòng nào ghi "Đang ở", tự động lấy phân phòng mới nhất và kích hoạt lại
-            PhanPhong latestPp = svPps.get(0);
-            latestPp.setTrangThai("Đang ở");
-            phanPhongRepository.save(latestPp);
-            return Optional.of(latestPp);
         }
 
-        // 3. Thực sự chưa từng được phân phòng
+        // 3. Thực sự chưa từng được phân phòng hoặc đã trả phòng/kết thúc lưu trú
         return Optional.empty();
     }
 

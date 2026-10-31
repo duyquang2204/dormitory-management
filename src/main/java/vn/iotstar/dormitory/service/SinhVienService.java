@@ -382,7 +382,9 @@ public class SinhVienService {
             sv.setNamHoc(java.time.LocalDate.now().getYear());
         }
         sv.setDienUuTien(dto.getDienUuTien());
-        sv.setTrangThai("Hoạt động");
+        if (sv.getTrangThai() == null || sv.getTrangThai().isEmpty()) {
+            sv.setTrangThai("Hoạt động");
+        }
         
         // Cấp mật khẩu mặc định nếu chưa có
         String plainPassword = null;
@@ -408,5 +410,22 @@ public class SinhVienService {
                           "Trân trọng,\nBan quản lý KTX.";
             emailService.sendEmail(sv.getEmail(), subject, body);
         }
+    }
+
+    public String toggleLockStudent(String maSV) {
+        Optional<SinhVien> svOpt = sinhVienRepository.findById(maSV);
+        if (svOpt.isPresent()) {
+            SinhVien sv = svOpt.get();
+            if ("Đã khóa".equalsIgnoreCase(sv.getTrangThai()) || "Bị khóa".equalsIgnoreCase(sv.getTrangThai())) {
+                sv.setTrangThai("Hoạt động");
+                sinhVienRepository.save(sv);
+                return "Đã mở khóa tài khoản cho sinh viên " + sv.getHoTen() + " (" + sv.getMaSV() + ").";
+            } else {
+                sv.setTrangThai("Đã khóa");
+                sinhVienRepository.save(sv);
+                return "Đã khóa tài khoản sinh viên " + sv.getHoTen() + " (" + sv.getMaSV() + ") thành công.";
+            }
+        }
+        return "Không tìm thấy sinh viên.";
     }
 }

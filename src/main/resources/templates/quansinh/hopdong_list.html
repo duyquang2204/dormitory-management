@@ -82,13 +82,17 @@
                                                     <form th:if="${hd.yeuCauCuaSV == 'Xin gia hạn'}" th:action="@{/quansinh/hop-dong/duyet-gia-han}" method="post">
                                                         <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
                                                         <input type="hidden" name="soThang" value="12">
-                                                        <button type="submit" class="btn btn-sm btn-success" title="Duyệt gia hạn 1 năm"><i class="fas fa-check"></i> Duyệt GH</button>
+                                                        <button type="submit" class="btn btn-sm btn-success" title="Duyệt gia hạn 1 năm"><i class="fas fa-check me-1"></i>Duyệt GH</button>
                                                     </form>
                                                     
-                                                    <!-- Báo trả phòng hoặc Đã hết hạn -->
-                                                    <form th:if="${hd.yeuCauCuaSV == 'Báo trả phòng' or hd.trangThai == 'Đã hết hạn'}" th:action="@{/quansinh/hop-dong/thanh-ly}" method="post">
+                                                    <!-- Nút Thanh lý luôn sẵn sàng cho Quản sinh (sinh viên báo trả phòng, hết hạn, hoặc bị kỷ luật / buộc rời KTX) -->
+                                                    <form th:action="@{/quansinh/hop-dong/thanh-ly}" method="post">
                                                         <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
-                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn xác nhận thanh lý hợp đồng và thu hồi giường này?');" title="Thanh lý hợp đồng"><i class="fas fa-times-circle"></i> Thanh lý</button>
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger shadow-xs" 
+                                                                onclick="return confirm('Bạn xác nhận muốn thanh lý hợp đồng này và thu hồi giường của sinh viên?');" 
+                                                                title="Thanh lý hợp đồng & thu hồi phòng">
+                                                            <i class="fas fa-times-circle me-1"></i>Thanh lý
+                                                        </button>
                                                     </form>
                                                 </th:block>
                                             </div>

@@ -1,6 +1,8 @@
 package vn.iotstar.dormitory.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,8 +32,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         // 1. Kiểm tra tài khoản cán bộ / quản trị / nhân viên
         NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhap(username);
         if (nguoiDung != null) {
-            if ("Bị khóa".equals(nguoiDung.getTrangThai())) {
-                throw new UsernameNotFoundException("Tài khoản đã bị khóa");
+            if ("Bị khóa".equals(nguoiDung.getTrangThai()) || "Đã khóa".equals(nguoiDung.getTrangThai())) {
+                throw new LockedException("Tài khoản đã bị khóa");
             }
             List<GrantedAuthority> authorities = new ArrayList<>();
             String role = "ROLE_USER";
@@ -56,8 +58,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         if (sinhVien != null) {
+            if ("Bị khóa".equalsIgnoreCase(sinhVien.getTrangThai()) || "Đã khóa".equalsIgnoreCase(sinhVien.getTrangThai())) {
+                throw new LockedException("Tài khoản sinh viên đã bị khóa do vi phạm kỷ luật hoặc ngừng hoạt động");
+            }
             if ("Chưa kích hoạt".equalsIgnoreCase(sinhVien.getTrangThai())) {
-                throw new UsernameNotFoundException("Tài khoản chưa được kích hoạt mã OTP qua Email");
+                throw new DisabledException("Tài khoản chưa được kích hoạt mã OTP qua Email");
             }
             if (sinhVien.getMatKhau() == null || sinhVien.getMatKhau().isEmpty()) {
                 throw new UsernameNotFoundException("Tài khoản sinh viên chưa được thiết lập mật khẩu");

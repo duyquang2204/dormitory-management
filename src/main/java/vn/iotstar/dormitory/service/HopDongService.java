@@ -29,7 +29,13 @@ public class HopDongService {
     private NguoiDungRepository nguoiDungRepository;
 
     @Autowired
+    private vn.iotstar.dormitory.repository.PhongRepository phongRepository;
+
+    @Autowired
     private HoaDonService hoaDonService;
+
+    @Autowired(required = false)
+    private ThongBaoService thongBaoService;
 
     @jakarta.annotation.PostConstruct
     public void cleanupMultipleActiveContracts() {
@@ -76,13 +82,26 @@ public class HopDongService {
                 }
                 if (!activeFound && !contracts.isEmpty()) {
                     HopDong latest = contracts.get(0);
-                    latest.setTrangThai("Còn hạn");
-                    if (latest.getPhanPhong() != null) {
-                        PhanPhong pp = latest.getPhanPhong();
-                        pp.setTrangThai("Đang ở");
+                    if (!"Đã thanh lý".equals(latest.getTrangThai()) && !"Đã hết hạn".equals(latest.getTrangThai())) {
+                        latest.setTrangThai("Còn hạn");
+                        if (latest.getPhanPhong() != null) {
+                            PhanPhong pp = latest.getPhanPhong();
+                            pp.setTrangThai("Đang ở");
+                            phanPhongRepository.save(pp);
+                        }
+                        hopDongRepository.save(latest);
+                    }
+                }
+            }
+
+            // Đảm bảo các phân phòng gắn với hợp đồng Đã thanh lý luôn có trạng thái Đã trả phòng
+            for (HopDong hd : all) {
+                if ("Đã thanh lý".equals(hd.getTrangThai()) && hd.getPhanPhong() != null) {
+                    PhanPhong pp = hd.getPhanPhong();
+                    if ("Đang ở".equals(pp.getTrangThai())) {
+                        pp.setTrangThai("Đã trả phòng");
                         phanPhongRepository.save(pp);
                     }
-                    hopDongRepository.save(latest);
                 }
             }
         } catch (Exception ignored) {
@@ -141,13 +160,15 @@ public class HopDongService {
         }
         if (!activeFound && !list.isEmpty()) {
             HopDong latest = list.get(0);
-            latest.setTrangThai("Còn hạn");
-            if (latest.getPhanPhong() != null) {
-                PhanPhong pp = latest.getPhanPhong();
-                pp.setTrangThai("Đang ở");
-                phanPhongRepository.save(pp);
+            if (!"Đã thanh lý".equals(latest.getTrangThai()) && !"Đã hết hạn".equals(latest.getTrangThai())) {
+                latest.setTrangThai("Còn hạn");
+                if (latest.getPhanPhong() != null) {
+                    PhanPhong pp = latest.getPhanPhong();
+                    pp.setTrangThai("Đang ở");
+                    phanPhongRepository.save(pp);
+                }
+                hopDongRepository.save(latest);
             }
-            hopDongRepository.save(latest);
         }
         return list;
     }
@@ -213,8 +234,10 @@ public class HopDongService {
         Optional<HopDong> hdOpt = hopDongRepository.findById(maHopDong);
         if (hdOpt.isPresent()) {
             HopDong hd = hdOpt.get();
-            hd.setYeuCauCuaSV(loaiYeuCau);
-            hopDongRepository.save(hd);
+            if ("Còn hạn".equals(hd.getTrangThai())) {
+                hd.setYeuCauCuaSV(loaiYeuCau);
+                hopDongRepository.save(hd);
+            }
         }
     }
 
@@ -237,6 +260,18 @@ public class HopDongService {
                 Phong p = hd.getPhanPhong().getPhong();
                 double donGiaThang = (p.getLoaiPhong() != null && p.getLoaiPhong().getDonGia() != null) ? p.getLoaiPhong().getDonGia() : 0.0;
                 hoaDonService.createTienPhongInvoice(hd.getPhanPhong().getSinhVien(), p, ngayBatDauGiaHan, donGiaThang, soThang);
+                
+                if (thongBaoService != null) {
+                    try {
+                        thongBaoService.taoThongBao(
+                            hd.getPhanPhong().getSinhVien().getMaSV(),
+                            "Hợp đồng được gia hạn",
+                            "Hợp đồng " + hd.getMaHopDong() + " đã được Ban quản lý duyệt gia hạn thêm " + soThang + " tháng.",
+                            "HopDong",
+                            "/sinhvien/phong"
+                        );
+                    } catch (Exception ignored) {}
+                }
             }
         }
     }
@@ -252,6 +287,45 @@ public class HopDongService {
                 PhanPhong pp = hd.getPhanPhong();
                 pp.setTrangThai("Đã trả phòng");
                 phanPhongRepository.save(pp);
+
+                // Cập nhật tất cả phân phòng đang ở của sinh viên này sang Đã trả phòng
+                if (pp.getSinhVien() != null) {
+                    List<PhanPhong> svPps = phanPhongRepository.findBySinhVien_MaSV(pp.getSinhVien().getMaSV());
+                    for (PhanPhong otherPp : svPps) {
+                        if ("Đang ở".equals(otherPp.getTrangThai())) {
+                            otherPp.setTrangThai("Đã trả phòng");
+                            phanPhongRepository.save(otherPp);
+                        }
+                    }
+                }
+
+                // Cập nhật lại số lượng và trạng thái phòng (Còn trống / Đang ở / Đã đầy)
+                if (pp.getPhong() != null && phongRepository != null) {
+                    Phong p = pp.getPhong();
+                    long cnt = phanPhongRepository.countByPhong_MaPhongAndTrangThai(p.getMaPhong(), "Đang ở");
+                    int max = (p.getLoaiPhong() != null && p.getLoaiPhong().getSoNguoiToiDa() != null) ? p.getLoaiPhong().getSoNguoiToiDa() : 4;
+                    if (cnt == 0) {
+                        p.setTrangThai("Còn trống");
+                    } else if (cnt < max) {
+                        p.setTrangThai("Đang ở");
+                    } else {
+                        p.setTrangThai("Đã đầy");
+                    }
+                    phongRepository.save(p);
+                }
+
+                // Gửi thông báo đến sinh viên
+                if (thongBaoService != null && pp.getSinhVien() != null) {
+                    try {
+                        thongBaoService.taoThongBao(
+                            pp.getSinhVien().getMaSV(),
+                            "Hợp đồng lưu trú đã được thanh lý",
+                            "Hợp đồng " + hd.getMaHopDong() + " đã được Ban quản lý thanh lý hoàn tất và thu hồi chỗ ở KTX.",
+                            "HopDong",
+                            "/sinhvien/phong"
+                        );
+                    } catch (Exception ignored) {}
+                }
             }
             hopDongRepository.save(hd);
         }

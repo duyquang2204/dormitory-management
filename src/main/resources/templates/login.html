@@ -26,7 +26,12 @@
         
         <!-- Alerts -->
         <div th:if="${param.error}" class="alert alert-danger py-2 small border-0 rounded-3" role="alert">
-            <i class="fa-solid fa-circle-exclamation me-1"></i> Tên đăng nhập/Email hoặc mật khẩu không chính xác!
+            <i class="fa-solid fa-circle-exclamation me-1"></i> 
+            <span th:if="${session != null and session['SPRING_SECURITY_LAST_EXCEPTION'] != null and session['SPRING_SECURITY_LAST_EXCEPTION'].message != null and session['SPRING_SECURITY_LAST_EXCEPTION'].message != 'Bad credentials'}" 
+                  th:text="${session['SPRING_SECURITY_LAST_EXCEPTION'].message}"></span>
+            <span th:if="${session == null or session['SPRING_SECURITY_LAST_EXCEPTION'] == null or session['SPRING_SECURITY_LAST_EXCEPTION'].message == null or session['SPRING_SECURITY_LAST_EXCEPTION'].message == 'Bad credentials'}">
+                Tên đăng nhập/Email hoặc mật khẩu không chính xác!
+            </span>
         </div>
         <div th:if="${param.logout}" class="alert alert-info py-2 small border-0 rounded-3" role="alert">
             <i class="fa-solid fa-circle-info me-1"></i> Bạn đã đăng xuất thành công!

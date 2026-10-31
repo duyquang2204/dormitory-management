@@ -51,7 +51,7 @@
                                         <th>Năm vào KTX</th>
                                         <th>SĐT</th>
                                         <th>Email</th>
-                                        <th class="text-center text-nowrap" style="min-width: 120px;">Hành động</th>
+                                        <th class="text-center text-nowrap" style="min-width: 160px;">Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -59,8 +59,18 @@
                                         <td th:text="${sv.maSV}"></td>
                                         <td class="fw-bold" th:text="${sv.hoTen}"></td>
                                         <td>
-                                            <span th:class="${trangThaiMap.get(sv.maSV) == 'Chờ xếp phòng' ? 'badge bg-secondary text-white' : 'badge bg-success text-white'}" 
-                                                  th:text="${trangThaiMap.get(sv.maSV)}"></span>
+                                            <span th:if="${trangThaiMap.get(sv.maSV) == 'Đã khóa tài khoản'}" class="badge bg-danger text-white">
+                                                <i class="fas fa-user-slash me-1"></i>Đã khóa tài khoản
+                                            </span>
+                                            <span th:if="${trangThaiMap.get(sv.maSV) != null and #strings.startsWith(trangThaiMap.get(sv.maSV), 'Nội trú')}" class="badge bg-success text-white">
+                                                <i class="fas fa-check-circle me-1"></i><span th:text="${trangThaiMap.get(sv.maSV)}"></span>
+                                            </span>
+                                            <span th:if="${trangThaiMap.get(sv.maSV) == 'Đã rời KTX (Ngoại trú)'}" class="badge bg-secondary text-white">
+                                                <i class="fas fa-walking me-1"></i>Đã rời KTX (Ngoại trú)
+                                            </span>
+                                            <span th:if="${trangThaiMap.get(sv.maSV) == 'Chờ xếp phòng'}" class="badge bg-info text-dark">
+                                                <i class="fas fa-clock me-1"></i>Chờ xếp phòng
+                                            </span>
                                         </td>
                                         <td th:text="${sv.gioiTinh}"></td>
                                         <td th:text="${sv.khoa}"></td>
@@ -69,10 +79,33 @@
                                         <td th:text="${sv.email}"></td>
                                         <td class="text-nowrap">
                                             <div class="d-flex gap-1 justify-content-center">
-                                                <a th:href="@{/quansinh/phong/phan-nhanh/{id}(id=${sv.maSV})}" class="btn btn-sm btn-outline-success" title="Xếp phòng"><i class="fas fa-bed"></i></a>
-                                                <a th:href="@{/quansinh/sinhvien/sua/{id}(id=${sv.maSV})}" class="btn btn-sm btn-outline-primary" title="Sửa"><i class="fas fa-edit"></i></a>
-                                                <form th:action="@{/quansinh/sinhvien/xoa/{id}(id=${sv.maSV})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sinh viên này không? Hệ thống sẽ xóa sạch dữ liệu liên quan và gửi email thông báo tới sinh viên.');">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="fas fa-trash"></i></button>
+                                                <!-- Xếp phòng nhanh (chỉ hiện khi chưa có phòng hoặc đã rời KTX) -->
+                                                <a th:if="${trangThaiMap.get(sv.maSV) == 'Chờ xếp phòng' or trangThaiMap.get(sv.maSV) == 'Đã rời KTX (Ngoại trú)'}" 
+                                                   th:href="@{/quansinh/phong/phan-nhanh/{id}(id=${sv.maSV})}" 
+                                                   class="btn btn-sm btn-outline-success" title="Xếp phòng cho sinh viên">
+                                                    <i class="fas fa-bed"></i>
+                                                </a>
+                                                
+                                                <a th:href="@{/quansinh/sinhvien/sua/{id}(id=${sv.maSV})}" class="btn btn-sm btn-outline-primary" title="Sửa thông tin"><i class="fas fa-edit"></i></a>
+                                                
+                                                <!-- Khóa / Mở khóa tài khoản -->
+                                                <form th:action="@{/quansinh/sinhvien/khoa/{id}(id=${sv.maSV})}" method="post" class="d-inline">
+                                                    <button th:if="${sv.trangThai == 'Đã khóa' or sv.trangThai == 'Bị khóa'}" 
+                                                            type="submit" class="btn btn-sm btn-warning" 
+                                                            onclick="return confirm('Bạn xác nhận muốn MỞ KHÓA tài khoản cho sinh viên này?');" 
+                                                            title="Mở khóa tài khoản">
+                                                        <i class="fas fa-unlock"></i>
+                                                    </button>
+                                                    <button th:unless="${sv.trangThai == 'Đã khóa' or sv.trangThai == 'Bị khóa'}" 
+                                                            type="submit" class="btn btn-sm btn-outline-secondary" 
+                                                            onclick="return confirm('Bạn xác nhận muốn KHÓA tài khoản sinh viên này (chặn đăng nhập vào KTX)?');" 
+                                                            title="Khóa tài khoản (kỷ luật / rời KTX)">
+                                                        <i class="fas fa-lock"></i>
+                                                    </button>
+                                                </form>
+
+                                                <form th:action="@{/quansinh/sinhvien/xoa/{id}(id=${sv.maSV})}" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sinh viên này không? Hệ thống sẽ xóa sạch dữ liệu liên quan và gửi email thông báo tới sinh viên.');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa vĩnh viễn"><i class="fas fa-trash"></i></button>
                                                 </form>
                                             </div>
                                         </td>

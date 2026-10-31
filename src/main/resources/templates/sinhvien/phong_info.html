@@ -143,16 +143,16 @@
                                         </div>
                                     </div>
 
-                                    <div th:if="${hd.isSapHetHan() and hd.yeuCauCuaSV == null}" class="d-flex gap-2 mt-3 pt-2 border-top">
+                                    <div th:if="${(hd.trangThai == 'Còn hạn' or hd.isSapHetHan()) and hd.yeuCauCuaSV == null}" class="d-flex gap-2 mt-3 pt-2 border-top">
                                         <form th:action="@{/sinhvien/hop-dong/yeu-cau}" method="post">
                                             <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
                                             <input type="hidden" name="loaiYeuCau" value="Xin gia hạn">
-                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Bạn muốn gia hạn hợp đồng lưu trú thêm 1 năm?')"><i class="fas fa-calendar-plus me-1"></i> Xin gia hạn</button>
+                                            <button type="submit" class="btn btn-sm btn-success shadow-xs" onclick="return confirm('Bạn muốn gia hạn hợp đồng lưu trú thêm 1 năm?')"><i class="fas fa-calendar-plus me-1"></i> Xin gia hạn</button>
                                         </form>
                                         <form th:action="@{/sinhvien/hop-dong/yeu-cau}" method="post">
                                             <input type="hidden" name="maHopDong" th:value="${hd.maHopDong}">
                                             <input type="hidden" name="loaiYeuCau" value="Báo trả phòng">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn xác nhận sẽ dọn khỏi KTX khi hết hạn?')"><i class="fas fa-sign-out-alt me-1"></i> Báo trả phòng</button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger shadow-xs" onclick="return confirm('Bạn xác nhận muốn gửi yêu cầu trả phòng đến Ban Quản lý KTX?')"><i class="fas fa-sign-out-alt me-1"></i> Báo trả phòng</button>
                                         </form>
                                     </div>
                                 </div>

@@ -183,9 +183,13 @@ public class SinhVienController {
     @PostMapping("/sua-chua/gui")
     public String guiYeuCauSuaChua(@Valid @ModelAttribute("yeuCauDTO") vn.iotstar.dormitory.dto.YeuCauSuaChuaDTO dto, BindingResult result, Model model, Authentication auth) {
         String maSV = auth.getName();
+        java.util.Optional<vn.iotstar.dormitory.entity.PhanPhong> ppOpt = phanPhongService.findBySinhVienId(maSV);
+        if (ppOpt.isEmpty()) {
+            return "redirect:/sinhvien/sua-chua?error=no_room";
+        }
         if (result.hasErrors()) {
             model.addAttribute("yeuCauList", yeuCauSuaChuaService.findBySinhVienId(maSV));
-            model.addAttribute("myRooms", phanPhongService.findBySinhVienId(maSV).stream().toList());
+            model.addAttribute("myRooms", ppOpt.stream().toList());
             return "sinhvien/suachua_form";
         }
         yeuCauSuaChuaService.createYeuCau(dto, maSV);

@@ -61,13 +61,25 @@ public class QuanSinhController {
         java.util.Map<String, String> trangThaiMap = new java.util.HashMap<>();
         
         for (SinhVien sv : pageData.getContent()) {
-            java.util.Optional<vn.iotstar.dormitory.entity.PhanPhong> ppOpt = allPhanPhong.stream()
+            if ("Đã khóa".equalsIgnoreCase(sv.getTrangThai()) || "Bị khóa".equalsIgnoreCase(sv.getTrangThai())) {
+                trangThaiMap.put(sv.getMaSV(), "Đã khóa tài khoản");
+                continue;
+            }
+
+            java.util.Optional<vn.iotstar.dormitory.entity.PhanPhong> activePpOpt = allPhanPhong.stream()
                 .filter(p -> p.getSinhVien() != null && p.getSinhVien().getMaSV().equals(sv.getMaSV()) && "Đang ở".equals(p.getTrangThai()))
                 .findFirst();
-            if (ppOpt.isPresent()) {
-                trangThaiMap.put(sv.getMaSV(), "Nội trú (Phòng " + ppOpt.get().getPhong().getSoPhong() + ")");
+
+            if (activePpOpt.isPresent()) {
+                trangThaiMap.put(sv.getMaSV(), "Nội trú (Phòng " + activePpOpt.get().getPhong().getSoPhong() + ")");
             } else {
-                trangThaiMap.put(sv.getMaSV(), "Chờ xếp phòng");
+                boolean hasPastRoom = allPhanPhong.stream()
+                    .anyMatch(p -> p.getSinhVien() != null && p.getSinhVien().getMaSV().equals(sv.getMaSV()));
+                if (hasPastRoom) {
+                    trangThaiMap.put(sv.getMaSV(), "Đã rời KTX (Ngoại trú)");
+                } else {
+                    trangThaiMap.put(sv.getMaSV(), "Chờ xếp phòng");
+                }
             }
         }
         
@@ -163,6 +175,13 @@ public class QuanSinhController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Không thể xóa sinh viên này (có thể do dữ liệu ràng buộc)!");
         }
+        return "redirect:/quansinh/sinhvien";
+    }
+
+    @PostMapping("/sinhvien/khoa/{id}")
+    public String toggleKhoaSinhVien(@PathVariable("id") String id, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        String msg = sinhVienService.toggleLockStudent(id);
+        redirectAttributes.addFlashAttribute("success", msg);
         return "redirect:/quansinh/sinhvien";
     }
 
